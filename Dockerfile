@@ -1,12 +1,9 @@
-# Use an official Java runtime as a parent image
-FROM openjdk:17-jdk-slim
+FROM amazoncorretto:17
+# FROM openjdk:17-jdk
+ARG JAR_FILE=build/libs/*.jar
 
-# Set the working directory in the container
-WORKDIR /app
+COPY ${JAR_FILE} with-bee.jar
+# COPY build/libs/*.jar my-project.jar
+ENTRYPOINT ["java","-jar","/with-bee.jar"]
 
-# Copy the local gradle build JAR file to the container
-# Gradle 빌드 후 생성되는 JAR 파일을 복사합니다.
-COPY ./build/libs/withbeetravel-*.jar /app/withbeetravel.jar
-
-# Run the application
-CMD ["java", "-jar", "withbeetravel.jar"]
+RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
