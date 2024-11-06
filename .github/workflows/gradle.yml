@@ -49,6 +49,6 @@ jobs:
       - name: Trigger AWS deployment workflow
         uses: peter-evans/workflow-dispatch@v1
         with:
-          repository: your-username/WithBeeTravel-BE  # 실제 리포지토리 이름으로 변경
-          workflow: aws.yml  # aws.yml 파일을 실행
+          repository: woorifisa-projects-3rd/WithBeeTravel-BE  # 리포지토리 이름
+          workflow: .github/workflows/aws.yml  # aws.yml 파일 경로
           ref: refs/heads/dev_cd  # dev_cd 브랜치에서 실행되도록 설정
