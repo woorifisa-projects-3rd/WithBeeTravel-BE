@@ -2,7 +2,6 @@ package withbeetravel.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.PaymentErrorCode;
 
 @Getter
