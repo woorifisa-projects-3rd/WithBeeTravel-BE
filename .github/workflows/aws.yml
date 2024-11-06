@@ -26,6 +26,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # 디렉토리 생성
+      - name: Create necessary directories
+        run: |
+          mkdir -p ./src/main/resources
+
+      # application.properties 파일 생성
       - name: Set up application.properties
         run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
