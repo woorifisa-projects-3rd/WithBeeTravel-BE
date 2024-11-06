@@ -49,8 +49,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Trigger AWS deployment workflow
-        uses: peter-evans/workflow-dispatch@v2  # 최신 버전으로 수정
+        uses: peter-evans/workflow-dispatch@v2
         with:
-          repository: woorifisa-projects-3rd/WithBeeTravel-BE  # 리포지토리 이름
-          workflow: .github/workflows/aws.yml  # aws.yml 파일 경로
+          workflow: .github/workflows/aws.yml  # 현재 리포지토리 내의 워크플로우 경로
           ref: refs/heads/dev_cd  # dev_cd 브랜치에서 실행되도록 설정
