@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import withbeetravel.exception.AuthException;
 import withbeetravel.exception.PaymentException;
 import withbeetravel.exception.SettlementException;
+import withbeetravel.exception.TravelException;
 import withbeetravel.exception.dto.ErrorResponseDto;
 
 @ControllerAdvice
@@ -23,6 +24,11 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(SettlementException.class)
     protected ResponseEntity<ErrorResponseDto> handleSettlementException(SettlementException e) {
+        return ErrorResponseDto.toResponseEntity(e.getErrorCode());
+    }
+
+    @ExceptionHandler(TravelException.class)
+    protected ResponseEntity<ErrorResponseDto> handleTravelException(TravelException e) {
         return ErrorResponseDto.toResponseEntity(e.getErrorCode());
     }
 }
