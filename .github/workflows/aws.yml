@@ -7,11 +7,11 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: with-bee
-  EC2_HOST: 3.37.175.22
-  EC2_SSH_USER: ec2-user
-  PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} # Docker Hub username
-  DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/with-bee # Docker Hub image name
+  EC2_HOST: 3.37.175.22  # EC2 퍼블릭 IP
+  EC2_SSH_USER: ubuntu  # Ubuntu의 기본 사용자 이름
+  PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}  # SSH private key
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
+  DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/with-bee  # Docker Hub 이미지 이름
 
 jobs:
   build-and-push-docker:
