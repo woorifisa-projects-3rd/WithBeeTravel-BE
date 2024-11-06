@@ -135,7 +135,10 @@ cmake-build-*/
 *.iws
 
 # IntelliJ
+application.properties
 
+out/
+.idea
 *.iml
 *.ipr
 !**/src/main/**/out/
