@@ -1,4 +1,12 @@
-package withbeetravel.exception.error;
+package withbeetravel.exception;
 
-public class AuthException {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import withbeetravel.exception.error.AuthErrorCode;
+
+@Getter
+@AllArgsConstructor
+public class AuthException extends RuntimeException {
+
+    AuthErrorCode errorCode;
 }

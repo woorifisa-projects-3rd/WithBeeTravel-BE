@@ -1,10 +1,11 @@
-package withbeetravel.exception;
+package withbeetravel.exception.dto;
 
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import withbeetravel.exception.error.ErrorCode;
 
+@Getter
 @Builder
 public class ErrorResponseDto {
 
@@ -18,6 +19,10 @@ public class ErrorResponseDto {
         return ResponseEntity
                 .status(e.getStatus())
                 .body(ErrorResponseDto.builder()
-                        .name(e.).build());
+                        .status(e.getStatus().value())
+                        .name(e.getName())
+                        .code(e.getCode())
+                        .message(e.getMessage())
+                        .build());
     }
 }
