@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  DOCKER_IMAGE_NAME:
-  EC2_HOST:
+  DOCKER_IMAGE_NAME: withBee
+  EC2_HOST: 3.37.175.22
   EC2_SSH_USER: ec2-user
   PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
