@@ -2,9 +2,9 @@ name: Deploy to AWS EC2 using Docker
 
 on:
   workflow_run:
-    workflows: ["Java CI with Gradle"]  # "gradle.yml" 워크플로우 이름
+    workflows: ["Java CI with Gradle"]
     types:
-      - completed  # 워크플로우가 완료되었을 때만 실행
+      - success
 
 env:
   DOCKER_IMAGE_NAME: with-bee
