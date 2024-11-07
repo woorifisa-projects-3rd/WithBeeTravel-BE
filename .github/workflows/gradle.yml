@@ -25,7 +25,7 @@ jobs:
 
       # Gradle 설치
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v1
+        uses: gradle/setup-gradle@v2  # gradle/setup-gradle 액션을 사용
 
       # Gradle 빌드
       - name: Build with Gradle Wrapper
@@ -44,5 +44,3 @@ jobs:
           SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
           SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver  # 필요시 추가
-
-
