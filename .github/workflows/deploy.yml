@@ -34,6 +34,10 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
           SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
 
+      # Gradle 빌드 후 build/libs 디렉토리 확인
+      - name: List build/libs contents
+        run: ls -l build/libs  # 빌드 후 JAR 파일이 제대로 생성되었는지 확인
+
       - name: Run tests
         run: ./gradlew test
         env:
@@ -64,6 +68,7 @@ jobs:
       - name: Set up application.properties
         run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
+      # Docker 이미지 빌드
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/with-bee:latest
 
