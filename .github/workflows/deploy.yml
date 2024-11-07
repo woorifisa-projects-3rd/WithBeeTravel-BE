@@ -61,12 +61,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Create necessary directories
+      # Gradle 빌드를 통해 생성된 JAR 파일 확인
+      - name: Check if JAR file exists
+        run: |
+          if [ ! -f build/libs/*.jar ]; then
+            echo "JAR file not found!";
+            exit 1;
+          fi
+
+      # application.properties 파일 생성
+      - name: Create application.properties
         run: |
           mkdir -p ./src/main/resources
-
-      - name: Set up application.properties
-        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+          echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
       # Docker 이미지 빌드
       - name: Build the Docker image
