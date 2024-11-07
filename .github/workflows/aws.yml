@@ -1,9 +1,10 @@
 name: Deploy to AWS EC2 using Docker
 
 on:
-  push:
-    branches:
-      - dev_cd
+  workflow_run:
+    workflows: ["Java CI with Gradle"]
+    types:
+      - completed
 
 env:
   DOCKER_IMAGE_NAME: with-bee
