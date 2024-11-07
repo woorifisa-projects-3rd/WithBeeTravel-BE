@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Java CI with Gradle  # 워크플로우 이름
 
 on:
   push:

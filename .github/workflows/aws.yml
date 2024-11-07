@@ -2,9 +2,9 @@ name: Deploy to AWS EC2 using Docker
 
 on:
   workflow_run:
-    workflows: ["Java CI with Gradle"]
+    workflows: ["Java CI with Gradle"]  # "gradle.yml" 워크플로우 이름
     types:
-      - completed
+      - completed  # 워크플로우가 완료되었을 때만 실행
 
 env:
   DOCKER_IMAGE_NAME: with-bee
@@ -50,7 +50,7 @@ jobs:
         run: docker push ${{ env.DOCKER_HUB }}:latest
 
   deploy-to-ec2:
-    needs: build-and-push-docker
+    needs: build-and-push-docker  # 이 작업은 Docker 푸시가 성공적으로 완료된 후 실행됩니다
     runs-on: ubuntu-latest
 
     steps:
