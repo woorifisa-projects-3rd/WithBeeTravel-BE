@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Entity
 @Getter
+@Table(name = "travel_countries")
 public class TravelCountry {
 
     @Id

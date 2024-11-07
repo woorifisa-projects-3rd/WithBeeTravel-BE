@@ -3,10 +3,11 @@ package withbeetravel.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
+@Table(name = "travels")
 public class Travel {
 
     @Id
@@ -18,10 +19,10 @@ public class Travel {
     private String travelName;
 
     @Column(name = "travel_start_date", nullable = false)
-    private Date travelStartDate;
+    private LocalDate travelStartDate;
 
     @Column(name = "travel_end_date", nullable = false)
-    private Date travelEndDate;
+    private LocalDate travelEndDate;
 
     @Column(name = "invite_code", nullable = false)
     private String inviteCode;
@@ -40,8 +41,8 @@ public class Travel {
 
     public Travel(Long id,
                   String travelName,
-                  Date travelStartDate,
-                  Date travelEndDate,
+                  LocalDate travelStartDate,
+                  LocalDate travelEndDate,
                   String inviteCode,
                   String mainImage, int isDomesticTravel, SettlementStatus settlementStatus) {
         this.id = id;
