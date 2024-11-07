@@ -11,7 +11,7 @@ public class Country {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "country_id", nullable = false)
-    private Long id;
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency_id", nullable = false)
@@ -23,7 +23,7 @@ public class Country {
     protected Country() {}
 
     @Builder
-    public Country(Long id, Currency currency, String countryName) {
+    public Country(int id, Currency currency, String countryName) {
         this.id = id;
         this.currency = currency;
         this.countryName = countryName;

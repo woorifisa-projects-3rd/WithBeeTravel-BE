@@ -10,14 +10,14 @@ public class Currency {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "currency_id", nullable = false)
-    private Long id;
+    private int id;
 
     @Column(name = "unit", nullable = false)
     private String unit;
 
     protected Currency() {}
 
-    public Currency(Long id, String unit) {
+    public Currency(int id, String unit) {
         this.id = id;
         this.unit = unit;
     }
