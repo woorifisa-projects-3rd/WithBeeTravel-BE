@@ -1,76 +1,76 @@
-name: Deploy to AWS EC2 using Docker
-
-on:
-  workflow_run:
-    workflows: ["Java CI with Gradle"]
-    types:
-      - success
-
-env:
-  DOCKER_IMAGE_NAME: with-bee
-  EC2_HOST: 3.37.175.22  # EC2 퍼블릭 IP
-  EC2_SSH_USER: ubuntu  # Ubuntu의 기본 사용자 이름
-  PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}  # SSH private key
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
-  DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/with-bee  # Docker Hub 이미지 이름
-
-jobs:
-  build-and-push-docker:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      # 디렉토리 생성
-      - name: Create necessary directories
-        run: |
-          mkdir -p ./src/main/resources
-
-      # application.properties 파일 생성
-      - name: Set up application.properties
-        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag ${{ env.DOCKER_HUB }}:latest
-
-      - name: Login to Docker Hub using Access Token
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-
-      - name: Push the Docker image
-        run: docker push ${{ env.DOCKER_HUB }}:latest
-
-  deploy-to-ec2:
-    needs: build-and-push-docker  # 이 작업은 Docker 푸시가 성공적으로 완료된 후 실행됩니다
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.EC2_HOST }}
-          username: ${{ env.EC2_SSH_USER }}
-          key: ${{ env.PRIVATE_KEY }}
-          script: |
-            # EC2에서 기존 컨테이너가 있을 경우 제거
-            CONTAINER_ID=$(sudo docker ps -q --filter "publish=80-8080")
-            
-            if [ ! -z "$CONTAINER_ID" ]; then
-              sudo docker stop $CONTAINER_ID
-              sudo docker rm $CONTAINER_ID
-            fi
-            
-            # Docker Hub에서 새 이미지 pull
-            sudo docker pull ${{ env.DOCKER_HUB }}:latest
-            
-            # 새로운 컨테이너로 실행
-            sudo docker run --name ${{ env.DOCKER_IMAGE_NAME }} -d -p 80:8080 -e TZ=Asia/Seoul ${{ env.DOCKER_HUB }}:latest
+#name: Deploy to AWS EC2 using Docker
+#
+#on:
+#  workflow_run:
+#    workflows: ["Java CI with Gradle"]
+#    types:
+#      - success
+#
+#env:
+#  DOCKER_IMAGE_NAME: with-bee
+#  EC2_HOST: 3.37.175.22  # EC2 퍼블릭 IP
+#  EC2_SSH_USER: ubuntu  # Ubuntu의 기본 사용자 이름
+#  PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}  # SSH private key
+#  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
+#  DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/with-bee  # Docker Hub 이미지 이름
+#
+#jobs:
+#  build-and-push-docker:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#
+#      # 디렉토리 생성
+#      - name: Create necessary directories
+#        run: |
+#          mkdir -p ./src/main/resources
+#
+#      # application.properties 파일 생성
+#      - name: Set up application.properties
+#        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+#
+#      - name: Build with Gradle
+#        run: ./gradlew build
+#
+#      - name: Build the Docker image
+#        run: docker build . --file Dockerfile --tag ${{ env.DOCKER_HUB }}:latest
+#
+#      - name: Login to Docker Hub using Access Token
+#        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+#
+#      - name: Push the Docker image
+#        run: docker push ${{ env.DOCKER_HUB }}:latest
+#
+#  deploy-to-ec2:
+#    needs: build-and-push-docker  # 이 작업은 Docker 푸시가 성공적으로 완료된 후 실행됩니다
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Deploy to EC2
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ env.EC2_HOST }}
+#          username: ${{ env.EC2_SSH_USER }}
+#          key: ${{ env.PRIVATE_KEY }}
+#          script: |
+#            # EC2에서 기존 컨테이너가 있을 경우 제거
+#            CONTAINER_ID=$(sudo docker ps -q --filter "publish=80-8080")
+#
+#            if [ ! -z "$CONTAINER_ID" ]; then
+#              sudo docker stop $CONTAINER_ID
+#              sudo docker rm $CONTAINER_ID
+#            fi
+#
+#            # Docker Hub에서 새 이미지 pull
+#            sudo docker pull ${{ env.DOCKER_HUB }}:latest
+#
+#            # 새로운 컨테이너로 실행
+#            sudo docker run --name ${{ env.DOCKER_IMAGE_NAME }} -d -p 80:8080 -e TZ=Asia/Seoul ${{ env.DOCKER_HUB }}:latest
