@@ -3,10 +3,10 @@ name: Build and Deploy to AWS EC2 using Docker
 on:
   push:
     branches:
-      - dev_cd
+      - main
   pull_request:
     branches:
-      - dev_cd
+      - main
 
 env:
     DOCKER_IMAGE_NAME: with-bee
