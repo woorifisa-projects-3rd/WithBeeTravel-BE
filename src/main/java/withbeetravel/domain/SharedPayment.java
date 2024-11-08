@@ -17,12 +17,12 @@ public class SharedPayment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "travel_member_id", nullable = false)
-    private TravelMember travelMember;
+    @JoinColumn(name = "added_by_member_id", nullable = false)
+    private TravelMember addedByMember;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "currency_id", nullable = false)
-    private Currency currency;
+    @Column(name = "currency_unit", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CurrencyUnit currencyUnit;
 
     @Column(name = "payment_amount", nullable = false)
     private int paymentAmount;
@@ -59,8 +59,8 @@ public class SharedPayment {
 
     @Builder
     public SharedPayment(Long id,
-                         TravelMember travelMember,
-                         Currency currency,
+                         TravelMember addedByMember,
+                         CurrencyUnit currencyUnit,
                          int paymentAmount,
                          double foreignPaymentAmount,
                          double exchangeRate,
@@ -72,8 +72,8 @@ public class SharedPayment {
                          String storeName,
                          LocalDateTime paymentDate) {
         this.id = id;
-        this.travelMember = travelMember;
-        this.currency = currency;
+        this.addedByMember = addedByMember;
+        this.currencyUnit = currencyUnit;
         this.paymentAmount = paymentAmount;
         this.foreignPaymentAmount = foreignPaymentAmount;
         this.exchangeRate = exchangeRate;
