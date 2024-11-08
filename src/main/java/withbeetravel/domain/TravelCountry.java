@@ -14,8 +14,8 @@ public class TravelCountry {
     @Column(name = "travel_country_id", nullable = false)
     private Long id;
 
-    @JoinColumn(name = "country_id", nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "country", nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private Country country;
 
     @JoinColumn(name = "travel_id", nullable = false)
