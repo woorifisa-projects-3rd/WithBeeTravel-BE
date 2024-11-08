@@ -23,7 +23,7 @@ public class SettlementRequest {
 
     @CreationTimestamp
     @Column(name = "request_start_time")
-    private LocalDateTime requestStartTime = LocalDateTime.now();
+    private LocalDateTime requestStartTime;
 
     @Column(name = "request_end_time")
     private LocalDateTime requestEndTime;
@@ -33,9 +33,6 @@ public class SettlementRequest {
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
-    @Column(name = "cancellation_reason")
-    private String cancellationReason;
-
     protected SettlementRequest() {}
 
     @Builder
@@ -43,13 +40,11 @@ public class SettlementRequest {
                              Travel travel,
                              LocalDateTime requestStartTime,
                              LocalDateTime requestEndTime,
-                             RequestStatus requestStatus,
-                             String cancellationReason) {
+                             RequestStatus requestStatus) {
         this.id = id;
         this.travel = travel;
         this.requestStartTime = requestStartTime;
         this.requestEndTime = requestEndTime;
         this.requestStatus = requestStatus;
-        this.cancellationReason = cancellationReason;
     }
 }
