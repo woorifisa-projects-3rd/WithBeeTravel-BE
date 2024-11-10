@@ -1,6 +1,7 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -39,6 +40,7 @@ public class Travel {
 
     protected Travel() {}
 
+    @Builder
     public Travel(Long id,
                   String travelName,
                   LocalDate travelStartDate,
