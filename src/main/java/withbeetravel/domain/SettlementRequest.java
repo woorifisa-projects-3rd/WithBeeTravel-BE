@@ -1,8 +1,10 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -10,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(name = "settlement_requests")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SettlementRequest {
 
     @Id
@@ -34,8 +37,6 @@ public class SettlementRequest {
 
     @Column(name = "disagree_count", nullable = false)
     private int disagreeCount;
-
-    protected SettlementRequest() {}
 
     @Builder
     public SettlementRequest(Long id,

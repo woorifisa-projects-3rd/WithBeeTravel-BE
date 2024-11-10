@@ -1,12 +1,15 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "travel_member_settlement_histories")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelMemberSettlementHistory {
 
     @Id
@@ -29,9 +32,7 @@ public class TravelMemberSettlementHistory {
     private double actualBurdenCost;
 
     @Column(name = "is_agreed", nullable = false)
-    private int isAgreed;
-
-    protected TravelMemberSettlementHistory() {}
+    private boolean isAgreed;
 
     @Builder
     public TravelMemberSettlementHistory(Long id,
@@ -39,7 +40,7 @@ public class TravelMemberSettlementHistory {
                                          TravelMember travelMember,
                                          double ownPaymentCost,
                                          double actualBurdenCost,
-                                         int isAgreed) {
+                                         boolean isAgreed) {
         this.id = id;
         this.settlementRequest = settlementRequest;
         this.travelMember = travelMember;
