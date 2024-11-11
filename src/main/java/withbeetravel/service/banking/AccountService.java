@@ -1,6 +1,7 @@
 package withbeetravel.service.banking;
 
 import withbeetravel.domain.Account;
+import withbeetravel.dto.banking.account.AccountRequest;
 import withbeetravel.dto.banking.account.AccountResponse;
 
 import java.util.List;
@@ -11,4 +12,6 @@ public interface AccountService {
     List<AccountResponse> showAll(Long userId);
 
     Account showAccount(Long accountId);
+
+    Account createAccount(Long userId, AccountRequest accountRequest);
 }

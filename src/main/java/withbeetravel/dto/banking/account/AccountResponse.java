@@ -11,7 +11,7 @@ public class AccountResponse {
     private long balance;
     private Product product;
 
-    AccountResponse(String accountNumber, long balance, Product product){
+    public AccountResponse(String accountNumber, long balance, Product product){
         this.accountNumber = accountNumber;
         this.balance = balance;
         this.product = product;
