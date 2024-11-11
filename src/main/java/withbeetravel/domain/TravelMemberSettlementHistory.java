@@ -29,7 +29,7 @@ public class TravelMemberSettlementHistory {
     private double actualBurdenCost;
 
     @Column(name = "is_agreed", nullable = false)
-    private int isAgreed;
+    private boolean isAgreed;
 
     protected TravelMemberSettlementHistory() {}
 
@@ -39,7 +39,7 @@ public class TravelMemberSettlementHistory {
                                          TravelMember travelMember,
                                          double ownPaymentCost,
                                          double actualBurdenCost,
-                                         int isAgreed) {
+                                         boolean isAgreed) {
         this.id = id;
         this.settlementRequest = settlementRequest;
         this.travelMember = travelMember;

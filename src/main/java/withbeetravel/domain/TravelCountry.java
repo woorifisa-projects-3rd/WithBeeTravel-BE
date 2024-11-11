@@ -18,8 +18,8 @@ public class TravelCountry {
     @Enumerated(value = EnumType.STRING)
     private Country country;
 
-    @JoinColumn(name = "travel_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travel_id", nullable = false)
     private Travel travel;
 
     protected TravelCountry() {}

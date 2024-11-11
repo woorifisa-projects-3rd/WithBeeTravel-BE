@@ -31,7 +31,7 @@ public class Travel {
     private String mainImage;
 
     @Column(name = "is_domestic_travel", nullable = false)
-    private int isDomesticTravel;
+    private boolean isDomesticTravel;
 
     @Column(name = "settlement_status", nullable = false)
     @Enumerated(value = EnumType.STRING)
@@ -44,7 +44,7 @@ public class Travel {
                   LocalDate travelStartDate,
                   LocalDate travelEndDate,
                   String inviteCode,
-                  String mainImage, int isDomesticTravel, SettlementStatus settlementStatus) {
+                  String mainImage, boolean isDomesticTravel, SettlementStatus settlementStatus) {
         this.id = id;
         this.travelName = travelName;
         this.travelStartDate = travelStartDate;

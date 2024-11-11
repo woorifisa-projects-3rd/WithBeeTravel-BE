@@ -27,7 +27,7 @@ public class User {
     private String name;
 
     @Column(name = "has_card", nullable = false)
-    private int hasCard;
+    private boolean hasCard;
 
     @Column(name = "profile_image", nullable = false)
     private String profileImage;
@@ -35,7 +35,7 @@ public class User {
     protected User() {}
 
     @Builder
-    public User(Long id, String email, String password, String pinNumber, String name, int hasCard, String profileImage) {
+    public User(Long id, String email, String password, String pinNumber, String name, boolean hasCard, String profileImage) {
         this.id = id;
         this.email = email;
         this.password = password;

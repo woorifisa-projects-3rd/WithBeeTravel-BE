@@ -37,13 +37,13 @@ public class SharedPayment {
     private String paymentComment;
 
     @Column(name = "payment_image")
-    private String profileImage;
+    private String paymentImage;
 
     @Column(name = "is_manually_added", nullable = false)
-    private int isManuallyAdded;
+    private boolean isManuallyAdded;
 
     @Column(name = "is_all_members_participated", nullable = false)
-    private int isAllMembersParticipated;
+    private boolean isAllMembersParticipated;
 
     @Column(name = "category", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -65,9 +65,9 @@ public class SharedPayment {
                          double foreignPaymentAmount,
                          double exchangeRate,
                          String paymentComment,
-                         String profileImage,
-                         int isManuallyAdded,
-                         int isAllMembersParticipated,
+                         String paymentImage,
+                         boolean isManuallyAdded,
+                         boolean isAllMembersParticipated,
                          Category category,
                          String storeName,
                          LocalDateTime paymentDate) {
@@ -78,7 +78,7 @@ public class SharedPayment {
         this.foreignPaymentAmount = foreignPaymentAmount;
         this.exchangeRate = exchangeRate;
         this.paymentComment = paymentComment;
-        this.profileImage = profileImage;
+        this.paymentImage = paymentImage;
         this.isManuallyAdded = isManuallyAdded;
         this.isAllMembersParticipated = isAllMembersParticipated;
         this.category = category;
