@@ -26,10 +26,10 @@ public class History {
     private LocalDateTime date;
 
     @Column(name = "rcv_am")
-    private int rcvAm;
+    private Integer rcvAm;
 
     @Column(name = "pay_am")
-    private int payAM;
+    private Integer payAM;
 
     @Column(name = "balance", nullable = false)
     private long balance;
