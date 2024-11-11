@@ -1,7 +1,7 @@
-package withbeetravel.controller;
+package withbeetravel.controller.banking;
 
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BankingController {
+public class HistoryController {
 }
