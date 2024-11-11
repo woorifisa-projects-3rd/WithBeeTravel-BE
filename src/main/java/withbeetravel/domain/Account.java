@@ -27,7 +27,8 @@ public class Account {
     private long balance;
 
     @Enumerated(EnumType.STRING)
-    private String product;
+    @Column(name = "product", nullable = false)
+    private Product product;
 
     @Column(name = "is_connected_wibee_card", nullable = false)
     private boolean isConnectedWibeeCard;
