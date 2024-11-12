@@ -15,6 +15,7 @@ public class SecurityConfig{
 
         // 로그인 기능 구현 전까지 모든 요청 허용
         http
+                .csrf((csrf) -> csrf.disable())
                 .authorizeHttpRequests((requests) ->
                         requests.requestMatchers("/**").permitAll());
 
