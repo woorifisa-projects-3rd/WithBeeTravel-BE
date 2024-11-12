@@ -1,14 +1,17 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "shared_payments")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SharedPayment {
 
     @Id
@@ -37,10 +40,10 @@ public class SharedPayment {
     private String paymentComment;
 
     @Column(name = "payment_image")
-    private String profileImage;
+    private String paymentImage;
 
     @Column(name = "is_manually_added", nullable = false)
-    private int isManuallyAdded;
+    private boolean isManuallyAdded;
 
     @Column(name = "is_all_members_participated", nullable = false)
     private int isAllMembersParticipated;
@@ -55,8 +58,6 @@ public class SharedPayment {
     @Column(name = "payment_date", nullable = false)
     private LocalDateTime paymentDate;
 
-    protected SharedPayment() {}
-
     @Builder
     public SharedPayment(Long id,
                          TravelMember addedByMember,
@@ -65,8 +66,8 @@ public class SharedPayment {
                          double foreignPaymentAmount,
                          double exchangeRate,
                          String paymentComment,
-                         String profileImage,
-                         int isManuallyAdded,
+                         String paymentImage,
+                         boolean isManuallyAdded,
                          int isAllMembersParticipated,
                          Category category,
                          String storeName,
@@ -78,7 +79,7 @@ public class SharedPayment {
         this.foreignPaymentAmount = foreignPaymentAmount;
         this.exchangeRate = exchangeRate;
         this.paymentComment = paymentComment;
-        this.profileImage = profileImage;
+        this.paymentImage = paymentImage;
         this.isManuallyAdded = isManuallyAdded;
         this.isAllMembersParticipated = isAllMembersParticipated;
         this.category = category;

@@ -1,12 +1,15 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "travel_members")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelMember {
 
     @Id
@@ -14,24 +17,22 @@ public class TravelMember {
     @Column(name = "travel_member_id", nullable = false)
     private Long id;
 
-    @JoinColumn(name = "travel_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travel_id", nullable = false)
     private Travel travel;
 
-    @JoinColumn(name = "user_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "is_captain", nullable = false)
-    private int isCaptain;
+    private boolean isCaptain;
 
     @Column(name = "connected_account", nullable = false)
     private String connectedAccount;
 
-    protected TravelMember() {}
-
     @Builder
-    public TravelMember(Long id, Travel travel, User user, int isCaptain, String connectedAccount) {
+    public TravelMember(Long id, Travel travel, User user, boolean isCaptain, String connectedAccount) {
         this.id = id;
         this.travel = travel;
         this.user = user;

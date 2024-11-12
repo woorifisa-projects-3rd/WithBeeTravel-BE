@@ -1,12 +1,15 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "travel_countries")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelCountry {
 
     @Id
@@ -18,11 +21,9 @@ public class TravelCountry {
     @Enumerated(value = EnumType.STRING)
     private Country country;
 
-    @JoinColumn(name = "travel_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travel_id", nullable = false)
     private Travel travel;
-
-    protected TravelCountry() {}
 
     @Builder
     public TravelCountry(Long id, Country country, Travel travel) {
