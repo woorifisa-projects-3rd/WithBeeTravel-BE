@@ -126,6 +126,18 @@ public class AccountServiceImpl implements AccountService {
         targetAccount.transfer(amount);
     }
 
+    @Transactional
+    public void deposit(Long accountId, int amount, String rqspeNm) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
 
+        History history = History.builder().account(account).balance(account.getBalance()+amount).rcvAm(amount)
+                        .date(LocalDateTime.now()).rqspeNm(rqspeNm).isWibeeCard(false).build();
+
+        historyRepository.save(history);
+
+        account.transfer(amount);
+
+    }
 }
 

@@ -6,10 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.domain.Account;
 import withbeetravel.domain.History;
-import withbeetravel.dto.banking.account.AccountRequest;
-import withbeetravel.dto.banking.account.AccountResponse;
-import withbeetravel.dto.banking.account.HistoryResponse;
-import withbeetravel.dto.banking.account.TransferRequest;
+import withbeetravel.dto.banking.account.*;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.banking.HistoryService;
 
@@ -58,6 +55,15 @@ public class AccountController {
                 transferRequest.getRqspeNm());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("송금이 완료되었습니다.");
+    }
+
+    @PostMapping("/deposit")
+    public ResponseEntity deposit(@RequestBody DepositRequest depositRequest){
+
+        accountService.deposit(accountId,depositRequest.getAmount(), depositRequest.getRqspeNm());
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("입금이 완료되었습니다.");
+
     }
 
 }
