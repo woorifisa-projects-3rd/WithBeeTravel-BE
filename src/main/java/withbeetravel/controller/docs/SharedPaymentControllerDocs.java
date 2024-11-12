@@ -11,14 +11,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.dto.ChooseParticipantsRequestDto;
 import withbeetravel.exception.dto.ErrorResponseDto;
 
 @Tag(name = "공동 결제 내역 API", description = "에 대한 설명입니다.")
-public interface PaymentControllerDocs {
+public interface SharedPaymentControllerDocs {
 
     @Operation(
             summary = "정산 인원 선택",

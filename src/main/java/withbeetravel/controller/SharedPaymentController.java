@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import withbeetravel.controller.docs.PaymentControllerDocs;
+import withbeetravel.controller.docs.SharedPaymentControllerDocs;
 import withbeetravel.dto.ChooseParticipantsRequestDto;
 import withbeetravel.security.annotation.CheckTravelAccess;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/travels/{travelId}/payments")
-public class PaymentController implements PaymentControllerDocs {
+public class SharedPaymentController implements SharedPaymentControllerDocs {
 
     @Override
     @PatchMapping("/{sharedPaymentId}/participants")
