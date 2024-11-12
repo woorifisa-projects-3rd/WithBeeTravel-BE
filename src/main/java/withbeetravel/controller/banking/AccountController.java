@@ -15,7 +15,7 @@ import withbeetravel.service.banking.HistoryService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/banking/{userId}")
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
 public class AccountController {
 
@@ -23,28 +23,25 @@ public class AccountController {
 
     private final HistoryService historyService;
 
-    @GetMapping("/account")
-    public List<AccountResponse> showAllAccount(@PathVariable Long userId){
+    private final Long userId = 1L;
+    private final Long accountId = 1L;
+
+    @GetMapping()
+    public List<AccountResponse> showAllAccount(){
         return accountService.showAll(userId);
     }
 
-    @GetMapping("/account/{accountId}")
-    public List<HistoryResponse> showAllHistories(@PathVariable Long userId, @PathVariable Long accountId){
+    @GetMapping("/histories")
+    public List<HistoryResponse> showAllHistories(){
         return historyService.showAll(accountId);
     }
 
-    @PostMapping("/account")
-    public ResponseEntity<AccountResponse> createAccount(@PathVariable Long userId, @RequestBody AccountRequest accountRequest){
+    @PostMapping()
+    public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest){
         Account createdAccount = accountService.createAccount(userId,accountRequest);
 
         AccountResponse accountResponse = AccountResponse.from(createdAccount);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(accountResponse);
     }
-
-
-
-
-
-
 }

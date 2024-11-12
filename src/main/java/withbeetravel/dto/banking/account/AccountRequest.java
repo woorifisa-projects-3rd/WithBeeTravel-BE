@@ -1,13 +1,14 @@
 package withbeetravel.dto.banking.account;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import withbeetravel.domain.Product;
 
 @Getter
-@Setter
 @AllArgsConstructor
+@Builder
 public class AccountRequest {
 
     private String accountNumber;
