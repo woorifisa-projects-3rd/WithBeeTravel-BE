@@ -1,12 +1,15 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "users")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
@@ -26,22 +29,26 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "has_card", nullable = false)
-    private boolean hasCard;
-
     @Column(name = "profile_image", nullable = false)
     private String profileImage;
 
-    protected User() {}
+    @Column(name = "has_wibee_card", nullable = false)
+    private boolean hasWibeeCard;
 
     @Builder
-    public User(Long id, String email, String password, String pinNumber, String name, boolean hasCard, String profileImage) {
+    public User(Long id,
+                String email,
+                String password,
+                String pinNumber,
+                String name,
+                String profileImage,
+                boolean hasWibeeCard) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.pinNumber = pinNumber;
         this.name = name;
-        this.hasCard = hasCard;
         this.profileImage = profileImage;
+        this.hasWibeeCard = hasWibeeCard;
     }
 }

@@ -1,13 +1,17 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity
 @Getter
 @Table(name = "travels")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Travel {
 
     @Id
@@ -37,14 +41,15 @@ public class Travel {
     @Enumerated(value = EnumType.STRING)
     private SettlementStatus settlementStatus;
 
-    protected Travel() {}
-
+    @Builder
     public Travel(Long id,
                   String travelName,
                   LocalDate travelStartDate,
                   LocalDate travelEndDate,
                   String inviteCode,
-                  String mainImage, boolean isDomesticTravel, SettlementStatus settlementStatus) {
+                  String mainImage,
+                  boolean isDomesticTravel,
+                  SettlementStatus settlementStatus) {
         this.id = id;
         this.travelName = travelName;
         this.travelStartDate = travelStartDate;

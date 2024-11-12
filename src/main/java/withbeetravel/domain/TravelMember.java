@@ -1,12 +1,15 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "travel_members")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelMember {
 
     @Id
@@ -27,8 +30,6 @@ public class TravelMember {
 
     @Column(name = "connected_account", nullable = false)
     private String connectedAccount;
-
-    protected TravelMember() {}
 
     @Builder
     public TravelMember(Long id, Travel travel, User user, boolean isCaptain, String connectedAccount) {

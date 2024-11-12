@@ -1,14 +1,17 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "settlement_request_logs")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SettlementRequestLog {
 
     @Id
@@ -25,8 +28,6 @@ public class SettlementRequestLog {
 
     @Column(name = "log_time", nullable = false)
     private LocalDateTime logTime;
-
-    protected SettlementRequestLog() {}
 
     @Builder
     public SettlementRequestLog(Long id, SettlementRequest settlementRequest, String logMessage, LocalDateTime logTime) {
