@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.Account;
+import withbeetravel.domain.History;
 import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
 import withbeetravel.dto.banking.account.AccountRequest;
@@ -14,6 +15,7 @@ import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.HistoryRepository;
 import withbeetravel.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -25,6 +27,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final HistoryRepository historyRepository;
 
     // 계좌 조회
     public List<AccountResponse> showAll(Long userId) {
@@ -88,7 +91,7 @@ public class AccountServiceImpl implements AccountService {
 
     // 송금하기
     @Transactional
-    public void transfer(Long accountId, String accountNumber, int amount) {
+    public void transfer(Long accountId, String accountNumber, int amount, String rqspeNm) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
@@ -101,7 +104,23 @@ public class AccountServiceImpl implements AccountService {
         }
 
         // 출금 처리
+
+        // 계좌 내역 객체 생성
+        History newHistory = History.builder().account(account).payAM(amount).rqspeNm(rqspeNm)
+                .date(LocalDateTime.now()).balance(account.getBalance()-amount).isWibeeCard(false).build();
+        // 후 저장 처리
+        historyRepository.save(newHistory);
+        // 한 다음 계좌 금액 조절
         account.transfer(-amount);
+
+
+
+        // 타겟 계좌 입금 처리
+
+        // 타겟 계좌 내역 객체 생성, 저장
+        History targetHistory = History.builder().account(targetAccount).rcvAm(amount).rqspeNm(account.getUser().getName())
+                .date(LocalDateTime.now()).balance(targetAccount.getBalance()+amount).isWibeeCard(false).build();
+        historyRepository.save(targetHistory);
 
         // 상대 계좌 입금 처리
         targetAccount.transfer(amount);

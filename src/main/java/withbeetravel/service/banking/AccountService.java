@@ -21,5 +21,5 @@ public interface AccountService {
 
     boolean isAccountNumberExists(String accountNumber);
 
-    void transfer(Long accountId, String accountNumber, int amount);
+    void transfer(Long accountId, String accountNumber, int amount, String rqspeNm);
 }

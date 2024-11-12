@@ -54,7 +54,8 @@ public class AccountController {
 
         accountService.transfer(transferRequest.getAccountId(),
                 transferRequest.getAccountNumber(),
-                transferRequest.getAmount());
+                transferRequest.getAmount(),
+                transferRequest.getRqspeNm());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("송금이 완료되었습니다.");
     }
