@@ -40,7 +40,7 @@ public class SharedPayment {
     private String paymentComment;
 
     @Column(name = "payment_image")
-    private String profileImage;
+    private String paymentImage;
 
     @Column(name = "is_manually_added", nullable = false)
     private boolean isManuallyAdded;
@@ -66,7 +66,7 @@ public class SharedPayment {
                          double foreignPaymentAmount,
                          double exchangeRate,
                          String paymentComment,
-                         String profileImage,
+                         String paymentImage,
                          boolean isManuallyAdded,
                          int isAllMembersParticipated,
                          Category category,
@@ -79,7 +79,7 @@ public class SharedPayment {
         this.foreignPaymentAmount = foreignPaymentAmount;
         this.exchangeRate = exchangeRate;
         this.paymentComment = paymentComment;
-        this.profileImage = profileImage;
+        this.paymentImage = paymentImage;
         this.isManuallyAdded = isManuallyAdded;
         this.isAllMembersParticipated = isAllMembersParticipated;
         this.category = category;
