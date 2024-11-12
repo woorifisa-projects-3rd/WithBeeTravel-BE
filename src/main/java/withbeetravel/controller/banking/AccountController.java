@@ -38,6 +38,10 @@ public class AccountController {
 
     @PostMapping()
     public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest){
+
+        String accountNumber;
+
+
         Account createdAccount = accountService.createAccount(userId,accountRequest);
 
         AccountResponse accountResponse = AccountResponse.from(createdAccount);

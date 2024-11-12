@@ -14,4 +14,10 @@ public interface AccountService {
     Account showAccount(Long accountId);
 
     Account createAccount(Long userId, AccountRequest accountRequest);
+
+    String generateUniqueAccountNumber();
+
+    String generateAccountNumber();
+
+    boolean isAccountNumberExists(String accountNumber);
 }
