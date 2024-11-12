@@ -9,6 +9,7 @@ import withbeetravel.domain.History;
 import withbeetravel.dto.banking.account.AccountRequest;
 import withbeetravel.dto.banking.account.AccountResponse;
 import withbeetravel.dto.banking.account.HistoryResponse;
+import withbeetravel.dto.banking.account.TransferRequest;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.banking.HistoryService;
 
@@ -47,4 +48,15 @@ public class AccountController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(accountResponse);
     }
+
+    @PostMapping("/transfer")
+    public ResponseEntity transfer(@RequestBody TransferRequest transferRequest){
+
+        accountService.transfer(transferRequest.getAccountId(),
+                transferRequest.getAccountNumber(),
+                transferRequest.getAmount());
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("송금이 완료되었습니다.");
+    }
+
 }

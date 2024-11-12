@@ -2,6 +2,7 @@ package withbeetravel.service.banking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.Account;
 import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
@@ -86,6 +87,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     // 송금하기
+    @Transactional
     public void transfer(Long accountId, String accountNumber, int amount) {
 
         Account account = accountRepository.findById(accountId)
@@ -102,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
         account.transfer(-amount);
 
         // 상대 계좌 입금 처리
-        account.transfer(amount);
+        targetAccount.transfer(amount);
     }
 
 
