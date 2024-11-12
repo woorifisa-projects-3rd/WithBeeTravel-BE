@@ -20,4 +20,6 @@ public interface AccountService {
     String generateAccountNumber();
 
     boolean isAccountNumberExists(String accountNumber);
+
+    void transfer(Long accountId, String accountNumber, int amount);
 }

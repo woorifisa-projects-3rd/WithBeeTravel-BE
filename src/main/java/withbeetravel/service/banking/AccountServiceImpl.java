@@ -7,6 +7,8 @@ import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
 import withbeetravel.dto.banking.account.AccountRequest;
 import withbeetravel.dto.banking.account.AccountResponse;
+import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.HistoryRepository;
 import withbeetravel.repository.UserRepository;
@@ -82,5 +84,27 @@ public class AccountServiceImpl implements AccountService {
         Optional<Account> existingAccount = accountRepository.findByAccountNumber(accountNumber);
         return existingAccount.isPresent(); // 존재하면 true 반환
     }
+
+    // 송금하기
+    public void transfer(Long accountId, String accountNumber, int amount) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+
+        Account targetAccount = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+
+        if(amount > account.getBalance()){
+            throw new CustomException(BankingErrorCode.INSUFFICIENT_FUNDS_ERROR);
+        }
+
+        // 출금 처리
+        account.transfer(-amount);
+
+        // 상대 계좌 입금 처리
+        account.transfer(amount);
+    }
+
+
 }
 

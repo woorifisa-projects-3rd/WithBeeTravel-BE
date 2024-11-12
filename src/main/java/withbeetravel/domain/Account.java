@@ -33,5 +33,9 @@ public class Account {
     @Column(name = "is_connected_wibee_card", nullable = false)
     private boolean isConnectedWibeeCard;
 
+    public void transfer(int amount){
+        balance += amount;
+    }
+
 
 }

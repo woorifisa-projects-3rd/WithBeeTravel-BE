@@ -39,11 +39,10 @@ public class AccountController {
     @PostMapping()
     public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest){
 
-        String accountNumber;
+        // 계좌 생성
+        Account createdAccount = accountService.createAccount(userId, accountRequest);
 
-
-        Account createdAccount = accountService.createAccount(userId,accountRequest);
-
+        // 생성된 계좌를 AccountResponse로 변환
         AccountResponse accountResponse = AccountResponse.from(createdAccount);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(accountResponse);
