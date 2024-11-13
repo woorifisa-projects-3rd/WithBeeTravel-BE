@@ -22,15 +22,15 @@ public class AccountController {
     private final HistoryService historyService;
 
     private final Long userId = 1L;
-    private final Long accountId = 1L;
+    //private final Long accountId = 1L;
 
     @GetMapping()
     public List<AccountResponse> showAllAccount(){
         return accountService.showAll(userId);
     }
 
-    @GetMapping("/histories")
-    public List<HistoryResponse> showAllHistories(){
+    @GetMapping("/{accountId}")
+    public List<HistoryResponse> showAllHistories(@PathVariable Long accountId){
         return historyService.showAll(accountId);
     }
 
@@ -46,7 +46,7 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(accountResponse);
     }
 
-    @PostMapping("/transfer")
+    @PostMapping("{accountId}/transfer")
     public ResponseEntity transfer(@RequestBody TransferRequest transferRequest){
 
         accountService.transfer(transferRequest.getAccountId(),
@@ -57,8 +57,8 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("송금이 완료되었습니다.");
     }
 
-    @PostMapping("/deposit")
-    public ResponseEntity deposit(@RequestBody DepositRequest depositRequest){
+    @PostMapping("{accountId}/deposit")
+    public ResponseEntity deposit(@RequestBody DepositRequest depositRequest,@PathVariable Long accountId){
 
         accountService.deposit(accountId,depositRequest.getAmount(), depositRequest.getRqspeNm());
 
