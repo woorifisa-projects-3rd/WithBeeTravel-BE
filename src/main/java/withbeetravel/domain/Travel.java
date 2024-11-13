@@ -59,4 +59,5 @@ public class Travel {
         this.isDomesticTravel = isDomesticTravel;
         this.settlementStatus = settlementStatus;
     }
+
 }
