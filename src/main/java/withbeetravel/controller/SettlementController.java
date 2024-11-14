@@ -16,7 +16,7 @@ public class SettlementController {
 
     @GetMapping("/{settlementId}")
     ShowSettlementDetailResponse getSettlementDetails(@PathVariable Long travelId, @PathVariable Long settlementId) {
-        Long userId = 3L;
+        Long userId = 1L;
         return settlementService.getSettlementDetails(userId, travelId, settlementId);
     }
 }
