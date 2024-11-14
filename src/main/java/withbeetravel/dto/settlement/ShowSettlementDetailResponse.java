@@ -1,7 +1,10 @@
 package withbeetravel.dto.settlement;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class ShowSettlementDetailResponse {
     private ShowMyTotalPaymentResponse myTotalPayment;
     private List<ShowMyDetailPaymentResponse> myDetailPayments;
