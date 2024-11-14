@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.controller.docs.SharedPaymentControllerDocs;
 import withbeetravel.dto.ChooseParticipantsRequestDto;
-import withbeetravel.security.annotation.CheckTravelAccess;
+import withbeetravel.aspect.CheckTravelAccess;
 
 @RequiredArgsConstructor
 @RestController

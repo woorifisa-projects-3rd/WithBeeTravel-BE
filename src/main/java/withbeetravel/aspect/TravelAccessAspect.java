@@ -1,4 +1,4 @@
-package withbeetravel.security.aspect;
+package withbeetravel.aspect;
 
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
@@ -6,14 +6,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import withbeetravel.domain.Travel;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.TravelMemberRepository;
 import withbeetravel.repository.TravelRepository;
-import withbeetravel.security.annotation.CheckTravelAccess;
-
-import java.util.Optional;
 
 /**
  * 메소드 실행 전 Travel에 대한 권한 검증
@@ -27,17 +23,17 @@ public class TravelAccessAspect {
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
 
-    @Before("@annotation(checkTravelAccess)") // @CheckTravelAccess이 붙은 메소드에 적용
+    @Before("@annotation(checkTravelAccess)") // @CheckTravelAccess가 붙은 메소드 실행 전에 실행
     public void checkAccess(JoinPoint joinPoint, CheckTravelAccess checkTravelAccess) {
 
         // 로그인된 회원 id
-        Long userId = 3L;
+        Long userId = 1L;
 
         // @CheckTravelAccess를 붙인 메소드의 파라미터에서 travelId 추출
         Long travelId = getTravelIdFromArgs(joinPoint, checkTravelAccess.travelIdParam());
 
         // travelId에 해당하는 travel이 있는지 확인(없다면 예외 던지기)
-        Travel travel = travelRepository.findById(travelId)
+        travelRepository.findById(travelId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
         // 권한 검사
