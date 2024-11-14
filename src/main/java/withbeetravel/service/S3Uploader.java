@@ -20,6 +20,9 @@ public class S3Uploader {
     private final AmazonS3 amazonS3;
     private final String bucket;
 
+    @Value("${cloud.aws.s3.bucket.domain}")
+    private String bucketDomain;
+
     public S3Uploader(AmazonS3 amazonS3, @Value("${cloud.aws.s3.bucket}") String bucket) {
         this.amazonS3 = amazonS3;
         this.bucket = bucket;
@@ -53,13 +56,8 @@ public class S3Uploader {
 
     // 이미지 삭제
     public void delete(String fileName) {
-        try {
-            // URL 디코딩을 통해 원래의 파일 이름 가져오기
-            String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
-            System.out.println(decodedFileName);
-            amazonS3.deleteObject(bucket, decodedFileName);
-        } catch (UnsupportedEncodingException e) {
-            System.err.println("Error while decoding the file name: " + e.getMessage());
+        if(fileName.startsWith(bucketDomain)) {
+            amazonS3.deleteObject(bucket, fileName.substring(bucketDomain.length()));
         }
     }
 
