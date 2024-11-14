@@ -21,4 +21,6 @@ public class TravelController {
         TravelResponseDto response = travelService.saveTravel(request);
         return ResponseEntity.ok(response);
     }
+
+
 }

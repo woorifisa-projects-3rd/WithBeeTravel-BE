@@ -36,9 +36,9 @@ public class TravelServiceImpl implements TravelService {
                 .travelStartDate(LocalDate.parse(requestDto.getStartDate()))
                 .travelEndDate(LocalDate.parse(requestDto.getEndDate()))
                 .isDomesticTravel(requestDto.isDomesticTravel())
-                .settlementStatus(SettlementStatus.PENDING) // 정산 상태 기본값 설정 (정산전)
-                .inviteCode(inviteCode) // 생성된 초대 코드 설정
-                .mainImage(null) // mainImage는 null로 저장
+                .settlementStatus(SettlementStatus.PENDING)
+                .inviteCode(inviteCode)
+                .mainImage(null)
                 .build();
 
 
@@ -68,7 +68,6 @@ public class TravelServiceImpl implements TravelService {
 
     // 나라 이름으로 Country enum 찾는 메서드
     private Country findCountryByName(String countryName) {
-        System.out.println(countryName);
         String name = countryName.trim();
 
         return List.of(Country.values()).stream()
