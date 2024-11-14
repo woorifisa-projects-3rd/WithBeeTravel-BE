@@ -26,10 +26,10 @@ public class TravelMemberSettlementHistory {
     private TravelMember travelMember;
 
     @Column(name = "own_payment_cost", nullable = false)
-    private double ownPaymentCost;
+    private int ownPaymentCost;
 
     @Column(name = "actual_burden_cost", nullable = false)
-    private double actualBurdenCost;
+    private int actualBurdenCost;
 
     @Column(name = "is_agreed", nullable = false)
     private boolean isAgreed;
@@ -38,8 +38,8 @@ public class TravelMemberSettlementHistory {
     public TravelMemberSettlementHistory(Long id,
                                          SettlementRequest settlementRequest,
                                          TravelMember travelMember,
-                                         double ownPaymentCost,
-                                         double actualBurdenCost,
+                                         int ownPaymentCost,
+                                         int actualBurdenCost,
                                          boolean isAgreed) {
         this.id = id;
         this.settlementRequest = settlementRequest;
