@@ -15,4 +15,11 @@ public class ShowSettlementDetailResponse {
         this.myDetailPayments = myDetailPayments;
         this.others = others;
     }
+
+    public static ShowSettlementDetailResponse of (
+            ShowMyTotalPaymentResponse myTotalPayment,
+            List<ShowMyDetailPaymentResponse> myDetailPayments,
+            List<ShowOtherSettlementResponse> others) {
+        return new ShowSettlementDetailResponse(myTotalPayment, myDetailPayments, others);
+    }
 }
