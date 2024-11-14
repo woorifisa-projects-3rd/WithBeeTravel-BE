@@ -24,4 +24,6 @@ public interface AccountService {
     void transfer(Long accountId, String accountNumber, int amount, String rqspeNm);
 
     void deposit(Long accountId, int amount, String rqspeNm);
+
+    AccountResponse accountInfo(Long accountId);
 }

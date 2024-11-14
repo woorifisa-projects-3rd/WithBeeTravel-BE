@@ -139,5 +139,13 @@ public class AccountServiceImpl implements AccountService {
         account.transfer(amount);
 
     }
+
+    // accountId로 계좌 조회하기
+    public AccountResponse accountInfo(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+
+        return  AccountResponse.from(account);
+    }
 }
 

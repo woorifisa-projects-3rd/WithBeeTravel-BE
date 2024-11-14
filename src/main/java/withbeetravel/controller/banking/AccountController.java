@@ -29,6 +29,11 @@ public class AccountController {
         return accountService.showAll(userId);
     }
 
+    @GetMapping("/{accountId}/info")
+    public AccountResponse accountInfo(@PathVariable Long accountId){
+        return accountService.accountInfo(accountId);
+    }
+
     @GetMapping("/{accountId}")
     public List<HistoryResponse> showAllHistories(@PathVariable Long accountId){
         return historyService.showAll(accountId);
