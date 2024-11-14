@@ -45,8 +45,8 @@ public class SharedPayment {
     @Column(name = "is_manually_added", nullable = false)
     private boolean isManuallyAdded;
 
-    @Column(name = "is_all_members_participated", nullable = false)
-    private boolean isAllMembersParticipated;
+    @Column(name = "participant_count", nullable = false)
+    private int participantCount;
 
     @Column(name = "category", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -68,7 +68,7 @@ public class SharedPayment {
                          String paymentComment,
                          String paymentImage,
                          boolean isManuallyAdded,
-                         boolean isAllMembersParticipated,
+                         int participantCount,
                          Category category,
                          String storeName,
                          LocalDateTime paymentDate) {
@@ -81,7 +81,7 @@ public class SharedPayment {
         this.paymentComment = paymentComment;
         this.paymentImage = paymentImage;
         this.isManuallyAdded = isManuallyAdded;
-        this.isAllMembersParticipated = isAllMembersParticipated;
+        this.participantCount = participantCount;
         this.category = category;
         this.storeName = storeName;
         this.paymentDate = paymentDate;
