@@ -1,5 +1,8 @@
 package withbeetravel.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum Country {
     US("미국", "USD"),
     ES("스페인", "EUR"),
@@ -59,4 +62,7 @@ public enum Country {
         this.countryName = countryName;
         this.currencyCode = currencyCode;
     }
+
+
+
 }

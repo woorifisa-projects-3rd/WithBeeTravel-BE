@@ -1,15 +1,14 @@
 package withbeetravel.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "travels")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Travel {
@@ -59,4 +58,12 @@ public class Travel {
         this.isDomesticTravel = isDomesticTravel;
         this.settlementStatus = settlementStatus;
     }
+
+    public void updateTravel(String travelName, LocalDate travelStartDate, LocalDate travelEndDate, boolean isDomesticTravel) {
+        this.travelName = travelName;
+        this.travelStartDate = travelStartDate;
+        this.travelEndDate = travelEndDate;
+        this.isDomesticTravel = isDomesticTravel;
+    }
+
 }
