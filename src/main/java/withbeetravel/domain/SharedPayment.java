@@ -23,6 +23,10 @@ public class SharedPayment {
     @JoinColumn(name = "added_by_member_id", nullable = false)
     private TravelMember addedByMember;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travel_id", nullable = false)
+    private Travel travel;
+
     @Column(name = "currency_unit", nullable = false)
     @Enumerated(EnumType.STRING)
     private CurrencyUnit currencyUnit;
@@ -45,8 +49,8 @@ public class SharedPayment {
     @Column(name = "is_manually_added", nullable = false)
     private boolean isManuallyAdded;
 
-    @Column(name = "is_all_members_participated", nullable = false)
-    private boolean isAllMembersParticipated;
+    @Column(name = "participant_count", nullable = false)
+    private int participantCount;
 
     @Column(name = "category", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -61,6 +65,7 @@ public class SharedPayment {
     @Builder
     public SharedPayment(Long id,
                          TravelMember addedByMember,
+                         Travel travel,
                          CurrencyUnit currencyUnit,
                          int paymentAmount,
                          double foreignPaymentAmount,
@@ -68,12 +73,13 @@ public class SharedPayment {
                          String paymentComment,
                          String paymentImage,
                          boolean isManuallyAdded,
-                         boolean isAllMembersParticipated,
+                         int participantCount,
                          Category category,
                          String storeName,
                          LocalDateTime paymentDate) {
         this.id = id;
         this.addedByMember = addedByMember;
+        this.travel = travel;
         this.currencyUnit = currencyUnit;
         this.paymentAmount = paymentAmount;
         this.foreignPaymentAmount = foreignPaymentAmount;
@@ -81,7 +87,7 @@ public class SharedPayment {
         this.paymentComment = paymentComment;
         this.paymentImage = paymentImage;
         this.isManuallyAdded = isManuallyAdded;
-        this.isAllMembersParticipated = isAllMembersParticipated;
+        this.participantCount = participantCount;
         this.category = category;
         this.storeName = storeName;
         this.paymentDate = paymentDate;
