@@ -27,6 +27,8 @@ public class S3Uploader {
     }
 
     // 이미지 저장
+    // file := s3에 저장할 이미지 파일
+    // dirName := 이미지 파일을 저장할 s3 디렉토리
     public String upload(MultipartFile file, String dirName) throws IOException {
 
         // 파일의 원래 이름에서 공백을 제거
@@ -53,6 +55,7 @@ public class S3Uploader {
     }
 
     // 이미지 삭제
+    // filName := 삭제할 이미지명(URL 형식)
     public void delete(String fileName) {
         if(fileName.startsWith(bucketDomain)) {
             amazonS3.deleteObject(bucket, fileName.substring(bucketDomain.length()));
@@ -60,6 +63,9 @@ public class S3Uploader {
     }
 
     // 이미지 수정
+    // newFile := 새로 저장할 이미지 파일
+    // oldFileName := 기존에 저장되어 있던 이미지명(URL 형식)
+    // dirName := 이미지 파일을 저장할 s3 디렉토리
     public String update(MultipartFile newFile, String oldFileName, String dirName) throws IOException {
         // 기존 파일 삭제
         delete(oldFileName);

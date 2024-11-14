@@ -38,7 +38,7 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
 
-        sharedPaymentService.addAndUpdatePaymentRecord(sharedPaymentId, paymentImage, paymentComment, isMainImage);
+        sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage);
 
         return null;
     }
