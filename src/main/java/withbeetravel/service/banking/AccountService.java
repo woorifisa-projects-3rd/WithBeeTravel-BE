@@ -26,4 +26,6 @@ public interface AccountService {
     void deposit(Long accountId, int amount, String rqspeNm);
 
     AccountResponse accountInfo(Long accountId);
+
+    boolean verifyAccount(String accountNumber);
 }

@@ -71,4 +71,13 @@ public class AccountController {
 
     }
 
+    @GetMapping("/verify/{accountNumber}")
+    public ResponseEntity verifyAccount(@PathVariable String accountNumber){
+
+        if(accountService.verifyAccount(accountNumber)){
+            return ResponseEntity.ok("ok");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found");
+    }
+
 }
