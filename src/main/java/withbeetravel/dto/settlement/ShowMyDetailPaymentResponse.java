@@ -1,7 +1,10 @@
 package withbeetravel.dto.settlement;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class ShowMyDetailPaymentResponse {
     private int paymentAmount;
     private int requestedAmount;
