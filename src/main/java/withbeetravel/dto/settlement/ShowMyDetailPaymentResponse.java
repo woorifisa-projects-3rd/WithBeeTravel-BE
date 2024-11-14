@@ -17,4 +17,8 @@ public class ShowMyDetailPaymentResponse {
         this.storeName = storeName;
         this.paymentDate = paymentDate;
     }
+
+    public static ShowMyDetailPaymentResponse of (int paymentAmount, int requestedAmount, String storeName, LocalDateTime paymentDate) {
+        return new ShowMyDetailPaymentResponse(paymentAmount, requestedAmount, storeName, paymentDate);
+    }
 }

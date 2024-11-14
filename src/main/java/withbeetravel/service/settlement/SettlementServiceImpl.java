@@ -2,8 +2,10 @@ package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.TravelMember;
 import withbeetravel.domain.TravelMemberSettlementHistory;
+import withbeetravel.dto.settlement.ShowMyDetailPaymentResponse;
 import withbeetravel.dto.settlement.ShowMyTotalPaymentResponse;
 import withbeetravel.dto.settlement.ShowOtherSettlementResponse;
 import withbeetravel.dto.settlement.ShowSettlementDetailResponse;
@@ -59,8 +61,24 @@ public class SettlementServiceImpl implements SettlementService{
                         })
                         .collect(Collectors.toList());
 
-        return null;
-    }
+        List<ShowMyDetailPaymentResponse> myDetailPayments =
+                paymentParticipatedMemberRepository.findAllByTravelMemberId(myTravelMemberId)
+                        .stream()
+                        .map(paymentParticipatedMember -> {
+                            SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
+                            int participantCount = sharedPayment.getParticipantCount();
+                            int paymentAmount = sharedPayment.getPaymentAmount();
+                            int requestedAmount = paymentAmount/participantCount;
+
+                            return ShowMyDetailPaymentResponse.of(
+                                    paymentAmount,
+                                    requestedAmount,
+                                    sharedPayment.getStoreName(),
+                                    sharedPayment.getPaymentDate());
+                        })
+                        .collect(Collectors.toList());
+
+        return ShowSettlementDetailResponse.of(myTotalPayments, myDetailPayments, others);    }
 
     private Long findMyTravelMemberIdByUserIdAndTravelId(Long userId, Long travelId) {
         TravelMember userTravelMember =
