@@ -23,6 +23,10 @@ public class SettlementRequestLog {
     @JoinColumn(name = "settlement_request_id", nullable = false)
     private SettlementRequest settlementRequest;
 
+    @Column(name = "log_title", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LogTitle logTitle;
+
     @Column(name = "log_message", nullable = false)
     private String logMessage;
 
@@ -30,9 +34,14 @@ public class SettlementRequestLog {
     private LocalDateTime logTime;
 
     @Builder
-    public SettlementRequestLog(Long id, SettlementRequest settlementRequest, String logMessage, LocalDateTime logTime) {
+    public SettlementRequestLog(Long id,
+                                SettlementRequest settlementRequest,
+                                LogTitle logTitle,
+                                String logMessage,
+                                LocalDateTime logTime) {
         this.id = id;
         this.settlementRequest = settlementRequest;
+        this.logTitle = logTitle;
         this.logMessage = logMessage;
         this.logTime = logTime;
     }
