@@ -1,5 +1,8 @@
 package withbeetravel.dto.settlement;
 
+import lombok.Getter;
+
+@Getter
 public class ShowOtherSettlementResponse {
     private String name;
     private int totalPaymentCost;
