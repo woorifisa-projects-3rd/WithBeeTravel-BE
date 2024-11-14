@@ -7,11 +7,14 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.controller.docs.SharedPaymentControllerDocs;
 import withbeetravel.dto.ChooseParticipantsRequestDto;
 import withbeetravel.aspect.CheckTravelAccess;
+import withbeetravel.service.SharedPaymentService;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/travels/{travelId}/payments")
 public class SharedPaymentController implements SharedPaymentControllerDocs {
+
+    private final SharedPaymentService sharedPaymentService;
 
     @Override
     @PatchMapping("/{sharedPaymentId}/participants")
@@ -34,6 +37,8 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
             @RequestParam(value = "paymentComment", required = false) String paymentComment,
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
+
+        sharedPaymentService.addAndUpdatePaymentRecord(sharedPaymentId, paymentImage, paymentComment, isMainImage);
 
         return null;
     }
