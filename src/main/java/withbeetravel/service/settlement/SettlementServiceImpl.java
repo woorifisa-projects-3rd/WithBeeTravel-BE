@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import withbeetravel.domain.TravelMember;
 import withbeetravel.domain.TravelMemberSettlementHistory;
 import withbeetravel.dto.settlement.ShowMyTotalPaymentResponse;
+import withbeetravel.dto.settlement.ShowOtherSettlementResponse;
 import withbeetravel.dto.settlement.ShowSettlementDetailResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.SettlementErrorCode;
@@ -12,6 +13,7 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,19 @@ public class SettlementServiceImpl implements SettlementService{
                             return ShowMyTotalPaymentResponse.of(totalPaymentCost, ownPaymentCost, actualBurdenCost);
                         })
                         .orElseThrow(() -> new CustomException(SettlementErrorCode.MEMBER_SETTLEMENT_HISTORY_NOT_FOUND));
+
+        List<ShowOtherSettlementResponse> others =
+                travelMemberSettlementHistories
+                        .stream()
+                        .filter(history -> !history.getTravelMember().getId().equals(myTravelMemberId))
+                        .map(history -> {
+                            Long travelMemberId = history.getTravelMember().getId();
+                            TravelMember travelMember = travelMemberRepository.findById(travelMemberId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
+                            String memberName = travelMember.getUser().getName();
+                            int totalPaymentCost = history.getOwnPaymentCost() - history.getActualBurdenCost();
+                            return ShowOtherSettlementResponse.of(memberName, totalPaymentCost);
+                        })
+                        .collect(Collectors.toList());
 
         return null;
     }
