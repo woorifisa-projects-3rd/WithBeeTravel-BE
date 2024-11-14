@@ -10,4 +10,8 @@ public class ShowMyTotalPaymentResponse {
         this.ownPaymentCost = ownPaymentCost;
         this.actualBurdenCost = actualBurdenCost;
     }
+
+    public static ShowMyTotalPaymentResponse of (int totalPaymentCost, int ownPaymentCost, int actualBurdenCost) {
+        return new ShowMyTotalPaymentResponse(totalPaymentCost, ownPaymentCost, actualBurdenCost);
+    }
 }
