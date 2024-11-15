@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import withbeetravel.domain.SettlementStatus;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
-import withbeetravel.dto.response.HoneyCapsuleResponse;
+import withbeetravel.dto.response.travel.HoneyCapsuleResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.SettlementErrorCode;

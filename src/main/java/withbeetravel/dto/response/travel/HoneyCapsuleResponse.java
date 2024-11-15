@@ -1,4 +1,4 @@
-package withbeetravel.dto.response;
+package withbeetravel.dto.response.travel;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

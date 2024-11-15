@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.controller.travel.docs.HoneyCapsuleControllerDocs;
-import withbeetravel.dto.response.HoneyCapsuleResponse;
+import withbeetravel.dto.response.travel.HoneyCapsuleResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.travel.HoneyCapsuleService;
 

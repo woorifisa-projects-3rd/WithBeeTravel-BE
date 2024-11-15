@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
-import withbeetravel.dto.response.SharedPaymentRecordResponse;
+import withbeetravel.dto.response.shardPayment.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.sharedPayment.docs.SharedPaymentRecordControllerDocs;
-import withbeetravel.dto.response.SharedPaymentRecordResponse;
+import withbeetravel.dto.response.shardPayment.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.sharedPayment.SharedPaymentRecordService;
 

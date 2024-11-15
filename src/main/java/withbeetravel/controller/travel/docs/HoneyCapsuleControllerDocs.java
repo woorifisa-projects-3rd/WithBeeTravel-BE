@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import withbeetravel.dto.response.ErrorResponse;
-import withbeetravel.dto.response.HoneyCapsuleResponse;
+import withbeetravel.dto.response.travel.HoneyCapsuleResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
 import java.util.List;
