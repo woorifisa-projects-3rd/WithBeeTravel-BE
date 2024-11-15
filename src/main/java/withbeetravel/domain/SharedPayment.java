@@ -100,4 +100,8 @@ public class SharedPayment {
     public void updatePaymentCommnet(String newPaymentComment) {
         this.paymentComment = newPaymentComment;
     }
+
+    public void updateParticipantCount(int newParticipantCount) {
+        this.participantCount = newParticipantCount;
+    }
 }

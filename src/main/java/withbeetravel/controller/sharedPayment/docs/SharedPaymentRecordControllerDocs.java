@@ -19,7 +19,7 @@ public interface SharedPaymentRecordControllerDocs {
     @Operation(
             summary = "여행 기록 추가/수정하기",
             description = "공동 결제 내역에 대해 이미지, 문구를 추가/수정할 수 있습니다.",
-            tags = {"User Management"},
+            tags = {"User Management", "공동 결제 내역"},
             parameters = {
                     @Parameter(
                             name = "travelId",
@@ -69,7 +69,7 @@ public interface SharedPaymentRecordControllerDocs {
     @Operation(
             summary = "SHARED PAYMENT ID에 따른 여행 기록 불러오기",
             description = "SHARED PAYMENT ID에 따른 여행 사진, 문구를 불러올 수 있습니다.",
-            tags = {"User Management"},
+            tags = {"User Management", "공동 결제 내역"},
             parameters = {
                     @Parameter(
                             name = "travelId",
