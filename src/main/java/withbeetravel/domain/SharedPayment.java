@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -61,6 +63,9 @@ public class SharedPayment {
 
     @Column(name = "payment_date", nullable = false)
     private LocalDateTime paymentDate;
+
+    @OneToMany(mappedBy = "sharedPayment")
+    private List<PaymentParticipatedMember> paymentParticipatedMembers = new ArrayList<>();
 
     @Builder
     public SharedPayment(Long id,

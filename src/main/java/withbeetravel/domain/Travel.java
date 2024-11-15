@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,6 +42,9 @@ public class Travel {
     @Column(name = "settlement_status", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private SettlementStatus settlementStatus;
+
+    @OneToMany(mappedBy = "travel")
+    private List<TravelMember> travelMembers = new ArrayList<>();
 
     @Builder
     public Travel(Long id,

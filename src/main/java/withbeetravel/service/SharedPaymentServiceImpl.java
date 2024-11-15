@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
 import withbeetravel.dto.response.SharedPaymentRecordResponse;
+import withbeetravel.dto.response.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;
@@ -16,6 +17,8 @@ import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelRepository;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -76,6 +79,25 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
         SharedPaymentRecordResponse responseDto = SharedPaymentRecordResponse.from(sharedPayment);
 
         return SuccessResponse.of(200, "여행 기록 불러오기 성공", responseDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SuccessResponse<List<SharedPaymentResponse>> getSharedPaymentAll(Long travelId) {
+        // 여행 존재 여부 확인
+        Travel travel = travelRepository.findById(travelId)
+                .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
+
+        // 해당 여행의 모든 공동 결제 내역 조회
+        List<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelId(travelId)
+                .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
+
+        // Response DTO 변환
+        List<SharedPaymentResponse> responseDtos = sharedPayments.stream()
+                .map(SharedPaymentResponse::from)
+                .collect(Collectors.toList());
+
+        return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", responseDtos);
     }
 
     // 이미지 추가, 수정, 삭제

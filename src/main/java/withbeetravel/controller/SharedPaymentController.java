@@ -9,8 +9,11 @@ import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.docs.SharedPaymentControllerDocs;
 import withbeetravel.dto.request.ChooseParticipantsRequest;
 import withbeetravel.dto.response.SharedPaymentRecordResponse;
+import withbeetravel.dto.response.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.SharedPaymentService;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,5 +55,11 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
             @PathVariable Long sharedPaymentId
     ) {
         return sharedPaymentService.getSharedPaymentRecord(sharedPaymentId);
+    }
+
+    @CheckTravelAccess
+    @GetMapping("")
+    public SuccessResponse<List<SharedPaymentResponse>> getSharedPaymentAll(@PathVariable Long travelId) {
+        return sharedPaymentService.getSharedPaymentAll(travelId);
     }
 }
