@@ -40,7 +40,7 @@ public class TravelAndSharedPaymentAccessAspect {
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
         // 권한 검사
-        travelMemberRepository.findByTravel_IdAndUser_Id(travelId, userId)
+        travelMemberRepository.findByTravelIdAndUserId(travelId, userId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
 
         // @CheckTravelAndSharedPaymentAccess 붙인 메소드의 파라미터에서 sharedPaymentId 추출

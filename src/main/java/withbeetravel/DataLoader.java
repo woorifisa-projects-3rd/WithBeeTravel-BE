@@ -40,8 +40,17 @@ public class DataLoader implements CommandLineRunner {
                 .profileImage("profile2.jpg")
                 .hasWibeeCard(false)
                 .build();
+        User user3 = User.builder()
+                .email("user3@example.com")
+                .password("password123")
+                .pinNumber("567890")
+                .name("User Three")
+                .profileImage("profile3.jpg")
+                .hasWibeeCard(false)
+                .build();
         userRepository.save(user1);
         userRepository.save(user2);
+        userRepository.save(user3);
 
         // Travel 더미 데이터 생성
         Travel travel1 = Travel.builder()

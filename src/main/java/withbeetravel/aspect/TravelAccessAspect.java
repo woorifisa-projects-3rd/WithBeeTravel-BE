@@ -36,7 +36,7 @@ public class TravelAccessAspect {
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
         // 권한 검사
-        travelMemberRepository.findByTravel_IdAndUser_Id(travelId, userId)
+        travelMemberRepository.findByTravelIdAndUserId(travelId, userId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
     }
 
