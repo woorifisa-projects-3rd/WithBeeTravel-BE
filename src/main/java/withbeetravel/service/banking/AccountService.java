@@ -28,4 +28,6 @@ public interface AccountService {
     AccountResponse accountInfo(Long accountId);
 
     boolean verifyAccount(String accountNumber);
+
+    String findUserNameByAccountNumber(String accountNumber);
 }

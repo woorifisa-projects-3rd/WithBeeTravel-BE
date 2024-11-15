@@ -10,7 +10,9 @@ import withbeetravel.dto.banking.account.*;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.banking.HistoryService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/accounts")
@@ -78,6 +80,19 @@ public class AccountController {
             return ResponseEntity.ok("ok");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found");
+    }
+
+    @GetMapping("/find-user/{accountNumber}")
+    public ResponseEntity<Map<String, String>> findUserNameByAccountNumber(@PathVariable String accountNumber) {
+
+
+        String name = accountService.findUserNameByAccountNumber(accountNumber);
+
+        // 응답을 JSON 형식으로 감싸서 반환
+        Map<String, String> response = new HashMap<>();
+        response.put("name", name);
+
+        return ResponseEntity.ok(response);  // JSON 응답 반환
     }
 
 }

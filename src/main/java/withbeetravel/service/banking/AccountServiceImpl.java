@@ -148,9 +148,18 @@ public class AccountServiceImpl implements AccountService {
         return  AccountResponse.from(account);
     }
 
-    // 계좌번호가 존재한다면 true 아니면 false
     public boolean verifyAccount(String accountNumber) {
-        return accountRepository.findByAccountNumber(accountNumber).isPresent();
+        Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
+        if(account.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    public String findUserNameByAccountNumber(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow();
+        String name = account.getUser().getName();
+        return name;
     }
 }
 
