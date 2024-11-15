@@ -5,8 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.controller.docs.SharedPaymentControllerDocs;
-import withbeetravel.dto.ChooseParticipantsRequestDto;
+import withbeetravel.dto.request.ChooseParticipantsRequest;
 import withbeetravel.aspect.CheckTravelAccess;
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.SharedPaymentService;
 
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
     public ResponseEntity<String> chooseParticipant(
             @PathVariable Long travelId,
             @PathVariable Long sharedPaymentId,
-            @RequestBody ChooseParticipantsRequestDto requestDto
+            @RequestBody ChooseParticipantsRequest requestDto
     ) {
 
         return ResponseEntity.ok("정산인원 변경 성공");
@@ -30,7 +31,7 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
     @Override
     @CheckTravelAccess
     @PatchMapping(value = "/{sharedPaymentId}/records", consumes = "multipart/form-data")
-    public ResponseEntity<String> addAndUpdatePaymentRecord(
+    public SuccessResponse addAndUpdatePaymentRecord(
             @PathVariable Long travelId,
             @PathVariable Long sharedPaymentId,
             @RequestPart(value = "paymentImage") MultipartFile paymentImage,
@@ -38,8 +39,6 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
 
-        sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage);
-
-        return null;
+        return sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage);
     }
 }

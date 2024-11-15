@@ -12,7 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
-import withbeetravel.dto.ChooseParticipantsRequestDto;
+import withbeetravel.dto.request.ChooseParticipantsRequest;
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.dto.ErrorResponseDto;
 
 @Tag(name = "공동 결제 내역 API", description = "에 대한 설명입니다.")
@@ -48,7 +49,7 @@ public interface SharedPaymentControllerDocs {
     })
     public ResponseEntity<String> chooseParticipant(@PathVariable Long travelId,
                                                     @PathVariable Long sharedPaymentId,
-                                                    @RequestBody ChooseParticipantsRequestDto requestDto);
+                                                    @RequestBody ChooseParticipantsRequest requestDto);
 
     @Operation(
             summary = "여행 기록 추가/수정하기",
@@ -90,11 +91,12 @@ public interface SharedPaymentControllerDocs {
             }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "이미지 및 문구가 추가되었습니다."),
+            @ApiResponse(responseCode = "200", description = "이미지 및 문구를 성공적으로 변경하였습니다."),
             @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
             @ApiResponse(responseCode = "403", description = "TRAVEL-002", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "TRAVEL-001\nPAYMENT-001", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "422", description = "VALIDATION-004", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
     })
-    public ResponseEntity<String> addAndUpdatePaymentRecord(Long travelId, Long sharedPaymentId,
-                                                            MultipartFile paymentImage, String paymentComment, boolean isMainImage);
+    public SuccessResponse addAndUpdatePaymentRecord(Long travelId, Long sharedPaymentId,
+                                                     MultipartFile paymentImage, String paymentComment, boolean isMainImage);
 }
