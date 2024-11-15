@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import withbeetravel.domain.Account;
 import withbeetravel.domain.History;
 import withbeetravel.dto.banking.account.*;
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.banking.HistoryService;
 
@@ -61,16 +62,32 @@ public class AccountController {
                 transferRequest.getAmount(),
                 transferRequest.getRqspeNm());
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("송금이 완료되었습니다.");
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.ACCEPTED.value());
+        response.put("message", "송금이 완료되었습니다.");
+        response.put("data", null); // data는 null일 수도 있음
+
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     @PostMapping("{accountId}/deposit")
-    public ResponseEntity deposit(@RequestBody DepositRequest depositRequest,@PathVariable Long accountId){
+    public ResponseEntity<SuccessResponse<String>> deposit(
+            @RequestBody DepositRequest depositRequest,
+            @PathVariable Long accountId) {
 
-        accountService.deposit(accountId,depositRequest.getAmount(), depositRequest.getRqspeNm());
+        // 입금 처리
+        accountService.deposit(accountId, depositRequest.getAmount(), depositRequest.getRqspeNm());
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("입금이 완료되었습니다.");
+        // SuccessResponse 객체를 생성하여 반환
+        SuccessResponse<String> response = SuccessResponse.of(
+                HttpStatus.ACCEPTED.value(), // 상태 코드 202
+                "입금이 완료되었습니다.", // 메시지
+                null // data는 null로 설정 (필요시 다른 데이터를 넘길 수 있음)
+        );
 
+        // ResponseEntity로 감싸서 반환
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     @GetMapping("/verify/{accountNumber}")
