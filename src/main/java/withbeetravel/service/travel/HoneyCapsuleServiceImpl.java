@@ -2,6 +2,7 @@ package withbeetravel.service.travel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.SettlementStatus;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
@@ -25,6 +26,7 @@ public class HoneyCapsuleServiceImpl implements HoneyCapsuleService{
 
 
     @Override
+    @Transactional(readOnly = true)
     public SuccessResponse<List<HoneyCapsuleResponse>> getHoneyCapsuleList(Long travelId) {
 
         // travelId에 대한 엔티티 가져오기
