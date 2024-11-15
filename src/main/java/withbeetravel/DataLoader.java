@@ -104,7 +104,7 @@ public class DataLoader implements CommandLineRunner {
                 .foreignPaymentAmount(100)
                 .exchangeRate(1.0)
                 .paymentComment("Lunch")
-                .paymentImage(null)
+                .paymentImage("https://withbee-travel.s3.ap-northeast-2.amazonaws.com/shared-payments/1/32b52c1e-7a53-4e25-80cd-4a8b5eedb0e4_%EA%BE%B8%EB%B2%85.png")
                 .isManuallyAdded(true)
                 .participantCount(2)
                 .category(Category.FOOD)

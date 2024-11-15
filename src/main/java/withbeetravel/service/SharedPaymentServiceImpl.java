@@ -1,11 +1,12 @@
 package withbeetravel.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
+import withbeetravel.dto.response.SharedPaymentRecordResponseDto;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;
@@ -28,6 +29,7 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
     // S3에 이미지를 저장할 경로
     private static final String SHARED_PAYMENT_IMAGE_DIR = "shared-payments";
 
+    @Override
     @Transactional
     public SuccessResponse addAndUpdatePaymentRecord(
             Long travelId,
@@ -60,6 +62,20 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
         }
 
         return SuccessResponse.of(200, "이미지 및 문구를 성공적으로 변경하였습니다.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SuccessResponse<SharedPaymentRecordResponseDto> getSharedPaymentRecord(Long sharedPaymentId) {
+
+        // SharedPayment 엔티티 가져오기
+        SharedPayment sharedPayment = sharedPaymentRepository.findById(sharedPaymentId)
+                .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
+
+        // Response Dto에 담기
+        SharedPaymentRecordResponseDto responseDto = SharedPaymentRecordResponseDto.from(sharedPayment);
+
+        return SuccessResponse.of(200, "여행 기록 불러오기 성공", responseDto);
     }
 
     // 이미지 추가, 수정, 삭제
