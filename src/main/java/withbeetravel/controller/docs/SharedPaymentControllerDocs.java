@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
-import withbeetravel.dto.request.ChooseParticipantsRequestDto;
-import withbeetravel.dto.response.SharedPaymentRecordResponseDto;
+import withbeetravel.dto.request.ChooseParticipantsRequest;
+import withbeetravel.dto.response.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.ErrorResponse;
 
@@ -50,7 +50,7 @@ public interface SharedPaymentControllerDocs {
     })
     public ResponseEntity<String> chooseParticipant(@PathVariable Long travelId,
                                                     @PathVariable Long sharedPaymentId,
-                                                    @RequestBody ChooseParticipantsRequestDto requestDto);
+                                                    @RequestBody ChooseParticipantsRequest requestDto);
 
     @Operation(
             summary = "여행 기록 추가/수정하기",
@@ -124,12 +124,12 @@ public interface SharedPaymentControllerDocs {
             }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "여행 기록 불러오기 성공", content = @Content(schema = @Schema(implementation = SharedPaymentRecordResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "여행 기록 불러오기 성공", content = @Content(schema = @Schema(implementation = SharedPaymentRecordResponse.class))),
             @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "TRAVEL-002", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "TRAVEL-001\nPAYMENT-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public SuccessResponse<SharedPaymentRecordResponseDto> getSharedPaymentRecord(
+    public SuccessResponse<SharedPaymentRecordResponse> getSharedPaymentRecord(
             Long travelId,
             Long sharedPaymentId
     );

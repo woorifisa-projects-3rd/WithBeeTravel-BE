@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
-import withbeetravel.dto.response.SharedPaymentRecordResponseDto;
+import withbeetravel.dto.response.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;
@@ -66,14 +66,14 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
 
     @Override
     @Transactional(readOnly = true)
-    public SuccessResponse<SharedPaymentRecordResponseDto> getSharedPaymentRecord(Long sharedPaymentId) {
+    public SuccessResponse<SharedPaymentRecordResponse> getSharedPaymentRecord(Long sharedPaymentId) {
 
         // SharedPayment 엔티티 가져오기
         SharedPayment sharedPayment = sharedPaymentRepository.findById(sharedPaymentId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
 
         // Response Dto에 담기
-        SharedPaymentRecordResponseDto responseDto = SharedPaymentRecordResponseDto.from(sharedPayment);
+        SharedPaymentRecordResponse responseDto = SharedPaymentRecordResponse.from(sharedPayment);
 
         return SuccessResponse.of(200, "여행 기록 불러오기 성공", responseDto);
     }

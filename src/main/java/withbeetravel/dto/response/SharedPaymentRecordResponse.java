@@ -8,7 +8,7 @@ import withbeetravel.domain.SharedPayment;
 @Data
 @Builder
 @Schema(description = "SHARED PAYMENT ID에 따른 여행 기록 정보 Response DTO")
-public class SharedPaymentRecordResponseDto {
+public class SharedPaymentRecordResponse {
 
     @Schema(
             description = "SHARED PAYMENT ID",
@@ -28,9 +28,9 @@ public class SharedPaymentRecordResponseDto {
     )
     private String paymentComment;
 
-    public static SharedPaymentRecordResponseDto from(SharedPayment sharedPayment) {
+    public static SharedPaymentRecordResponse from(SharedPayment sharedPayment) {
 
-        return SharedPaymentRecordResponseDto.builder()
+        return SharedPaymentRecordResponse.builder()
                 .sharedPaymentId(sharedPayment.getId())
                 .paymentImage(sharedPayment.getPaymentImage())
                 .paymentComment(sharedPayment.getPaymentComment())

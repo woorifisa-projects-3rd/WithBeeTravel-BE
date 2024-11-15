@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Schema(description = "공동 결제 내역에 대한 정산 인원 리스트 DTO")
-public class ChooseParticipantsRequestDto {
+public class ChooseParticipantsRequest {
 
     @Schema(
             description = "정산 인원 리스트",
