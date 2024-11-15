@@ -95,7 +95,7 @@ public interface SharedPaymentControllerDocs {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이미지 및 문구를 성공적으로 변경하였습니다.", content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
             @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "TRAVEL-002", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "TRAVEL-002\nPAYMENT-003", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "TRAVEL-001\nPAYMENT-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "422", description = "VALIDATION-004", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
@@ -126,7 +126,7 @@ public interface SharedPaymentControllerDocs {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "여행 기록 불러오기 성공", content = @Content(schema = @Schema(implementation = SharedPaymentRecordResponse.class))),
             @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "TRAVEL-002", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "TRAVEL-002\nPAYMENT-003", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "TRAVEL-001\nPAYMENT-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public SuccessResponse<SharedPaymentRecordResponse> getSharedPaymentRecord(

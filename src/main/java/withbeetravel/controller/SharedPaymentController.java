@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import withbeetravel.aspect.CheckTravelAccess;
+import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.docs.SharedPaymentControllerDocs;
 import withbeetravel.dto.request.ChooseParticipantsRequest;
-import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.response.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.SharedPaymentService;
@@ -30,7 +31,7 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
     }
 
     @Override
-    @CheckTravelAccess
+    @CheckTravelAndSharedPaymentAccess
     @PatchMapping(value = "/{sharedPaymentId}/records", consumes = "multipart/form-data")
     public SuccessResponse addAndUpdatePaymentRecord(
             @PathVariable Long travelId,
@@ -44,7 +45,7 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
     }
 
     @Override
-    @CheckTravelAccess
+    @CheckTravelAndSharedPaymentAccess
     @GetMapping("/{sharedPaymentId}/records")
     public SuccessResponse<SharedPaymentRecordResponse> getSharedPaymentRecord(
             @PathVariable Long travelId,

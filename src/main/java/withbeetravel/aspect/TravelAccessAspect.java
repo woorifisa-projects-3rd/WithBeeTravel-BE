@@ -23,11 +23,10 @@ public class TravelAccessAspect {
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
 
+    private final Long userId = 1L;
+
     @Before("@annotation(checkTravelAccess)") // @CheckTravelAccess가 붙은 메소드 실행 전에 실행
     public void checkAccess(JoinPoint joinPoint, CheckTravelAccess checkTravelAccess) {
-
-        // 로그인된 회원 id
-        Long userId = 1L;
 
         // @CheckTravelAccess를 붙인 메소드의 파라미터에서 travelId 추출
         Long travelId = getTravelIdFromArgs(joinPoint, checkTravelAccess.travelIdParam());
