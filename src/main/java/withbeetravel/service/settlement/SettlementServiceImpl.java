@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import withbeetravel.domain.SettlementRequest;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.TravelMember;
 import withbeetravel.domain.TravelMemberSettlementHistory;
@@ -33,8 +34,9 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     @Transactional(readOnly = true)
-    public SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId, Long settlementRequestId) {
-        validateSettlement(settlementRequestId);
+    public SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId) {
+        Long settlementRequestId = findSettlementRequestIdByTravelId(travelId);
+
         Long myTravelMemberId = findMyTravelMemberIdByUserIdAndTravelId(userId, travelId);
 
         List<TravelMemberSettlementHistory> travelMemberSettlementHistories =
@@ -109,7 +111,8 @@ public class SettlementServiceImpl implements SettlementService {
         return userTravelMember.getId();
     }
 
-    private void validateSettlement(Long settlementRequestId) {
-        settlementRequestRepository.findById(settlementRequestId).orElseThrow(() -> new CustomException(SettlementErrorCode.SETTLEMENT_NOT_FOUND));
+    private Long findSettlementRequestIdByTravelId(Long travelId) {
+        SettlementRequest settlementRequest = settlementRequestRepository.findByTravelId(travelId).orElseThrow(() -> new CustomException(SettlementErrorCode.SETTLEMENT_NOT_FOUND));
+        return settlementRequest.getId();
     }
 }
