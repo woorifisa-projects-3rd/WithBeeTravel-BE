@@ -13,6 +13,7 @@ import withbeetravel.dto.settlement.ShowMyTotalPaymentResponse;
 import withbeetravel.dto.settlement.ShowOtherSettlementResponse;
 import withbeetravel.dto.settlement.ShowSettlementDetailResponse;
 import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
@@ -28,6 +29,7 @@ public class SettlementServiceImpl implements SettlementService {
     private final SettlementRequestRepository settlementRequestRepository;
     private final TravelMemberSettlementHistoryRepository travelMemberSettlementHistoryRepository;
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,7 +41,7 @@ public class SettlementServiceImpl implements SettlementService {
                 travelMemberSettlementHistoryRepository.findAllBySettlementRequestId(settlementRequestId);
 
         ShowMyTotalPaymentResponse myTotalPayments =
-                createMyTotalPaymentResponse(travelMemberSettlementHistories, myTravelMemberId);
+                createMyTotalPaymentResponse(userId, travelMemberSettlementHistories, myTravelMemberId);
 
         List<ShowOtherSettlementResponse> others =
                 createOtherSettlementResponses(travelMemberSettlementHistories, myTravelMemberId);
@@ -86,15 +88,17 @@ public class SettlementServiceImpl implements SettlementService {
                 .toList();
     }
 
-    private ShowMyTotalPaymentResponse createMyTotalPaymentResponse(List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Long myTravelMemberId) {
+    private ShowMyTotalPaymentResponse createMyTotalPaymentResponse(Long userId, List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Long myTravelMemberId) {
         return travelMemberSettlementHistories
                 .stream()
                 .filter(history -> history.getTravelMember().getId().equals(myTravelMemberId))
                 .findFirst()
                 .map(history -> {
+                    String name = userRepository.findById(userId)
+                            .orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED)).getName();
                     int ownPaymentCost = history.getOwnPaymentCost();
                     int actualBurdenCost = history.getActualBurdenCost();
-                    return ShowMyTotalPaymentResponse.of(ownPaymentCost, actualBurdenCost);
+                    return ShowMyTotalPaymentResponse.of(name, ownPaymentCost, actualBurdenCost);
                 })
                 .orElseThrow(() -> new CustomException(SettlementErrorCode.MEMBER_SETTLEMENT_HISTORY_NOT_FOUND));
     }
