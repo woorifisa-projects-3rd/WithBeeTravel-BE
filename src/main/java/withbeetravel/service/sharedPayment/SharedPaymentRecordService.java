@@ -1,4 +1,4 @@
-package withbeetravel.service;
+package withbeetravel.service.sharedPayment;
 
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.dto.response.SharedPaymentRecordResponse;

@@ -1,4 +1,4 @@
-package withbeetravel.service;
+package withbeetravel.service.sharedPayment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,7 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.exception.error.ValidationErrorCode;
 import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelRepository;
+import withbeetravel.service.global.S3Uploader;
 
 import java.io.IOException;
 

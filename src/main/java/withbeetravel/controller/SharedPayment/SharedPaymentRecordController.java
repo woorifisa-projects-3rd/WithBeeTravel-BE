@@ -7,7 +7,7 @@ import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.SharedPayment.docs.SharedPaymentRecordControllerDocs;
 import withbeetravel.dto.response.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.service.SharedPaymentRecordService;
+import withbeetravel.service.sharedPayment.SharedPaymentRecordService;
 
 @RequiredArgsConstructor
 @RestController
