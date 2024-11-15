@@ -1,6 +1,6 @@
-package withbeetravel.service.sharedPayment;
+package withbeetravel.service.payment;
 
-import withbeetravel.dto.request.sharedPayment.SharedPaymentParticipateRequest;
+import withbeetravel.dto.request.payment.SharedPaymentParticipateRequest;
 import withbeetravel.dto.response.SuccessResponse;
 
 public interface SharedPaymentParticipantService {

@@ -1,4 +1,4 @@
-package withbeetravel.dto.request.sharedPayment;
+package withbeetravel.dto.request.payment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

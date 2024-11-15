@@ -1,12 +1,12 @@
-package withbeetravel.controller.sharedPayment;
+package withbeetravel.controller.payment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
-import withbeetravel.controller.sharedPayment.docs.SharedPaymentParticipantControllerDocs;
-import withbeetravel.dto.request.sharedPayment.SharedPaymentParticipateRequest;
+import withbeetravel.controller.payment.docs.SharedPaymentParticipantControllerDocs;
+import withbeetravel.dto.request.payment.SharedPaymentParticipateRequest;
 import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.service.sharedPayment.SharedPaymentParticipantService;
+import withbeetravel.service.payment.SharedPaymentParticipantService;
 
 @RestController
 @RequestMapping("/api/travels/{travelId}/payments/{sharedPaymentId}/participants")

@@ -1,4 +1,4 @@
-package withbeetravel.service.sharedPayment;
+package withbeetravel.service.payment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.PaymentParticipatedMember;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.TravelMember;
-import withbeetravel.dto.request.sharedPayment.SharedPaymentParticipateRequest;
+import withbeetravel.dto.request.payment.SharedPaymentParticipateRequest;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;

@@ -1,4 +1,4 @@
-package withbeetravel.controller.sharedPayment.docs;
+package withbeetravel.controller.payment.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import withbeetravel.dto.request.sharedPayment.SharedPaymentParticipateRequest;
+import withbeetravel.dto.request.payment.SharedPaymentParticipateRequest;
 import withbeetravel.dto.response.ErrorResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
