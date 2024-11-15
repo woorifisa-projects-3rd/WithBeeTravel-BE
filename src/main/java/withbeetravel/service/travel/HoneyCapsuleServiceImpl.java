@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import withbeetravel.domain.SettlementStatus;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
-import withbeetravel.dto.response.HoneyCapsuleListResponse;
 import withbeetravel.dto.response.HoneyCapsuleResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
@@ -15,7 +14,6 @@ import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelRepository;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,8 +23,9 @@ public class HoneyCapsuleServiceImpl implements HoneyCapsuleService{
     private final TravelRepository travelRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
 
+
     @Override
-    public SuccessResponse<HoneyCapsuleListResponse> getHoneyCapsuleList(Long travelId) {
+    public SuccessResponse<List<HoneyCapsuleResponse>> getHoneyCapsuleList(Long travelId) {
 
         // travelId에 대한 엔티티 가져오기
         Travel travel = travelRepository.findById(travelId)
@@ -45,10 +44,6 @@ public class HoneyCapsuleServiceImpl implements HoneyCapsuleService{
                 .map(HoneyCapsuleResponse::from)
                 .collect(Collectors.toList());
 
-        return SuccessResponse.of(
-                200,
-                "여행 기록 조회 성공",
-                HoneyCapsuleListResponse.builder().honeyCapsuleList(honeyCapsuleResponseList).build()
-        );
+        return SuccessResponse.of(200, "여행 기록 조회 성공", honeyCapsuleResponseList);
     }
 }

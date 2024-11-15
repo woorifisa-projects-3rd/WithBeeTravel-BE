@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import withbeetravel.dto.response.ErrorResponse;
-import withbeetravel.dto.response.HoneyCapsuleListResponse;
+import withbeetravel.dto.response.HoneyCapsuleResponse;
 import withbeetravel.dto.response.SuccessResponse;
+
+import java.util.List;
 
 public interface HoneyCapsuleControllerDocs {
 
@@ -28,11 +30,11 @@ public interface HoneyCapsuleControllerDocs {
             }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "여행 기록 조회 성공", content = @Content(schema = @Schema(implementation = HoneyCapsuleListResponse.class))),
+            @ApiResponse(responseCode = "200", description = "여행 기록 조회 성공", content = @Content(schema = @Schema(implementation = HoneyCapsuleResponse.class))),
             @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "TRAVEL-002", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "TRAVEL-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "SETTLEMENT-005", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    SuccessResponse<HoneyCapsuleListResponse> getHoneyCapsuleList(Long travelId);
+    SuccessResponse<List<HoneyCapsuleResponse>> getHoneyCapsuleList(Long travelId);
 }

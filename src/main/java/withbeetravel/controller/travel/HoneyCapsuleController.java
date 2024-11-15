@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.controller.travel.docs.HoneyCapsuleControllerDocs;
-import withbeetravel.dto.response.HoneyCapsuleListResponse;
+import withbeetravel.dto.response.HoneyCapsuleResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.travel.HoneyCapsuleService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/travels/{travelId}/honeycapsule")
@@ -21,7 +23,7 @@ public class HoneyCapsuleController implements HoneyCapsuleControllerDocs {
     @Override
     @CheckTravelAccess
     @GetMapping
-    public SuccessResponse<HoneyCapsuleListResponse> getHoneyCapsuleList(
+    public SuccessResponse<List<HoneyCapsuleResponse>> getHoneyCapsuleList(
             @PathVariable Long travelId
     ) {
 
