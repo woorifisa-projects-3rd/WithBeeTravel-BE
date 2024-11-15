@@ -1,8 +1,9 @@
 package withbeetravel.service.settlement;
 
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.settlement.ShowSettlementDetailResponse;
 
 public interface SettlementService {
-    ShowSettlementDetailResponse getSettlementDetails(Long userId, Long travelId, Long settlementRequestId);
+    SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId, Long settlementRequestId);
 
 }

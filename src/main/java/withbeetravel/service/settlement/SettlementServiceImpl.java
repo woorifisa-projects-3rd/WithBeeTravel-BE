@@ -1,11 +1,13 @@
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.TravelMember;
 import withbeetravel.domain.TravelMemberSettlementHistory;
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.settlement.ShowMyDetailPaymentResponse;
 import withbeetravel.dto.settlement.ShowMyTotalPaymentResponse;
 import withbeetravel.dto.settlement.ShowOtherSettlementResponse;
@@ -16,7 +18,6 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     @Transactional(readOnly = true)
-    public ShowSettlementDetailResponse getSettlementDetails(Long userId, Long travelId, Long settlementRequestId) {
+    public SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId, Long settlementRequestId) {
         validateSettlement(settlementRequestId);
         Long myTravelMemberId = findMyTravelMemberIdByUserIdAndTravelId(userId, travelId);
 
@@ -46,7 +47,8 @@ public class SettlementServiceImpl implements SettlementService {
         List<ShowMyDetailPaymentResponse> myDetailPayments =
                 createMyDetailPaymentResponses(myTravelMemberId);
 
-        return ShowSettlementDetailResponse.of(myTotalPayments, myDetailPayments, others);
+        ShowSettlementDetailResponse showSettlementDetailResponse = ShowSettlementDetailResponse.of(myTotalPayments, myDetailPayments, others);
+        return SuccessResponse.of(HttpStatus.OK.value(), "세부 지출 내역 조회 성공", showSettlementDetailResponse);
     }
 
     private List<ShowMyDetailPaymentResponse> createMyDetailPaymentResponses(Long myTravelMemberId) {
