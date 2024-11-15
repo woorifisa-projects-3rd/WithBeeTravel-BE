@@ -4,7 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.dto.response.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
-public interface SharedPaymentService {
+public interface SharedPaymentRecordService {
 
     SuccessResponse addAndUpdatePaymentRecord(
             Long travelId,

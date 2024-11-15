@@ -19,7 +19,7 @@ import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
-public class SharedPaymentServiceImpl implements SharedPaymentService{
+public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordService {
 
     private final S3Uploader s3Uploader;
 

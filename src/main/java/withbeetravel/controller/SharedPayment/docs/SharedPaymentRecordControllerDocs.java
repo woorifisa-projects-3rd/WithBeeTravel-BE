@@ -1,4 +1,4 @@
-package withbeetravel.controller.docs;
+package withbeetravel.controller.SharedPayment.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,39 +18,7 @@ import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.ErrorResponse;
 
 @Tag(name = "공동 결제 내역 API", description = "에 대한 설명입니다.")
-public interface SharedPaymentControllerDocs {
-
-    @Operation(
-            summary = "정산 인원 선택",
-            description = "공동 결제 내역에 대한 정산 인원을 선택할 수 있습니다.",
-            tags = {"User Management"},
-            parameters = {
-                    @Parameter(
-                            name = "travelId",
-                            description = "여행 ID",
-                            required = true,
-                            in = ParameterIn.PATH,
-                            example = "1234"
-                    ),
-                    @Parameter(
-                            name = "sharedPaymentId",
-                            description = "공동 결제 내역 ID",
-                            required = true,
-                            in = ParameterIn.PATH,
-                            example = "1234"
-                    )
-            }
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정산인원 변경 성공"),
-            @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "TRAVEL-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "TRAVEL-002", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "PAYMENT-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-    })
-    public ResponseEntity<String> chooseParticipant(@PathVariable Long travelId,
-                                                    @PathVariable Long sharedPaymentId,
-                                                    @RequestBody ChooseParticipantsRequest requestDto);
+public interface SharedPaymentRecordControllerDocs {
 
     @Operation(
             summary = "여행 기록 추가/수정하기",
@@ -133,4 +101,5 @@ public interface SharedPaymentControllerDocs {
             Long travelId,
             Long sharedPaymentId
     );
+
 }
