@@ -2,6 +2,7 @@ package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.TravelMember;
 import withbeetravel.domain.TravelMemberSettlementHistory;
@@ -19,7 +20,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SettlementServiceImpl implements SettlementService{
+@Transactional
+public class SettlementServiceImpl implements SettlementService {
 
     private final TravelMemberRepository travelMemberRepository;
     private final SettlementRequestRepository settlementRequestRepository;
@@ -27,6 +29,7 @@ public class SettlementServiceImpl implements SettlementService{
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public ShowSettlementDetailResponse getSettlementDetails(Long userId, Long travelId, Long settlementRequestId) {
         validateSettlement(settlementRequestId);
         Long myTravelMemberId = findMyTravelMemberIdByUserIdAndTravelId(userId, travelId);
@@ -35,50 +38,60 @@ public class SettlementServiceImpl implements SettlementService{
                 travelMemberSettlementHistoryRepository.findAllBySettlementRequestId(settlementRequestId);
 
         ShowMyTotalPaymentResponse myTotalPayments =
-                travelMemberSettlementHistories
-                        .stream()
-                        .filter(history -> history.getTravelMember().getId().equals(myTravelMemberId))
-                        .findFirst()
-                        .map(history -> {
-                            int ownPaymentCost = history.getOwnPaymentCost();
-                            int actualBurdenCost = history.getActualBurdenCost();
-                            int totalPaymentCost = ownPaymentCost - actualBurdenCost;
-
-                            return ShowMyTotalPaymentResponse.of(totalPaymentCost, ownPaymentCost, actualBurdenCost);
-                        })
-                        .orElseThrow(() -> new CustomException(SettlementErrorCode.MEMBER_SETTLEMENT_HISTORY_NOT_FOUND));
+                createMyTotalPaymentResponse(travelMemberSettlementHistories, myTravelMemberId);
 
         List<ShowOtherSettlementResponse> others =
-                travelMemberSettlementHistories
-                        .stream()
-                        .filter(history -> !history.getTravelMember().getId().equals(myTravelMemberId))
-                        .map(history -> {
-                            Long travelMemberId = history.getTravelMember().getId();
-                            TravelMember travelMember = travelMemberRepository.findById(travelMemberId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
-                            String memberName = travelMember.getUser().getName();
-                            int totalPaymentCost = history.getOwnPaymentCost() - history.getActualBurdenCost();
-                            return ShowOtherSettlementResponse.of(memberName, totalPaymentCost);
-                        })
-                        .collect(Collectors.toList());
+                createOtherSettlementResponses(travelMemberSettlementHistories, myTravelMemberId);
 
         List<ShowMyDetailPaymentResponse> myDetailPayments =
-                paymentParticipatedMemberRepository.findAllByTravelMemberId(myTravelMemberId)
-                        .stream()
-                        .map(paymentParticipatedMember -> {
-                            SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
-                            int participantCount = sharedPayment.getParticipantCount();
-                            int paymentAmount = sharedPayment.getPaymentAmount();
-                            int requestedAmount = paymentAmount/participantCount;
-
-                            return ShowMyDetailPaymentResponse.of(
-                                    paymentAmount,
-                                    requestedAmount,
-                                    sharedPayment.getStoreName(),
-                                    sharedPayment.getPaymentDate());
-                        })
-                        .collect(Collectors.toList());
+                createMyDetailPaymentResponses(myTravelMemberId);
 
         return ShowSettlementDetailResponse.of(myTotalPayments, myDetailPayments, others);
+    }
+
+    private List<ShowMyDetailPaymentResponse> createMyDetailPaymentResponses(Long myTravelMemberId) {
+        return paymentParticipatedMemberRepository.findAllByTravelMemberId(myTravelMemberId)
+                .stream()
+                .map(paymentParticipatedMember -> {
+                    SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
+                    int participantCount = sharedPayment.getParticipantCount();
+                    int paymentAmount = sharedPayment.getPaymentAmount();
+                    int requestedAmount = paymentAmount / participantCount;
+
+                    return ShowMyDetailPaymentResponse.of(
+                            paymentAmount,
+                            requestedAmount,
+                            sharedPayment.getStoreName(),
+                            sharedPayment.getPaymentDate());
+                })
+                .toList();
+    }
+
+    private List<ShowOtherSettlementResponse> createOtherSettlementResponses(List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Long myTravelMemberId) {
+        return travelMemberSettlementHistories
+                .stream()
+                .filter(history -> !history.getTravelMember().getId().equals(myTravelMemberId))
+                .map(history -> {
+                    Long travelMemberId = history.getTravelMember().getId();
+                    TravelMember travelMember = travelMemberRepository.findById(travelMemberId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
+                    String memberName = travelMember.getUser().getName();
+                    int totalPaymentCost = history.getOwnPaymentCost() - history.getActualBurdenCost();
+                    return ShowOtherSettlementResponse.of(memberName, totalPaymentCost);
+                })
+                .toList();
+    }
+
+    private ShowMyTotalPaymentResponse createMyTotalPaymentResponse(List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Long myTravelMemberId) {
+        return travelMemberSettlementHistories
+                .stream()
+                .filter(history -> history.getTravelMember().getId().equals(myTravelMemberId))
+                .findFirst()
+                .map(history -> {
+                    int ownPaymentCost = history.getOwnPaymentCost();
+                    int actualBurdenCost = history.getActualBurdenCost();
+                    return ShowMyTotalPaymentResponse.of(ownPaymentCost, actualBurdenCost);
+                })
+                .orElseThrow(() -> new CustomException(SettlementErrorCode.MEMBER_SETTLEMENT_HISTORY_NOT_FOUND));
     }
 
     private Long findMyTravelMemberIdByUserIdAndTravelId(Long userId, Long travelId) {

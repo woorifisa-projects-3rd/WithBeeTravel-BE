@@ -14,7 +14,7 @@ public class ShowMyTotalPaymentResponse {
         this.actualBurdenCost = actualBurdenCost;
     }
 
-    public static ShowMyTotalPaymentResponse of (int totalPaymentCost, int ownPaymentCost, int actualBurdenCost) {
-        return new ShowMyTotalPaymentResponse(totalPaymentCost, ownPaymentCost, actualBurdenCost);
+    public static ShowMyTotalPaymentResponse of (int ownPaymentCost, int actualBurdenCost) {
+        return new ShowMyTotalPaymentResponse(ownPaymentCost - actualBurdenCost, ownPaymentCost, actualBurdenCost);
     }
 }
