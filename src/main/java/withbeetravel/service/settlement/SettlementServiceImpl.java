@@ -54,11 +54,13 @@ public class SettlementServiceImpl implements SettlementService {
                 .stream()
                 .map(paymentParticipatedMember -> {
                     SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
+                    Long id = sharedPayment.getId();
                     int participantCount = sharedPayment.getParticipantCount();
                     int paymentAmount = sharedPayment.getPaymentAmount();
                     int requestedAmount = paymentAmount / participantCount;
 
                     return ShowMyDetailPaymentResponse.of(
+                            id,
                             paymentAmount,
                             requestedAmount,
                             sharedPayment.getStoreName(),
@@ -73,10 +75,11 @@ public class SettlementServiceImpl implements SettlementService {
                 .filter(history -> !history.getTravelMember().getId().equals(myTravelMemberId))
                 .map(history -> {
                     Long travelMemberId = history.getTravelMember().getId();
+                    boolean isAgreed = history.isAgreed();
                     TravelMember travelMember = travelMemberRepository.findById(travelMemberId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
                     String memberName = travelMember.getUser().getName();
                     int totalPaymentCost = history.getOwnPaymentCost() - history.getActualBurdenCost();
-                    return ShowOtherSettlementResponse.of(memberName, totalPaymentCost);
+                    return ShowOtherSettlementResponse.of(travelMemberId, memberName, totalPaymentCost, isAgreed);
                 })
                 .toList();
     }
