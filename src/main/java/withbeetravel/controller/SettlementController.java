@@ -1,10 +1,7 @@
 package withbeetravel.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.settlement.ShowSettlementDetailResponse;
@@ -22,5 +19,11 @@ public class SettlementController {
     @CheckTravelAccess
     SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(@PathVariable Long travelId) {
         return settlementService.getSettlementDetails(userId, travelId);
+    }
+
+    @PostMapping
+    @CheckTravelAccess
+    SuccessResponse requestSettlement(@PathVariable Long travelId) {
+        return settlementService.requestSettlement(userId, travelId);
     }
 }
