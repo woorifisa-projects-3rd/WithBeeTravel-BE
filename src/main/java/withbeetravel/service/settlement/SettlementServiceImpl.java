@@ -61,24 +61,13 @@ public class SettlementServiceImpl implements SettlementService {
         validateIsCaptain(travelMember);
 
         int totalMemberCount = travelMemberRepository.findAllByTravelId(travelId).size();
-        SettlementRequest newSettlementRequest =
-                createSettlementRequest(travelId, totalMemberCount);
+        SettlementRequest newSettlementRequest = createSettlementRequest(travelId, totalMemberCount);
 
         for (TravelMember member : travelMemberRepository.findAllByTravelId(travelId)) {
             Long travelMemberId = member.getId();
 
-            int ownPaymentCost = 0;
-            for (SharedPayment sharedPayment :
-                    sharedPaymentRepository.findAllByAddedByMemberId(travelMemberId)) {
-                ownPaymentCost += sharedPayment.getPaymentAmount();
-            }
-
-            int actualBurdenCost = 0;
-            for (PaymentParticipatedMember paymentParticipatedMember :
-                    paymentParticipatedMemberRepository.findAllByTravelMemberId(travelMemberId)) {
-                SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
-                actualBurdenCost += sharedPayment.getPaymentAmount() / sharedPayment.getParticipantCount();
-            }
+            int ownPaymentCost = getTotalOwnPaymentCost(travelMemberId);
+            int actualBurdenCost = getTotalActualBurdenCost(travelMemberId);
 
             TravelMemberSettlementHistory travelMemberSettlementHistory =
                     TravelMemberSettlementHistory.builder()
@@ -93,6 +82,25 @@ public class SettlementServiceImpl implements SettlementService {
         }
 
         return SuccessResponse.of(HttpStatus.OK.value(), "정산 요청 성공");
+    }
+
+    private int getTotalActualBurdenCost(Long travelMemberId) {
+        int actualBurdenCost = 0;
+        for (PaymentParticipatedMember paymentParticipatedMember :
+                paymentParticipatedMemberRepository.findAllByTravelMemberId(travelMemberId)) {
+            SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
+            actualBurdenCost += sharedPayment.getPaymentAmount() / sharedPayment.getParticipantCount();
+        }
+        return actualBurdenCost;
+    }
+
+    private int getTotalOwnPaymentCost(Long travelMemberId) {
+        int ownPaymentCost = 0;
+        for (SharedPayment sharedPayment :
+                sharedPaymentRepository.findAllByAddedByMemberId(travelMemberId)) {
+            ownPaymentCost += sharedPayment.getPaymentAmount();
+        }
+        return ownPaymentCost;
     }
 
     private SettlementRequest createSettlementRequest(Long travelId, int totalMemberCount) {
