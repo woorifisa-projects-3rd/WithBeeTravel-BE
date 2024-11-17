@@ -92,4 +92,12 @@ public class SharedPayment {
         this.storeName = storeName;
         this.paymentDate = paymentDate;
     }
+
+    public void updatePaymentImage(String newPaymentImage) {
+        this.paymentImage = newPaymentImage;
+    }
+
+    public void updatePaymentCommnet(String newPaymentComment) {
+        this.paymentComment = newPaymentComment;
+    }
 }

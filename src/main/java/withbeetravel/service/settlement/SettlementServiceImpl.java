@@ -107,7 +107,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     private Long findMyTravelMemberIdByUserIdAndTravelId(Long userId, Long travelId) {
         TravelMember userTravelMember =
-                travelMemberRepository.findByUserIdAndTravelId(userId, travelId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
+                travelMemberRepository.findByTravelIdAndUserId(travelId, userId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
         return userTravelMember.getId();
     }
 

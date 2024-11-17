@@ -59,4 +59,8 @@ public class Travel {
         this.isDomesticTravel = isDomesticTravel;
         this.settlementStatus = settlementStatus;
     }
+
+    public void updateMainImage(String newMainImage) {
+        this.mainImage = newMainImage;
+    }
 }

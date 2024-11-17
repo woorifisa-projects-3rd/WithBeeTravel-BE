@@ -1,4 +1,4 @@
-package withbeetravel.exception.dto;
+package withbeetravel.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import withbeetravel.exception.error.ErrorCode;
 @Getter
 @Builder
 @Schema(description = "Error에 대한 Response DTO")
-public class ErrorResponseDto {
+public class ErrorResponse {
 
     @Schema(description = "HTTP 상태 코드")
     private int status;
@@ -23,11 +23,11 @@ public class ErrorResponseDto {
     @Schema(description = "에러 메세지")
     private String message;
 
-    public static ResponseEntity<ErrorResponseDto> toResponseEntity(ErrorCode e) {
+    public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode e) {
 
         return ResponseEntity
                 .status(e.getStatus())
-                .body(ErrorResponseDto.builder()
+                .body(ErrorResponse.builder()
                         .status(e.getStatus().value())
                         .name(e.getName())
                         .code(e.getCode())
