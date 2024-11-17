@@ -56,7 +56,7 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     @Override
-    public SuccessResponse requestSettlement(Long userId, Long travelId) {
+    public SuccessResponse<Void> requestSettlement(Long userId, Long travelId) {
         TravelMember travelMember = findMyTravelMemberIdByTravelIdAndUserId(travelId, userId);
         validateIsCaptain(travelMember);
 

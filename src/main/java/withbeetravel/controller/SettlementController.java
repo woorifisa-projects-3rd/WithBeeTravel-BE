@@ -23,7 +23,7 @@ public class SettlementController {
 
     @PostMapping
     @CheckTravelAccess
-    SuccessResponse requestSettlement(@PathVariable Long travelId) {
+    SuccessResponse<Void> requestSettlement(@PathVariable Long travelId) {
         return settlementService.requestSettlement(userId, travelId);
     }
 }
