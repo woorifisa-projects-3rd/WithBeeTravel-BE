@@ -1,4 +1,4 @@
-package withbeetravel.dto.settlement;
+package withbeetravel.dto.response.settlement;
 
 import lombok.Getter;
 

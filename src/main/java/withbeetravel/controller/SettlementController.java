@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.dto.settlement.ShowSettlementDetailResponse;
+import withbeetravel.dto.response.settlement.ShowSettlementDetailResponse;
 import withbeetravel.service.settlement.SettlementService;
 
 @RestController
