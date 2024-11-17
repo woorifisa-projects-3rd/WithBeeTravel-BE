@@ -15,9 +15,10 @@ import withbeetravel.service.settlement.SettlementService;
 public class SettlementController {
     private final SettlementService settlementService;
 
+    private final Long userId = 1L;
+
     @GetMapping
     SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(@PathVariable Long travelId) {
-        Long userId = 2L;
         return settlementService.getSettlementDetails(userId, travelId);
     }
 }
