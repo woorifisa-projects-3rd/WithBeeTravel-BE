@@ -16,6 +16,7 @@ import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,6 +31,7 @@ public class SettlementServiceImpl implements SettlementService {
     private final UserRepository userRepository;
     private final TravelRepository travelRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
+    private final SettlementRequestLogRepository settlementRequestLogRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,6 +54,8 @@ public class SettlementServiceImpl implements SettlementService {
 
         ShowSettlementDetailResponse showSettlementDetailResponse =
                 ShowSettlementDetailResponse.of(myTotalPayments, myDetailPayments, others);
+
+
         return SuccessResponse.of(HttpStatus.OK.value(), "세부 지출 내역 조회 성공", showSettlementDetailResponse);
     }
 
@@ -61,7 +65,8 @@ public class SettlementServiceImpl implements SettlementService {
         validateIsCaptain(travelMember);
 
         int totalMemberCount = travelMemberRepository.findAllByTravelId(travelId).size();
-        SettlementRequest newSettlementRequest = createSettlementRequest(travelId, totalMemberCount);
+        Travel travel = findTravelById(travelId);
+        SettlementRequest newSettlementRequest = createSettlementRequest(travel, totalMemberCount);
 
         for (TravelMember member : travelMemberRepository.findAllByTravelId(travelId)) {
             Long travelMemberId = member.getId();
@@ -81,7 +86,20 @@ public class SettlementServiceImpl implements SettlementService {
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
         }
 
+        saveSettlementRequestLog(travel, newSettlementRequest);
+
         return SuccessResponse.of(HttpStatus.OK.value(), "정산 요청 성공");
+    }
+
+    private void saveSettlementRequestLog(Travel travel, SettlementRequest newSettlementRequest) {
+
+        settlementRequestLogRepository.save(
+                SettlementRequestLog.builder()
+                .settlementRequest(newSettlementRequest)
+                .logTitle(LogTitle.SETTLEMENT_REQUEST)
+                .logMessage(LogTitle.SETTLEMENT_REQUEST.getMessage(travel.getTravelName()))
+                        .logTime(LocalDateTime.now())
+                        .build());
     }
 
     private int getTotalActualBurdenCost(Long travelMemberId) {
@@ -103,10 +121,10 @@ public class SettlementServiceImpl implements SettlementService {
         return ownPaymentCost;
     }
 
-    private SettlementRequest createSettlementRequest(Long travelId, int totalMemberCount) {
+    private SettlementRequest createSettlementRequest(Travel travel, int totalMemberCount) {
         SettlementRequest newSettlementRequest = settlementRequestRepository.save(
                 SettlementRequest.builder()
-                        .travel(findTravelById(travelId))
+                        .travel(travel)
                         .disagreeCount(totalMemberCount)
                         .build());
         return newSettlementRequest;
