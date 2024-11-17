@@ -37,7 +37,7 @@ public class SettlementServiceImpl implements SettlementService {
     public SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId) {
         Long settlementRequestId = findSettlementRequestIdByTravelId(travelId);
 
-        Long myTravelMemberId = findMyTravelMemberIdByUserIdAndTravelId(userId, travelId);
+        Long myTravelMemberId = findMyTravelMemberIdByTravelIdAndUserId(travelId, userId);
 
         List<TravelMemberSettlementHistory> travelMemberSettlementHistories =
                 travelMemberSettlementHistoryRepository.findAllBySettlementRequestId(settlementRequestId);
@@ -105,7 +105,7 @@ public class SettlementServiceImpl implements SettlementService {
                 .orElseThrow(() -> new CustomException(SettlementErrorCode.MEMBER_SETTLEMENT_HISTORY_NOT_FOUND));
     }
 
-    private Long findMyTravelMemberIdByUserIdAndTravelId(Long userId, Long travelId) {
+    private Long findMyTravelMemberIdByTravelIdAndUserId(Long travelId, Long userId) {
         TravelMember userTravelMember =
                 travelMemberRepository.findByTravelIdAndUserId(travelId, userId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
         return userTravelMember.getId();
