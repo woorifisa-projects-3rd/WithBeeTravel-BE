@@ -69,7 +69,7 @@ public class DataLoader implements CommandLineRunner {
                 .inviteCode("WINTER2024")
                 .mainImage("winter_trip.jpg")
                 .isDomesticTravel(false)
-                .settlementStatus(SettlementStatus.PENDING)
+                .settlementStatus(SettlementStatus.DONE)
                 .build();
         travelRepository.save(travel1);
         travelRepository.save(travel2);

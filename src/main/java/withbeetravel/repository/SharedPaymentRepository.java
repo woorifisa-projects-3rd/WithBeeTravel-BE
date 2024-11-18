@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import withbeetravel.domain.SharedPayment;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.List;
 
@@ -12,5 +13,9 @@ public interface SharedPaymentRepository extends JpaRepository<SharedPayment, Lo
 
     public Optional<SharedPayment> findByIdAndTravelId(Long id, Long travelId);
 
+
+    List<SharedPayment> findAllByTravelId(Long travelId);
+
     List<SharedPayment> findAllByAddedByMemberId(Long addedByMemberId);
+
 }

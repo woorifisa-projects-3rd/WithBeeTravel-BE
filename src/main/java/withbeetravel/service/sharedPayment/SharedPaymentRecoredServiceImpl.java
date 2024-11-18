@@ -1,4 +1,4 @@
-package withbeetravel.service;
+package withbeetravel.service.sharedPayment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
-import withbeetravel.dto.response.SharedPaymentRecordResponse;
+import withbeetravel.dto.response.shardPayment.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;
@@ -14,12 +14,13 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.exception.error.ValidationErrorCode;
 import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelRepository;
+import withbeetravel.service.global.S3Uploader;
 
 import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
-public class SharedPaymentServiceImpl implements SharedPaymentService{
+public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordService {
 
     private final S3Uploader s3Uploader;
 

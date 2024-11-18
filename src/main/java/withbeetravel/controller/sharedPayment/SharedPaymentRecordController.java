@@ -1,34 +1,20 @@
-package withbeetravel.controller;
+package withbeetravel.controller.sharedPayment;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
-import withbeetravel.controller.docs.SharedPaymentControllerDocs;
-import withbeetravel.dto.request.ChooseParticipantsRequest;
-import withbeetravel.dto.response.SharedPaymentRecordResponse;
+import withbeetravel.controller.sharedPayment.docs.SharedPaymentRecordControllerDocs;
+import withbeetravel.dto.response.shardPayment.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.service.SharedPaymentService;
+import withbeetravel.service.sharedPayment.SharedPaymentRecordService;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/travels/{travelId}/payments")
-public class SharedPaymentController implements SharedPaymentControllerDocs {
+public class SharedPaymentRecordController implements SharedPaymentRecordControllerDocs {
 
-    private final SharedPaymentService sharedPaymentService;
-
-    @Override
-    @PatchMapping("/{sharedPaymentId}/participants")
-    public ResponseEntity<String> chooseParticipant(
-            @PathVariable Long travelId,
-            @PathVariable Long sharedPaymentId,
-            @RequestBody ChooseParticipantsRequest requestDto
-    ) {
-
-        return ResponseEntity.ok("정산인원 변경 성공");
-    }
+    private final SharedPaymentRecordService sharedPaymentService;
 
     @Override
     @CheckTravelAndSharedPaymentAccess
