@@ -38,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
 
     // 계좌 내역 조회
     public Account showAccount(Long accountId) {
-        return accountRepository.findById(16L).orElseThrow();
+        return accountRepository.findById(16L).orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
     }
 
     //계좌 생성

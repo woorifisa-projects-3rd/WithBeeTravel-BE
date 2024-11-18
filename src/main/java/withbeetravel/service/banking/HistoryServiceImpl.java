@@ -17,6 +17,6 @@ public class HistoryServiceImpl implements HistoryService {
 
     public List<HistoryResponse> showAll(Long accountId) {
         List<History> histories = historyRepository.findByAccountIdOrderByDateDesc(accountId);
-        return histories.stream().map(HistoryResponse::from).collect(Collectors.toList());
+        return histories.stream().map(HistoryResponse::from).toList();
     }
 }
