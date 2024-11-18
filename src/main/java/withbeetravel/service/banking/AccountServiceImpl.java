@@ -46,6 +46,7 @@ public class AccountServiceImpl implements AccountService {
     // TODO: 회원 계좌만 조회 해야함
 
     //계좌 생성
+    @Transactional
     public SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest){
         User thisUser = userRepository.findById(userId).orElseThrow();
 
