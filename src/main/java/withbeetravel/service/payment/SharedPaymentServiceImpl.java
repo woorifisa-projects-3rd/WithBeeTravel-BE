@@ -30,7 +30,7 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
     public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId,
                                                                             int page,
                                                                             String sortBy,
-                                                                            Long memberId,
+                                                                            Long userId,
                                                                             LocalDate startDate,
                                                                             LocalDate endDate) {
         // 정렬 타입 검증
@@ -44,8 +44,8 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
         }
 
         // 멤버 ID가 제공된 경우, 해당 멤버가 이 여행의 멤버인지 확인
-        if (memberId != null) {
-            boolean isMemberOfTravel = travelMemberRepository.existsByTravelIdAndId(travelId, memberId);
+        if (userId != null) {
+            boolean isMemberOfTravel = travelMemberRepository.existsByTravelIdAndId(travelId, userId);
             if (!isMemberOfTravel) {
                 throw new CustomException(PaymentErrorCode.NON_TRAVEL_MEMBER_INCLUDED);
             }
@@ -57,7 +57,7 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
 
         // 해당 여행의 공동 결제 내역 페이지 조회
         Page<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelIdAndMemberIdAndDateRange(
-                travelId, memberId, startDate, endDate, pageable);
+                travelId, userId, startDate, endDate, pageable);
 
         if (sharedPayments.isEmpty()) {
             throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);

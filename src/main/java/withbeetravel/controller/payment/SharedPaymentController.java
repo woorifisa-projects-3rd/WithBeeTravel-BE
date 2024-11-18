@@ -24,10 +24,10 @@ public class SharedPaymentController {
             @PathVariable Long travelId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "latest") String sortBy, // latest 또는 amount
-            @RequestParam(required = false) Long memberId, // 특정 멤버 ID로 필터링
+            @RequestParam(required = false) Long userId, // 특정 유저 ID로 필터링
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
     ) {
-        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, memberId, startDate, endDate);
+        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, userId, startDate, endDate);
     }
 }
