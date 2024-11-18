@@ -25,13 +25,14 @@ public class TravelMember {
     @Column(name = "is_captain", nullable = false)
     private int isCaptain;
 
-    @Column(name = "connected_account", nullable = false)
-    private String connectedAccount;
+    @JoinColumn(name = "account_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Account connectedAccount;
 
     protected TravelMember() {}
 
     @Builder
-    public TravelMember(Long id, Travel travel, User user, int isCaptain, String connectedAccount) {
+    public TravelMember(Long id, Travel travel, User user, int isCaptain, Account connectedAccount) {
         this.id = id;
         this.travel = travel;
         this.user = user;
