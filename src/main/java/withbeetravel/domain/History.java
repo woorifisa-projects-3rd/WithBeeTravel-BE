@@ -8,9 +8,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(name = "histories")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class History {
 
     @Id
@@ -40,8 +37,19 @@ public class History {
     @Column(name = "is_wibee_card", nullable = false)
     private boolean isWibeeCard;
 
+    protected History(){};
 
-
-
-
+    @Builder
+    public History(Long id, Account account, LocalDateTime date,
+                   Integer rcvAm, Integer payAM, long balance,
+                   String rqspeNm, boolean isWibeeCard) {
+        this.id = id;
+        this.account = account;
+        this.date = date;
+        this.rcvAm = rcvAm;
+        this.payAM = payAM;
+        this.balance = balance;
+        this.rqspeNm = rqspeNm;
+        this.isWibeeCard = isWibeeCard;
+    }
 }

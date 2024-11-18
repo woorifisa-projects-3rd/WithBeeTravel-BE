@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
 @Table(name = "accounts")
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class Account {
 
@@ -37,5 +34,17 @@ public class Account {
         balance += amount;
     }
 
+    protected Account(){};
 
+    @Builder
+    public Account(Long id, User user,
+                   String accountNumber, long balance,
+                   Product product, boolean isConnectedWibeeCard) {
+        this.id = id;
+        this.user = user;
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.product = product;
+        this.isConnectedWibeeCard = isConnectedWibeeCard;
+    }
 }
