@@ -38,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
 
     // 계좌 내역 조회
     public Account showAccount(Long accountId) {
-        return accountRepository.findById(16L).orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+        return accountRepository.findById(16L).orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
     }
 
     //계좌 생성
@@ -94,13 +94,13 @@ public class AccountServiceImpl implements AccountService {
     public void transfer(Long accountId, String accountNumber, int amount, String rqspeNm) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
         Account targetAccount = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
         if(amount > account.getBalance()){
-            throw new CustomException(BankingErrorCode.INSUFFICIENT_FUNDS_ERROR);
+            throw new CustomException(BankingErrorCode.INSUFFICIENT_FUNDS);
         }
 
         // 출금 처리
@@ -129,7 +129,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void deposit(Long accountId, int amount, String rqspeNm) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
         History history = History.builder().account(account).balance(account.getBalance()+amount).rcvAm(amount)
                         .date(LocalDateTime.now()).rqspeNm(rqspeNm).isWibeeCard(false).build();
@@ -143,7 +143,7 @@ public class AccountServiceImpl implements AccountService {
     // accountId로 계좌 조회하기
     public AccountResponse accountInfo(Long accountId) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND_ERROR));
+                .orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
         return  AccountResponse.from(account);
     }
