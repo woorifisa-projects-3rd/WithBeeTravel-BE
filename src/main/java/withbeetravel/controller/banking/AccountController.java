@@ -3,12 +3,14 @@ package withbeetravel.controller.banking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import withbeetravel.dto.banking.account.*;
 import withbeetravel.dto.request.account.AccountNumberRequest;
 import withbeetravel.dto.request.account.AccountRequest;
 import withbeetravel.dto.request.account.DepositRequest;
 import withbeetravel.dto.request.account.TransferRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.account.AccountOwnerNameResponse;
+import withbeetravel.dto.response.account.AccountResponse;
+import withbeetravel.dto.response.account.HistoryResponse;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.banking.HistoryService;
 
