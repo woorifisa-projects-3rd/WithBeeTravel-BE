@@ -1,4 +1,4 @@
-package withbeetravel.dto.response.account;
+package withbeetravel.dto.banking.account;
 
 import lombok.Getter;
 import withbeetravel.domain.Account;
