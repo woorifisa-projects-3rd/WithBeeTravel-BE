@@ -42,7 +42,7 @@ public interface SharedPaymentParticipantControllerDocs {
             @ApiResponse(responseCode = "403", description = "TRAVEL-002\nPAYMENT-003\nPAYMENT-004", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "TRAVEL-001\nPAYMENT-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public SuccessResponse updateParticipantMembers(
+    public SuccessResponse<Void> updateParticipantMembers(
             Long travelId,
             Long sharedPaymentId,
             SharedPaymentParticipateRequest sharedPaymentParticipateRequest

@@ -28,7 +28,7 @@ public class SharedPaymentParticipantServiceImpl implements SharedPaymentPartici
     
     @Override
     @Transactional
-    public SuccessResponse updateParticipantMembers(
+    public SuccessResponse<Void> updateParticipantMembers(
             Long travelId,
             Long sharedPaymentId,
             SharedPaymentParticipateRequest sharedPaymentParticipateRequest
@@ -46,18 +46,6 @@ public class SharedPaymentParticipantServiceImpl implements SharedPaymentPartici
         // 공동 결제 내역 가져오기
         SharedPayment sharedPayment = sharedPaymentRepository.findById(sharedPaymentId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
-
-
-        // 전체 인원으로 설정한다면 참여멤버수만 바꿔주기
-        if(newParticipateMembersId.size() == allByTravelId.size()) {
-
-            //
-
-            // 정산 인원 수정
-            sharedPayment.updateParticipantCount(newParticipateMembersId.size());
-
-            return SuccessResponse.of(HttpStatus.OK.value(), "정산인원 변경 성공");
-        }
 
         // 기존 정산 인원 불러오기
         List<PaymentParticipatedMember> allBySharedPaymentId =

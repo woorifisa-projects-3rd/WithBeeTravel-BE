@@ -18,7 +18,7 @@ public class SharedPaymentParticipantController implements SharedPaymentParticip
     @Override
     @PatchMapping
     @CheckTravelAndSharedPaymentAccess
-    public SuccessResponse updateParticipantMembers(
+    public SuccessResponse<Void> updateParticipantMembers(
             @PathVariable Long travelId,
             @PathVariable Long sharedPaymentId,
             @RequestBody SharedPaymentParticipateRequest sharedPaymentParticipateRequest

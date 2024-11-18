@@ -5,7 +5,7 @@ import withbeetravel.dto.response.SuccessResponse;
 
 public interface SharedPaymentParticipantService {
 
-    public SuccessResponse updateParticipantMembers(
+    public SuccessResponse<Void> updateParticipantMembers(
             Long travelId,
             Long sharedPaymentId,
             SharedPaymentParticipateRequest sharedPaymentParticipateRequest
