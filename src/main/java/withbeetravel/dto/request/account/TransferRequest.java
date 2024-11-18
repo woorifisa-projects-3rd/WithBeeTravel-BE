@@ -1,4 +1,4 @@
-package withbeetravel.dto.banking.account;
+package withbeetravel.dto.request.account;
 
 import lombok.Getter;
 

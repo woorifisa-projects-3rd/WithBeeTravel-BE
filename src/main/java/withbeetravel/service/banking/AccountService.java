@@ -1,13 +1,11 @@
 package withbeetravel.service.banking;
 
-import withbeetravel.domain.Account;
-import withbeetravel.dto.banking.account.AccountOwnerNameResponse;
-import withbeetravel.dto.banking.account.AccountRequest;
-import withbeetravel.dto.banking.account.AccountResponse;
+import withbeetravel.dto.response.account.AccountOwnerNameResponse;
+import withbeetravel.dto.request.account.AccountRequest;
+import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface AccountService {
 

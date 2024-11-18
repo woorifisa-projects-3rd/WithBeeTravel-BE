@@ -1,9 +1,8 @@
-package withbeetravel.dto.banking.account;
+package withbeetravel.dto.request.account;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import withbeetravel.domain.Product;
 
 @Getter
