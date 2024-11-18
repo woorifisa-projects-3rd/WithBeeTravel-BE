@@ -32,16 +32,17 @@ public class AccountServiceImpl implements AccountService {
     private final HistoryRepository historyRepository;
 
     // 계좌 조회
-    public List<AccountResponse> showAll(Long userId) {
+    public SuccessResponse<List<AccountResponse>> showAll(Long userId) {
         List<Account> accounts = accountRepository.findByUserId(userId);
-
-        return accounts.stream().map(AccountResponse::from).collect(Collectors.toList());
+        List<AccountResponse> accountResponses = accounts.stream().map(AccountResponse::from).collect(Collectors.toList());
+        return SuccessResponse.of(
+                HttpStatus.OK.value(),
+                "전체 계좌 조회 완료",
+                accountResponses
+        );
     }
-
-    // 계좌 내역 조회
-    public Account showAccount(Long accountId) {
-        return accountRepository.findById(16L).orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
-    }
+    
+    // TODO: 회원 계좌만 조회 해야함
 
     //계좌 생성
     public SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest){
@@ -60,13 +61,11 @@ public class AccountServiceImpl implements AccountService {
 
         AccountResponse accountResponse = AccountResponse.from(account);
 
-        SuccessResponse<AccountResponse> response  = SuccessResponse.of(
+        return SuccessResponse.of(
                 HttpStatus.CREATED.value(),
                 "계좌 생성 완료",
                 accountResponse
         );
-
-        return response;
     }
 
     // 유니크 계좌번호 확인
@@ -125,7 +124,6 @@ public class AccountServiceImpl implements AccountService {
         account.transfer(-amount);
 
 
-
         // 타겟 계좌 입금 처리
 
         // 타겟 계좌 내역 객체 생성, 저장
@@ -152,11 +150,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     // accountId로 계좌 조회하기
-    public AccountResponse accountInfo(Long accountId) {
+    public SuccessResponse<AccountResponse> accountInfo(Long accountId) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
-        return  AccountResponse.from(account);
+        return  SuccessResponse.of(
+                HttpStatus.OK.value(),
+                "accountId로 계좌 조회 성공",
+                AccountResponse.from(account)
+        );
+
     }
 
     public boolean verifyAccount(String accountNumber) {

@@ -10,9 +10,7 @@ import java.util.Optional;
 
 public interface AccountService {
 
-    List<AccountResponse> showAll(Long userId);
-
-    Account showAccount(Long accountId);
+    SuccessResponse<List<AccountResponse>> showAll(Long userId);
 
     SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest);
 
@@ -26,7 +24,7 @@ public interface AccountService {
 
     void deposit(Long accountId, int amount, String rqspeNm);
 
-    AccountResponse accountInfo(Long accountId);
+    SuccessResponse<AccountResponse> accountInfo(Long accountId);
 
     boolean verifyAccount(String accountNumber);
 

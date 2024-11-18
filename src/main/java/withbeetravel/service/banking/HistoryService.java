@@ -1,9 +1,10 @@
 package withbeetravel.service.banking;
 
 import withbeetravel.dto.banking.account.HistoryResponse;
+import withbeetravel.dto.response.SuccessResponse;
 
 import java.util.List;
 
 public interface HistoryService {
-    List<HistoryResponse> showAll(Long AccountId);
+    SuccessResponse<List<HistoryResponse>> showAll(Long AccountId);
 }

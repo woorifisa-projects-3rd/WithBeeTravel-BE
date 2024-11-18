@@ -28,17 +28,17 @@ public class AccountController {
     //private final Long accountId = 1L;
 
     @GetMapping()
-    public List<AccountResponse> showAllAccount(){
+    public SuccessResponse<List<AccountResponse>> showAllAccount(){
         return accountService.showAll(userId);
     }
 
     @GetMapping("/{accountId}/info")
-    public AccountResponse accountInfo(@PathVariable Long accountId){
+    public SuccessResponse<AccountResponse> accountInfo(@PathVariable Long accountId){
         return accountService.accountInfo(accountId);
     }
 
     @GetMapping("/{accountId}")
-    public List<HistoryResponse> showAllHistories(@PathVariable Long accountId){
+    public SuccessResponse<List<HistoryResponse>> showAllHistories(@PathVariable Long accountId){
         return historyService.showAll(accountId);
     }
 
@@ -50,24 +50,21 @@ public class AccountController {
     }
 
     @PostMapping("{accountId}/transfer")
-    public ResponseEntity<SuccessResponse<String>> transfer(@RequestBody TransferRequest transferRequest){
+    public SuccessResponse transfer(@RequestBody TransferRequest transferRequest){
 
         accountService.transfer(transferRequest.getAccountId(),
                 transferRequest.getAccountNumber(),
                 transferRequest.getAmount(),
                 transferRequest.getRqspeNm());
 
-        SuccessResponse response = SuccessResponse.of(
+        return SuccessResponse.of(
                 HttpStatus.ACCEPTED.value(),
                 "송금이 완료되었습니다."
-
         );
-
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     @PostMapping("{accountId}/deposit")
-    public ResponseEntity<SuccessResponse<String>> deposit(
+    public SuccessResponse deposit(
             @RequestBody DepositRequest depositRequest,
             @PathVariable Long accountId) {
 
@@ -75,13 +72,10 @@ public class AccountController {
         accountService.deposit(accountId, depositRequest.getAmount(), depositRequest.getRqspeNm());
 
         // SuccessResponse 객체를 생성하여 반환
-        SuccessResponse<String> response = SuccessResponse.of(
+        return SuccessResponse.of(
                 HttpStatus.ACCEPTED.value(), // 상태 코드 202
                 "입금이 완료되었습니다." // 메시지
         );
-
-        // ResponseEntity로 감싸서 반환
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     @GetMapping("/verify/{accountNumber}")
