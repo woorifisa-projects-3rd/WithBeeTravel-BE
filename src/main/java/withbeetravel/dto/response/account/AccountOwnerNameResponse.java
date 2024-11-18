@@ -1,7 +1,6 @@
-package withbeetravel.dto.banking.account;
+package withbeetravel.dto.response.account;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
