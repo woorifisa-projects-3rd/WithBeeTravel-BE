@@ -1,6 +1,7 @@
 package withbeetravel.service.banking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.Account;
@@ -9,6 +10,7 @@ import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
 import withbeetravel.dto.banking.account.AccountRequest;
 import withbeetravel.dto.banking.account.AccountResponse;
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.repository.AccountRepository;
@@ -42,11 +44,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     //계좌 생성
-    public Account createAccount(Long userId, AccountRequest accountRequest){
+    public SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest){
         User thisUser = userRepository.findById(userId).orElseThrow();
 
         String accountNumber = generateUniqueAccountNumber();
-
 
         Account account = Account.builder().user(thisUser)
                 .accountNumber(accountNumber)
@@ -55,7 +56,17 @@ public class AccountServiceImpl implements AccountService {
                 .isConnectedWibeeCard(false)
                 .build();
 
-        return accountRepository.save(account);
+        accountRepository.save(account);
+
+        AccountResponse accountResponse = AccountResponse.from(account);
+
+        SuccessResponse<AccountResponse> response  = SuccessResponse.of(
+                HttpStatus.CREATED.value(),
+                "계좌 생성 완료",
+                accountResponse
+        );
+
+        return response;
     }
 
     // 유니크 계좌번호 확인

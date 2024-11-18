@@ -43,30 +43,25 @@ public class AccountController {
     }
 
     @PostMapping()
-    public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest){
+    public SuccessResponse<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest){
 
         // 계좌 생성
-        Account createdAccount = accountService.createAccount(userId, accountRequest);
-
-        // 생성된 계좌를 AccountResponse로 변환
-        AccountResponse accountResponse = AccountResponse.from(createdAccount);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountResponse);
+        return  accountService.createAccount(userId, accountRequest);
     }
 
     @PostMapping("{accountId}/transfer")
-    public ResponseEntity transfer(@RequestBody TransferRequest transferRequest){
+    public ResponseEntity<SuccessResponse<String>> transfer(@RequestBody TransferRequest transferRequest){
 
         accountService.transfer(transferRequest.getAccountId(),
                 transferRequest.getAccountNumber(),
                 transferRequest.getAmount(),
                 transferRequest.getRqspeNm());
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.ACCEPTED.value());
-        response.put("message", "송금이 완료되었습니다.");
-        response.put("data", null); // data는 null일 수도 있음
+        SuccessResponse response = SuccessResponse.of(
+                HttpStatus.ACCEPTED.value(),
+                "송금이 완료되었습니다."
 
+        );
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
@@ -82,8 +77,7 @@ public class AccountController {
         // SuccessResponse 객체를 생성하여 반환
         SuccessResponse<String> response = SuccessResponse.of(
                 HttpStatus.ACCEPTED.value(), // 상태 코드 202
-                "입금이 완료되었습니다.", // 메시지
-                null // data는 null로 설정 (필요시 다른 데이터를 넘길 수 있음)
+                "입금이 완료되었습니다." // 메시지
         );
 
         // ResponseEntity로 감싸서 반환
@@ -100,16 +94,20 @@ public class AccountController {
     }
 
     @GetMapping("/find-user/{accountNumber}")
-    public ResponseEntity<Map<String, String>> findUserNameByAccountNumber(@PathVariable String accountNumber) {
-
+    public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(@PathVariable String accountNumber) {
 
         String name = accountService.findUserNameByAccountNumber(accountNumber);
 
-        // 응답을 JSON 형식으로 감싸서 반환
-        Map<String, String> response = new HashMap<>();
-        response.put("name", name);
+        AccountOwnerNameResponse accountOwnerNameResponse = new AccountOwnerNameResponse(name);
 
-        return ResponseEntity.ok(response);  // JSON 응답 반환
+        SuccessResponse<AccountOwnerNameResponse> response = SuccessResponse.of(
+                HttpStatus.FOUND.value(),
+                "찾은 계좌 주인 이름",
+                accountOwnerNameResponse
+        );
+
+        // SuccessResponse 반환
+        return response;
     }
 
 }

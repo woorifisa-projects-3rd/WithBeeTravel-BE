@@ -3,6 +3,7 @@ package withbeetravel.service.banking;
 import withbeetravel.domain.Account;
 import withbeetravel.dto.banking.account.AccountRequest;
 import withbeetravel.dto.banking.account.AccountResponse;
+import withbeetravel.dto.response.SuccessResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ public interface AccountService {
 
     Account showAccount(Long accountId);
 
-    Account createAccount(Long userId, AccountRequest accountRequest);
+    SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest);
 
     String generateUniqueAccountNumber();
 
