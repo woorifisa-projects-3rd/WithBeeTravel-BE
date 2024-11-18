@@ -1,5 +1,6 @@
 package withbeetravel.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.dto.response.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SharedPaymentResponse;
@@ -21,5 +22,5 @@ public interface SharedPaymentService {
             Long sharedPaymentId
     );
 
-    SuccessResponse<List<SharedPaymentResponse>> getSharedPaymentAll(Long travelId);
+    SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId, int page);
 }

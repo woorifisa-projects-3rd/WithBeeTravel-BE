@@ -1,6 +1,10 @@
 package withbeetravel.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -83,19 +87,23 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
 
     @Override
     @Transactional(readOnly = true)
-    public SuccessResponse<List<SharedPaymentResponse>> getSharedPaymentAll(Long travelId) {
+    public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId, int page) {
         // 여행 존재 여부 확인
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
-        // 해당 여행의 모든 공동 결제 내역 조회
-        List<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelId(travelId)
-                .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
+        // 페이지네이션 설정 (10개씩, 결제일자 내림차순)
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("paymentDate").descending());
+
+        // 해당 여행의 공동 결제 내역 페이지 조회
+        Page<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelId(travelId, pageable);
+
+        if (sharedPayments.isEmpty()) {
+            throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);
+        }
 
         // Response DTO 변환
-        List<SharedPaymentResponse> responseDtos = sharedPayments.stream()
-                .map(SharedPaymentResponse::from)
-                .collect(Collectors.toList());
+        Page<SharedPaymentResponse> responseDtos = SharedPaymentResponse.from(sharedPayments);
 
         return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", responseDtos);
     }

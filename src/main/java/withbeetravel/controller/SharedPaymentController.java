@@ -1,6 +1,7 @@
 package withbeetravel.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,8 +59,11 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
     }
 
     @CheckTravelAccess
-    @GetMapping("")
-    public SuccessResponse<List<SharedPaymentResponse>> getSharedPaymentAll(@PathVariable Long travelId) {
-        return sharedPaymentService.getSharedPaymentAll(travelId);
+    @GetMapping()
+    public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(
+            @PathVariable Long travelId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        return sharedPaymentService.getSharedPaymentAll(travelId, page);
     }
 }
