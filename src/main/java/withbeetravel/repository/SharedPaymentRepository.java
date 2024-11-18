@@ -6,11 +6,16 @@ import withbeetravel.domain.SharedPayment;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface SharedPaymentRepository extends JpaRepository<SharedPayment, Long> {
 
     public Optional<SharedPayment> findByIdAndTravelId(Long id, Long travelId);
 
-    public List<SharedPayment> findAllByTravelId(Long travelId);
+
+    List<SharedPayment> findAllByTravelId(Long travelId);
+
+    List<SharedPayment> findAllByAddedByMemberId(Long addedByMemberId);
+
 }
