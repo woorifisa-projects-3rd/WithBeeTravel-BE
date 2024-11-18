@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.*;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.PaymentErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.exception.error.ValidationErrorCode;
 import withbeetravel.repository.PaymentParticipatedMemberRepository;
@@ -99,6 +100,63 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역이 추가되었습니다.");
     }
 
+    @Override
+    @Transactional
+    public SuccessResponse<Void> updateManualSharedPayment(
+            Long userId,
+            Long travelId,
+            Long sharedPaymentId,
+            String paymentDate,
+            String storeName,
+            int paymentAmount,
+            Double foreignPaymentAmount,
+            String currencyUnit,
+            Double exchangeRate,
+            MultipartFile paymentImage,
+            String paymentComment,
+            boolean isMainImage
+    ) {
+
+        // 공동 결제 내역 정보 가져오기
+        SharedPayment sharedPayment = getSharedPayment(sharedPaymentId);
+
+        // 여행 정보 가져오기
+        Travel travel = getTravel(travelId);
+
+        // 수정할 수 있는 공동 결제 내역인지 확인
+        validateUpdateSharedPayment(userId, travelId, sharedPayment);
+
+        // 외화 금액과 환율 정보가 하나라도 들어왔다면, 두 값이 모두 들어왔는지 확인
+        validatePaymentAmount(foreignPaymentAmount, exchangeRate);
+
+        // 이미지 값이 들어왔을 경우 S3에 업로드
+        String imageUrl;
+        try {
+            imageUrl = s3Uploader.update(paymentImage, sharedPayment.getPaymentImage(), SHARED_PAYMENT_IMAGE_DIR + travelId);
+        } catch (IOException e) {
+            throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
+        }
+
+        // 메인 이미지로 설정했다면, 여행 메인 사진 바꿔주기
+        if(isMainImage) setTravelMainImage(travel, imageUrl);
+
+        // 공동 내역 수정
+        sharedPayment.updateManuallyPayment(
+                CurrencyUnit.from(currencyUnit),
+                paymentAmount,
+                foreignPaymentAmount,
+                exchangeRate,
+                paymentComment,
+                imageUrl,
+                getCategory(storeName),
+                storeName,
+                dateTimeFormatter(paymentDate)
+        );
+
+
+        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역 정보가 수정되었습니다.");
+    }
+
     Travel getTravel(Long travelId) {
         return travelRepository.findById(travelId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
@@ -107,6 +165,21 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
     TravelMember getTravelMember(Long userId, Long travelId) {
         return travelMemberRepository.findByTravelIdAndUserId(travelId, userId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
+    }
+
+    List<TravelMember> getTravelMembers(Long travelId) {
+        return travelMemberRepository.findAllByTravelId(travelId);
+    }
+
+    SharedPayment getSharedPayment(Long sharedPaymentId) {
+        return sharedPaymentRepository.findById(sharedPaymentId)
+                .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
+    }
+
+    // TODO: 생성형 AI로 상호명으로 카테고리 구하기
+    Category getCategory(String storeName) { // 상호명으로 카테고리 구하기
+
+        return Category.ETC;
     }
 
     void validatePaymentAmount(Double foreignPaymentAmount, Double exchangeRate) {
@@ -118,14 +191,16 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         throw new CustomException(ValidationErrorCode.MISSING_REQUIRED_FIELDS);
     }
 
-    List<TravelMember> getTravelMembers(Long travelId) {
-        return travelMemberRepository.findAllByTravelId(travelId);
-    }
+    void validateUpdateSharedPayment(Long userId, Long travelId, SharedPayment sharedPayment) {
 
-    // TODO: 생성형 AI로 상호명으로 카테고리 구하기
-    Category getCategory(String storeName) { // 상호명으로 카테고리 구하기
+        // 직접 추가 결제 내역이 아닌 경우, 수정 불가
+        if(!sharedPayment.isManuallyAdded())
+            throw new CustomException(PaymentErrorCode.NO_PERMISSION_TO_MODIFY_SHARED_PAYMENT);
 
-        return Category.ETC;
+        // 로그인된 회원이 해당 결제 내역을 추가한 멤버가 아닌 경우, 수정 불가
+        TravelMember travelMember = getTravelMember(userId, travelId);
+        if(!sharedPayment.getAddedByMember().equals(travelMember))
+            throw new CustomException(PaymentErrorCode.NO_PERMISSION_TO_MODIFY_SHARED_PAYMENT);
     }
 
     LocalDateTime dateTimeFormatter(String date) {
