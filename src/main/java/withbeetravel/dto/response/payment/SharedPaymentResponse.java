@@ -1,9 +1,8 @@
-package withbeetravel.dto.response;
+package withbeetravel.dto.response.payment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
-import org.joda.time.DateTime;
 import org.springframework.data.domain.Page;
 import withbeetravel.domain.SharedPayment;
 

@@ -1,7 +1,7 @@
 package withbeetravel.service.payment;
 
 import org.springframework.data.domain.Page;
-import withbeetravel.dto.response.SharedPaymentResponse;
+import withbeetravel.dto.response.payment.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
 import java.time.LocalDate;

@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
-import withbeetravel.dto.response.SharedPaymentResponse;
+import withbeetravel.dto.response.payment.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.payment.SharedPaymentService;
 
