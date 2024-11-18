@@ -18,6 +18,7 @@ import withbeetravel.exception.error.PaymentErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.exception.error.ValidationErrorCode;
 import withbeetravel.repository.SharedPaymentRepository;
+import withbeetravel.repository.TravelMemberRepository;
 import withbeetravel.repository.TravelRepository;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
 
     private final TravelRepository travelRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
+    private final TravelMemberRepository travelMemberRepository;
 
     // S3에 이미지를 저장할 경로
     private static final String SHARED_PAYMENT_IMAGE_DIR = "shared-payments";
@@ -89,7 +91,8 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
     @Transactional(readOnly = true)
     public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId,
                                                                             int page,
-                                                                            String sortBy) {
+                                                                            String sortBy,
+                                                                            Long memberId) {
         // 정렬 타입 검증
         if (!sortBy.equals("latest") && !sortBy.equals("amount")) {
             throw new CustomException(PaymentErrorCode.INVALID_SORT_TYPE);
@@ -99,12 +102,23 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
+        // 멤버 ID가 제공된 경우, 해당 멤버가 이 여행의 멤버인지 확인
+        if (memberId != null) {
+            boolean isMemberOfTravel = travelMemberRepository.existsByTravelIdAndId(travelId, memberId);
+            if (!isMemberOfTravel) {
+                throw new CustomException(PaymentErrorCode.NON_TRAVEL_MEMBER_INCLUDED);
+            }
+        }
+
         // sortBy가 amount면 금액 내림차순, 아니면 날짜 내림차순
         Pageable pageable = PageRequest.of(page, 10,
                 Sort.by(Sort.Direction.DESC, sortBy.equals("amount") ? "paymentAmount" : "paymentDate"));
 
         // 해당 여행의 공동 결제 내역 페이지 조회
-        Page<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelId(travelId, pageable);
+        // 결제 내역 조회 (멤버 ID 유무에 따라 다른 메서드 호출)
+        Page<SharedPayment> sharedPayments = memberId != null ?
+                sharedPaymentRepository.findByTravelIdAndMemberId(travelId, memberId, pageable) :
+                sharedPaymentRepository.findAllByTravelId(travelId, pageable);
 
         if (sharedPayments.isEmpty()) {
             throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);

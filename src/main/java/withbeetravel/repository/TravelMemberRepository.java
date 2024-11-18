@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface TravelMemberRepository extends JpaRepository<TravelMember, Long> {
 
     Optional<TravelMember> findByTravelIdAndUserId(Long travelId, Long userId);
+    Boolean existsByTravelIdAndId(Long travelId, Long memberId);
 }

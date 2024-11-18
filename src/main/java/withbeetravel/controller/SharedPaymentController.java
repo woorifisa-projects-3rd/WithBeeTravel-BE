@@ -63,8 +63,9 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
     public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(
             @PathVariable Long travelId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "latest") String sortBy  // latest 또는 amount
+            @RequestParam(defaultValue = "latest") String sortBy, // latest 또는 amount
+            @RequestParam(required = false) Long memberId // 특정 멤버 ID로 필터링
     ) {
-        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy);
+        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, memberId);
     }
 }
