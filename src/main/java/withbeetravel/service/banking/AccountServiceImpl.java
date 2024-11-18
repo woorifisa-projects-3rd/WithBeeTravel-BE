@@ -8,6 +8,7 @@ import withbeetravel.domain.Account;
 import withbeetravel.domain.History;
 import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
+import withbeetravel.dto.banking.account.AccountOwnerNameResponse;
 import withbeetravel.dto.banking.account.AccountRequest;
 import withbeetravel.dto.banking.account.AccountResponse;
 import withbeetravel.dto.response.SuccessResponse;
@@ -170,10 +171,16 @@ public class AccountServiceImpl implements AccountService {
         return true;
     }
 
-    public String findUserNameByAccountNumber(String accountNumber) {
+    public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber) {
         Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow();
         String name = account.getUser().getName();
-        return name;
+        AccountOwnerNameResponse accountOwnerNameResponse = new AccountOwnerNameResponse(name);
+
+        return  SuccessResponse.of(
+                HttpStatus.FOUND.value(),
+                "찾은 계좌 주인 이름",
+                accountOwnerNameResponse
+        );
     }
 }
 

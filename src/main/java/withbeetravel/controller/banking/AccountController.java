@@ -90,18 +90,8 @@ public class AccountController {
     @GetMapping("/find-user/{accountNumber}")
     public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(@PathVariable String accountNumber) {
 
-        String name = accountService.findUserNameByAccountNumber(accountNumber);
+        return accountService.findUserNameByAccountNumber(accountNumber);
 
-        AccountOwnerNameResponse accountOwnerNameResponse = new AccountOwnerNameResponse(name);
-
-        SuccessResponse<AccountOwnerNameResponse> response = SuccessResponse.of(
-                HttpStatus.FOUND.value(),
-                "찾은 계좌 주인 이름",
-                accountOwnerNameResponse
-        );
-
-        // SuccessResponse 반환
-        return response;
     }
 
 }

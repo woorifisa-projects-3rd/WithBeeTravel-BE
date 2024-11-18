@@ -1,6 +1,7 @@
 package withbeetravel.service.banking;
 
 import withbeetravel.domain.Account;
+import withbeetravel.dto.banking.account.AccountOwnerNameResponse;
 import withbeetravel.dto.banking.account.AccountRequest;
 import withbeetravel.dto.banking.account.AccountResponse;
 import withbeetravel.dto.response.SuccessResponse;
@@ -28,5 +29,5 @@ public interface AccountService {
 
     boolean verifyAccount(String accountNumber);
 
-    String findUserNameByAccountNumber(String accountNumber);
+    SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber);
 }
