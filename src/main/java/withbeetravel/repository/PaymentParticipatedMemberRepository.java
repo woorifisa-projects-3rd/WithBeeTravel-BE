@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface PaymentParticipatedMemberRepository extends JpaRepository<PaymentParticipatedMember, Long> {
 
-    public List<PaymentParticipatedMember> findAllBySharedPaymentId(Long sharedPaymentId);
+    List<PaymentParticipatedMember> findAllBySharedPaymentId(Long sharedPaymentId);
+  
+    List<PaymentParticipatedMember> findAllByTravelMemberId(Long travelMemberId);
 }

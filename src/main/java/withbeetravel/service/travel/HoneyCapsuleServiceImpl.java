@@ -44,7 +44,7 @@ public class HoneyCapsuleServiceImpl implements HoneyCapsuleService{
         // SharedPayment 리스트를 HoneyCapsuleResponse 리스트로 변환
         List<HoneyCapsuleResponse> honeyCapsuleResponseList = allByTravelId.stream()
                 .map(HoneyCapsuleResponse::from)
-                .collect(Collectors.toList());
+                .toList();
 
         return SuccessResponse.of(200, "여행 기록 조회 성공", honeyCapsuleResponseList);
     }
