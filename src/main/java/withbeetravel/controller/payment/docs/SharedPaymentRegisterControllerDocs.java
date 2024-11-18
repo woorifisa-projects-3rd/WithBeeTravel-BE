@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.multipart.MultipartFile;
+import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.ErrorResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
@@ -211,5 +212,32 @@ public interface SharedPaymentRegisterControllerDocs {
             MultipartFile paymentImage,
             String paymentComment,
             boolean isMainImage
+    );
+
+    @Operation(
+            summary = "위비 카드 결제 내역 공동 결제 내역에 추가하기",
+            description = "여행 일자 이전에 발생한 위비 트래블 카드 결제 내역을 추가할 수 있습니다.",
+            tags = {"User Management", "공동 결제 내역"},
+            parameters = {
+                    @Parameter(
+                            name = "travelId",
+                            description = "여행 ID",
+                            required = true,
+                            in = ParameterIn.PATH,
+                            example = "1234"
+                    )
+            }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "결제 내역이 추가되었습니다.", content = @Content(schema = @Schema(implementation = SuccessResponse.class))),
+            @ApiResponse(responseCode = "400", description = "VALIDATION-003\nBANKING-007", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "TRAVEL-002\nBANKING-003\nBANKING-006", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "TRAVEL-001\nBANKING-005", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    SuccessResponse<Void> addWibeeCardSharedPayment(
+            Long travelId,
+            SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
+
     );
 }

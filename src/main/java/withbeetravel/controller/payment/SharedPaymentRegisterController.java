@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.payment.docs.SharedPaymentRegisterControllerDocs;
+import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.payment.SharedPaymentRegisterService;
 
@@ -62,6 +63,18 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
                 userId, travelId, sharedPaymentId, paymentDate, storeName,
                 paymentAmount, foreignPaymentAmount, currencyUnit, exchangeRate, paymentImage,
                 paymentComment, isMainImage
+        );
+    }
+
+    @Override
+    @CheckTravelAccess
+    @PostMapping("/manual-wibee-card")
+    public SuccessResponse<Void> addWibeeCardSharedPayment(
+            @PathVariable Long travelId,
+            @RequestBody SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
+    ) {
+        return sharedPaymentRegisterService.addWibeeCardSharedPayment(
+                userId, travelId, sharedPaymentWibeeCardRegisterRequest
         );
     }
 }
