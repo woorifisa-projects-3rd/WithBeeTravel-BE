@@ -17,6 +17,12 @@ public interface SharedPaymentRepository extends JpaRepository<SharedPayment, Lo
 
     public Optional<SharedPayment> findByIdAndTravelId(Long id, Long travelId);
 
+
+    List<SharedPayment> findAllByTravelId(Long travelId);
+
+    List<SharedPayment> findAllByAddedByMemberId(Long addedByMemberId);
+
+
     // 결제 내역 조회
     @Query("SELECT DISTINCT sp FROM SharedPayment sp " +
             "LEFT JOIN FETCH sp.paymentParticipatedMembers ppm " +

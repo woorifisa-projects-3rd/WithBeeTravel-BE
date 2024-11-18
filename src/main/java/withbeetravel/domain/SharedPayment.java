@@ -37,10 +37,10 @@ public class SharedPayment {
     private int paymentAmount;
 
     @Column(name = "foreign_payment_amount")
-    private double foreignPaymentAmount;
+    private Double foreignPaymentAmount;
 
     @Column(name = "exchange_rate")
-    private double exchangeRate;
+    private Double exchangeRate;
 
     @Column(name = "payment_comment")
     private String paymentComment;
@@ -73,8 +73,8 @@ public class SharedPayment {
                          Travel travel,
                          CurrencyUnit currencyUnit,
                          int paymentAmount,
-                         double foreignPaymentAmount,
-                         double exchangeRate,
+                         Double foreignPaymentAmount,
+                         Double exchangeRate,
                          String paymentComment,
                          String paymentImage,
                          boolean isManuallyAdded,
@@ -104,5 +104,9 @@ public class SharedPayment {
 
     public void updatePaymentCommnet(String newPaymentComment) {
         this.paymentComment = newPaymentComment;
+    }
+
+    public void updateParticipantCount(int newParticipantCount) {
+        this.participantCount = newParticipantCount;
     }
 }
