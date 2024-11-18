@@ -27,7 +27,6 @@ public class SharedPaymentRecordController implements SharedPaymentRecordControl
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
 
-        if(paymentImage.isEmpty()) System.out.println("empty");
         return sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage);
     }
 
