@@ -62,8 +62,9 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
     @GetMapping()
     public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(
             @PathVariable Long travelId,
-            @RequestParam(defaultValue = "0") int page
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "latest") String sortBy  // latest 또는 amount
     ) {
-        return sharedPaymentService.getSharedPaymentAll(travelId, page);
+        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy);
     }
 }

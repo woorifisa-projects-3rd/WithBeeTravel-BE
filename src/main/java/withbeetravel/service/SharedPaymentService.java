@@ -22,5 +22,7 @@ public interface SharedPaymentService {
             Long sharedPaymentId
     );
 
-    SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId, int page);
+    SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId,
+                                                                     int page,
+                                                                     String sortBy);
 }

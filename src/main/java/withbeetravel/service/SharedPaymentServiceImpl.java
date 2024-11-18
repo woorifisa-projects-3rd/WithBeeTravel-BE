@@ -87,13 +87,21 @@ public class SharedPaymentServiceImpl implements SharedPaymentService{
 
     @Override
     @Transactional(readOnly = true)
-    public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId, int page) {
+    public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId,
+                                                                            int page,
+                                                                            String sortBy) {
+        // 정렬 타입 검증
+        if (!sortBy.equals("latest") && !sortBy.equals("amount")) {
+            throw new CustomException(PaymentErrorCode.INVALID_SORT_TYPE);
+        }
+
         // 여행 존재 여부 확인
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
-        // 페이지네이션 설정 (10개씩, 결제일자 내림차순)
-        Pageable pageable = PageRequest.of(page, 10, Sort.by("paymentDate").descending());
+        // sortBy가 amount면 금액 내림차순, 아니면 날짜 내림차순
+        Pageable pageable = PageRequest.of(page, 10,
+                Sort.by(Sort.Direction.DESC, sortBy.equals("amount") ? "paymentAmount" : "paymentDate"));
 
         // 해당 여행의 공동 결제 내역 페이지 조회
         Page<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelId(travelId, pageable);
