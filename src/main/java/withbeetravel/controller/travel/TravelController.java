@@ -1,11 +1,10 @@
 package withbeetravel.controller.travel;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import withbeetravel.dto.travel.TravelRequestDto;
-import withbeetravel.dto.travel.TravelResponseDto;
+import withbeetravel.dto.request.travel.TravelRequestDto;
+import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.service.travel.TravelService;
 
 import java.util.HashMap;

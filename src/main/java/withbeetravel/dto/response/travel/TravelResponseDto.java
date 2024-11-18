@@ -1,4 +1,4 @@
-package withbeetravel.dto.travel;
+package withbeetravel.dto.response.travel;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -12,13 +12,15 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class TravelResponseDto {
+    private Long travelId;
     private String name;
     private List<String> country;
     private String startDate;
     private String endDate;
 
     @Builder
-    public TravelResponseDto(String name, List<String> country, String startDate, String endDate) {
+    public TravelResponseDto(Long travelId, String name, List<String> country, String startDate, String endDate) {
+        this.travelId = travelId;
         this.name = name;
         this.country = country;
         this.startDate = startDate;
@@ -33,6 +35,7 @@ public class TravelResponseDto {
                 .collect(Collectors.toList());
 
         return new TravelResponseDto(
+                travel.getId(),
                 travel.getTravelName(),
                 countryNames,
                 travel.getTravelStartDate().toString(),

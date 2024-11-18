@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.Country;
 import withbeetravel.domain.Travel;
 import withbeetravel.domain.TravelCountry;
-import withbeetravel.dto.travel.TravelRequestDto;
-import withbeetravel.dto.travel.TravelResponseDto;
+import withbeetravel.dto.request.travel.TravelRequestDto;
+import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.repository.travel.TravelCountryRepository;
 import withbeetravel.repository.travel.TravelRepository;
 import withbeetravel.domain.SettlementStatus;
@@ -63,7 +63,7 @@ public class TravelServiceImpl implements TravelService {
         }
 
         // ResponseDto 생성 및 반환
-        return TravelResponseDto.from(savedTravel, travelCountries != null ? travelCountries : List.of());
+        return TravelResponseDto.from( savedTravel, travelCountries != null ? travelCountries : List.of());
     }
 
     @Override
