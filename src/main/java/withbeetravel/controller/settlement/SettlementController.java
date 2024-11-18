@@ -1,4 +1,4 @@
-package withbeetravel.controller;
+package withbeetravel.controller.settlement;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

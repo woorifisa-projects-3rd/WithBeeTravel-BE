@@ -86,6 +86,8 @@ public class SettlementServiceImpl implements SettlementService {
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
         }
 
+        travel.updateSettlementStatus(SettlementStatus.ONGOING);
+
         saveSettlementRequestLog(travel, newSettlementRequest);
 
         return SuccessResponse.of(HttpStatus.OK.value(), "정산 요청 성공");
