@@ -1,4 +1,4 @@
-package withbeetravel.dto.travel;
+package withbeetravel.dto.response.travel;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -30,7 +30,7 @@ public class TravelResponseDto {
         // TravelCountry 엔티티 목록에서 country 이름만 추출
         List<String> countryNames = travelCountries.stream()
                 .map(travelCountry -> travelCountry.getCountry().name())
-                .collect(Collectors.toList());
+                .toList();
 
         return new TravelResponseDto(
                 travel.getTravelName(),

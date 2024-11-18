@@ -2,10 +2,12 @@ package withbeetravel.controller.travel;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import withbeetravel.dto.travel.TravelRequestDto;
-import withbeetravel.dto.travel.TravelResponseDto;
+import withbeetravel.dto.request.TravelRequestDto;
+import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.service.travel.TravelService;
 
 @RequiredArgsConstructor
@@ -17,10 +19,8 @@ public class TravelController {
 
     // 여행 생성 요청 처리
     @PostMapping
-    public ResponseEntity<TravelResponseDto> saveTravel(@RequestBody @Valid TravelRequestDto request) {
+    public SuccessResponse<TravelResponseDto> saveTravel(@RequestBody TravelRequestDto request) {
         TravelResponseDto response = travelService.saveTravel(request);
-        return ResponseEntity.ok(response);
+        return SuccessResponse.of(HttpStatus.OK.value(), "Travel saved successfully", response);
     }
-
-
 }

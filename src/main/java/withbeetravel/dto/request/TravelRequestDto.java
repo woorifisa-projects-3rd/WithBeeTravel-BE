@@ -1,4 +1,4 @@
-package withbeetravel.dto.travel;
+package withbeetravel.dto.request;
 
 
 import lombok.Getter;
