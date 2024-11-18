@@ -99,10 +99,17 @@ public class DataLoader implements CommandLineRunner {
                 .isCaptain(true)
                 .connectedAccount("user2_account")
                 .build();
+        TravelMember travelMember5 = TravelMember.builder()
+                .travel(travel1)
+                .user(user3)
+                .isCaptain(false)
+                .connectedAccount("user3_account")
+                .build();
         travelMemberRepository.save(travelMember1);
         travelMemberRepository.save(travelMember2);
         travelMemberRepository.save(travelMember3);
         travelMemberRepository.save(travelMember4);
+        travelMemberRepository.save(travelMember5);
 
         // SharedPayment 더미 데이터 생성
         SharedPayment payment1 = SharedPayment.builder()
@@ -115,7 +122,7 @@ public class DataLoader implements CommandLineRunner {
                 .paymentComment("Lunch")
                 .paymentImage("https://withbee-travel.s3.ap-northeast-2.amazonaws.com/shared-payments/1/32b52c1e-7a53-4e25-80cd-4a8b5eedb0e4_%EA%BE%B8%EB%B2%85.png")
                 .isManuallyAdded(true)
-                .participantCount(2)
+                .participantCount(3)
                 .category(Category.FOOD)
                 .storeName("Seafood Restaurant")
                 .paymentDate(LocalDateTime.of(2024, 6, 2, 12, 0))
@@ -131,7 +138,7 @@ public class DataLoader implements CommandLineRunner {
                 .paymentComment("Taxi fare")
                 .paymentImage(null)
                 .isManuallyAdded(false)
-                .participantCount(2)
+                .participantCount(3)
                 .category(Category.TRANSPORTATION)
                 .storeName("Seoul Taxi Co.")
                 .paymentDate(LocalDateTime.of(2024, 6, 2, 14, 30))

@@ -1,13 +1,13 @@
-package withbeetravel.controller.sharedPayment;
+package withbeetravel.controller.payment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
-import withbeetravel.controller.sharedPayment.docs.SharedPaymentRecordControllerDocs;
-import withbeetravel.dto.response.shardPayment.SharedPaymentRecordResponse;
+import withbeetravel.controller.payment.docs.SharedPaymentRecordControllerDocs;
+import withbeetravel.dto.response.payment.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.service.sharedPayment.SharedPaymentRecordService;
+import withbeetravel.service.payment.SharedPaymentRecordService;
 
 @RequiredArgsConstructor
 @RestController
