@@ -1,9 +1,12 @@
 package withbeetravel.controller.travel;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.request.travel.TravelRequestDto;
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.service.travel.TravelService;
 
@@ -25,15 +28,10 @@ public class TravelController { // new TravelController();
     }
 
     @PatchMapping("/{travel-id}")
-    public ResponseEntity<Map<String, String>> editTravel(@RequestBody TravelRequestDto request, @PathVariable("travel-id") Long travelId) {
+    @CheckTravelAccess
+    public SuccessResponse<TravelResponseDto> editTravel(@RequestBody TravelRequestDto request, @PathVariable("travel-id") Long travelId) {
         travelService.editTravel(request, travelId);  // 여행 정보 수정
-
-        // 성공 메시지 반환
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "200");
-        response.put("message", "여행 정보를 성공적으로 변경했습니다.");
-
-        return ResponseEntity.ok(response);  // ResponseEntity로 메시지 반환
+        return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경"); // ResponseEntity로 메시지 반환
     }
 
 
