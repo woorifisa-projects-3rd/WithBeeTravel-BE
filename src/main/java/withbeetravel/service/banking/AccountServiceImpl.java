@@ -163,21 +163,26 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
-    public boolean verifyAccount(String accountNumber) {
+    public SuccessResponse verifyAccount(String accountNumber) {
         Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         if(account.isEmpty()){
-            return false;
+            throw new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND);
+
         }
-        return true;
+        return SuccessResponse.of(
+                HttpStatus.OK.value(),
+                "계좌 번호 존재 확인 완료"
+        );
     }
 
     public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber) {
-        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow();
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
         String name = account.getUser().getName();
         AccountOwnerNameResponse accountOwnerNameResponse = new AccountOwnerNameResponse(name);
 
         return  SuccessResponse.of(
-                HttpStatus.FOUND.value(),
+                HttpStatus.OK.value(),
                 "찾은 계좌 주인 이름",
                 accountOwnerNameResponse
         );

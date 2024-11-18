@@ -27,7 +27,7 @@ public interface AccountService {
 
     SuccessResponse<AccountResponse> accountInfo(Long accountId);
 
-    boolean verifyAccount(String accountNumber);
+    SuccessResponse verifyAccount(String accountNumber);
 
     SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber);
 }
