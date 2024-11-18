@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import withbeetravel.domain.*;
-import withbeetravel.repository.SharedPaymentRepository;
-import withbeetravel.repository.TravelMemberRepository;
-import withbeetravel.repository.TravelRepository;
-import withbeetravel.repository.UserRepository;
+import withbeetravel.repository.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +17,7 @@ public class DataLoader implements CommandLineRunner {
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
+    private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -180,5 +178,56 @@ public class DataLoader implements CommandLineRunner {
         sharedPaymentRepository.save(payment2);
         sharedPaymentRepository.save(payment3);
         sharedPaymentRepository.save(payment4);
+
+        // PaymentParticipatedMembers 더미 데이터 생성
+        // payment1의 참여자들 (travelMember1, travelMember2, travelMember5)
+        PaymentParticipatedMember paymentParticipatedMember1 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment1)
+                .travelMember(travelMember1)
+                .build();
+        PaymentParticipatedMember paymentParticipatedMember2 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment1)
+                .travelMember(travelMember2)
+                .build();
+        PaymentParticipatedMember paymentParticipatedMember3 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment1)
+                .travelMember(travelMember5)
+                .build();
+
+        // payment2의 참여자들 (travelMember1, travelMember5)
+        PaymentParticipatedMember paymentParticipatedMember4 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment2)
+                .travelMember(travelMember1)
+                .build();
+        PaymentParticipatedMember paymentParticipatedMember6 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment2)
+                .travelMember(travelMember5)
+                .build();
+
+        // payment3의 참여자들 (travelMember3, travelMember4)
+        PaymentParticipatedMember paymentParticipatedMember7 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment3)
+                .travelMember(travelMember3)
+                .build();
+        PaymentParticipatedMember paymentParticipatedMember8 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment3)
+                .travelMember(travelMember4)
+                .build();
+
+        // payment4의 참여자들 (travelMember4)
+        PaymentParticipatedMember paymentParticipatedMember10 = PaymentParticipatedMember.builder()
+                .sharedPayment(payment4)
+                .travelMember(travelMember4)
+                .build();
+
+        // PaymentParticipatedMember 저장
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember1);
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember2);
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember3);
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember4);
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember6);
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember7);
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember8);
+        paymentParticipatedMemberRepository.save(paymentParticipatedMember10);
     }
 }

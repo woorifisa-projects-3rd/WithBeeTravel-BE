@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
-import withbeetravel.controller.docs.SharedPaymentControllerDocs;
 import withbeetravel.dto.response.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.payment.SharedPaymentService;
@@ -15,7 +14,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/travels/{travelId}/payments")
-public class SharedPaymentController implements SharedPaymentControllerDocs {
+public class SharedPaymentController {
 
     private final SharedPaymentService sharedPaymentService;
 
