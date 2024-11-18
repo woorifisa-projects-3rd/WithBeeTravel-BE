@@ -1,5 +1,7 @@
 package withbeetravel.service.banking;
 
+import withbeetravel.dto.request.account.AccountNumberRequest;
+import withbeetravel.dto.request.account.CreateAccountRequest;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.request.account.AccountRequest;
 import withbeetravel.dto.response.account.AccountResponse;
@@ -11,7 +13,7 @@ public interface AccountService {
 
     SuccessResponse<List<AccountResponse>> showAll(Long userId);
 
-    SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest);
+    SuccessResponse<AccountResponse> createAccount(Long userId, CreateAccountRequest CreateAccountRequest);
 
     String generateUniqueAccountNumber();
 

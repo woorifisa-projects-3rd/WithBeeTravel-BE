@@ -3,10 +3,7 @@ package withbeetravel.controller.banking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import withbeetravel.dto.request.account.AccountNumberRequest;
-import withbeetravel.dto.request.account.AccountRequest;
-import withbeetravel.dto.request.account.DepositRequest;
-import withbeetravel.dto.request.account.TransferRequest;
+import withbeetravel.dto.request.account.*;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.response.account.AccountResponse;
@@ -44,10 +41,10 @@ public class AccountController {
     }
 
     @PostMapping()
-    public SuccessResponse<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest){
+    public SuccessResponse<AccountResponse> createAccount(@RequestBody CreateAccountRequest createAccountRequest){
 
         // 계좌 생성
-        return  accountService.createAccount(userId, accountRequest);
+        return  accountService.createAccount(userId, createAccountRequest);
     }
 
     @PostMapping("{accountId}/transfer")
@@ -84,7 +81,7 @@ public class AccountController {
         return accountService.verifyAccount(accountNumberRequest.getAccountNumber());
     }
 
-    @PostMapping("/find-user/")
+    @PostMapping("/find-user")
     public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(@RequestBody AccountNumberRequest accountNumberRequest) {
         return accountService.findUserNameByAccountNumber(accountNumberRequest.getAccountNumber());
 

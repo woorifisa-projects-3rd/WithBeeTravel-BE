@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.Account;
 import withbeetravel.domain.History;
+import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
+import withbeetravel.dto.request.account.AccountNumberRequest;
+import withbeetravel.dto.request.account.CreateAccountRequest;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.request.account.AccountRequest;
 import withbeetravel.dto.response.account.AccountResponse;
@@ -46,15 +49,17 @@ public class AccountServiceImpl implements AccountService {
 
     //계좌 생성
     @Transactional
-    public SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest){
+    public SuccessResponse<AccountResponse> createAccount(Long userId, CreateAccountRequest createAccountRequest){
         User thisUser = userRepository.findById(userId).orElseThrow();
+
+        Product product = createAccountRequest.getProduct();
 
         String accountNumber = generateUniqueAccountNumber();
 
         Account account = Account.builder().user(thisUser)
                 .accountNumber(accountNumber)
                 .balance(0)
-                .product(accountRequest.getProduct())
+                .product(product)
                 .isConnectedWibeeCard(false)
                 .build();
 
