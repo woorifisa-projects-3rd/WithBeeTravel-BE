@@ -6,6 +6,7 @@ import withbeetravel.dto.response.SharedPaymentRecordResponse;
 import withbeetravel.dto.response.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface SharedPaymentService {
@@ -25,5 +26,7 @@ public interface SharedPaymentService {
     SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId,
                                                                      int page,
                                                                      String sortBy,
-                                                                     Long memberId);
+                                                                     Long memberId,
+                                                                     LocalDate startDate,
+                                                                     LocalDate endDate);
 }

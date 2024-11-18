@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import withbeetravel.domain.SharedPayment;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,20 +21,17 @@ public interface SharedPaymentRepository extends JpaRepository<SharedPayment, Lo
     @Query("SELECT DISTINCT sp FROM SharedPayment sp " +
             "LEFT JOIN FETCH sp.paymentParticipatedMembers ppm " +
             "LEFT JOIN FETCH ppm.travelMember " +
-            "WHERE sp.travel.id = :travelId")
-    public Page<SharedPayment> findAllByTravelId(@Param("travelId") Long travelId, Pageable pageable);
-
-    // 특정 멤버가 참여한 결제 내역 조회
-    @Query("SELECT DISTINCT sp FROM SharedPayment sp " +
-            "LEFT JOIN FETCH sp.paymentParticipatedMembers ppm " +
-            "LEFT JOIN FETCH ppm.travelMember tm " +
             "WHERE sp.travel.id = :travelId " +
-            "AND EXISTS (SELECT 1 FROM PaymentParticipatedMember pm " +
-            "           WHERE pm.sharedPayment = sp " +
-            "           AND pm.travelMember.id = :memberId)")
-    Page<SharedPayment> findByTravelIdAndMemberId(
+            "AND (:memberId IS NULL OR EXISTS (SELECT 1 FROM PaymentParticipatedMember pm " +
+            "                                 WHERE pm.sharedPayment = sp " +
+            "                                 AND pm.travelMember.id = :memberId)) " +
+            "AND (:startDate IS NULL OR DATE(sp.paymentDate) >= :startDate) " +
+            "AND (:endDate IS NULL OR DATE(sp.paymentDate) <= :endDate)")
+    Page<SharedPayment> findAllByTravelIdAndMemberIdAndDateRange(
             @Param("travelId") Long travelId,
             @Param("memberId") Long memberId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
             Pageable pageable
     );
 }

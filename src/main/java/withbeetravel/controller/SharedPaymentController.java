@@ -2,6 +2,7 @@ package withbeetravel.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,7 @@ import withbeetravel.dto.response.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.SharedPaymentService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -64,8 +66,10 @@ public class SharedPaymentController implements SharedPaymentControllerDocs {
             @PathVariable Long travelId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "latest") String sortBy, // latest 또는 amount
-            @RequestParam(required = false) Long memberId // 특정 멤버 ID로 필터링
+            @RequestParam(required = false) Long memberId, // 특정 멤버 ID로 필터링
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
     ) {
-        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, memberId);
+        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, memberId, startDate, endDate);
     }
 }
