@@ -78,15 +78,14 @@ public class AccountController {
         );
     }
 
-    @GetMapping("/verify/{accountNumber}")
-    public SuccessResponse verifyAccount(@PathVariable String accountNumber){
-        return accountService.verifyAccount(accountNumber);
+    @PostMapping("/verify")
+    public SuccessResponse verifyAccount(@RequestBody AccountNumberRequest accountNumberRequest){
+        return accountService.verifyAccount(accountNumberRequest.getAccountNumber());
     }
 
-    @GetMapping("/find-user/{accountNumber}")
-    public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(@PathVariable String accountNumber) {
-
-        return accountService.findUserNameByAccountNumber(accountNumber);
+    @PostMapping("/find-user/")
+    public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(@RequestBody AccountNumberRequest accountNumberRequest) {
+        return accountService.findUserNameByAccountNumber(accountNumberRequest.getAccountNumber());
 
     }
 
