@@ -23,7 +23,7 @@ public class TravelMember {
     private User user;
 
     @Column(name = "is_captain", nullable = false)
-    private int isCaptain;
+    private boolean isCaptain;
 
     @JoinColumn(name = "account_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,7 +32,7 @@ public class TravelMember {
     protected TravelMember() {}
 
     @Builder
-    public TravelMember(Long id, Travel travel, User user, int isCaptain, Account connectedAccount) {
+    public TravelMember(Long id, Travel travel, User user, boolean isCaptain, Account connectedAccount) {
         this.id = id;
         this.travel = travel;
         this.user = user;
