@@ -170,9 +170,7 @@ public class DataLoader implements CommandLineRunner {
                     .exchangeRate(i % 3 == 0 ? 1.0 :
                             i % 3 == 1 ? 1000.0 : 100.0)
                     .paymentComment("Payment " + (i + 5))
-                    .paymentImage(i % 2 == 0 ?
-                            "https://withbee-travel.s3.ap-northeast-2.amazonaws.com/shared-payments/1/payment_" + (i + 5) + ".png"
-                            : null)
+                    .paymentImage(null)
                     .isManuallyAdded(i % 2 == 0)
                     .participantCount(i % 3 + 1)  // 1~3명이 참여
                     .category(i % 5 == 0 ? Category.FOOD :
