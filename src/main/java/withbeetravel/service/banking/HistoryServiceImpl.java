@@ -51,17 +51,15 @@ public class HistoryServiceImpl implements HistoryService {
             throw new CustomException(BankingErrorCode.INSUFFICIENT_FUNDS);
         }
 
-
-
         History history = History.builder().
                 account(account).date(LocalDateTime.now()).payAM(historyRequest.getPayAm())
                 .rqspeNm(historyRequest.getRqspeNm()).isWibeeCard(historyRequest.isWibeeCard())
-                .balance(account.getBalance()+ historyRequest.getPayAm())
+                .balance(account.getBalance()- historyRequest.getPayAm())
                 .build();
 
         historyRepository.save(history);
 
-        account.transfer(historyRequest.getPayAm());
+        account.transfer(-historyRequest.getPayAm());
 
         return SuccessResponse.of(
                 HttpStatus.CREATED.value(),
