@@ -70,10 +70,11 @@ jobs:
       # Docker 이미지 푸시
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest  # Docker Hub에 푸시
+
   # 로컬 Ubuntu에 Docker 배포
   deploy-to-ubuntu:
     runs-on: ubuntu-latest
-    needs: build-and-push-docker  # Docker 빌드와 푸시가 성공해야 실행됨
+    needs: build-test-and-docker  # build-test-and-docker job이 성공해야 실행됨
 
     steps:
       - name: Deploy to Local Ubuntu
