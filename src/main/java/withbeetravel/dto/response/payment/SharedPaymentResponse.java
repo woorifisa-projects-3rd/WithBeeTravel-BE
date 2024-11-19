@@ -59,7 +59,7 @@ public class SharedPaymentResponse {
 
         return SharedPaymentResponse.builder()
                 .sharedPaymentId(sharedPayment.getId())
-                .adderProfileIcon(sharedPayment.getPaymentImage())
+                .adderProfileIcon(sharedPayment.getAddedByMember().getUser().getProfileImage())
                 .paymentAmount(sharedPayment.getPaymentAmount())
                 .foreignPaymentAmount(sharedPayment.getForeignPaymentAmount())
                 .exchangeRate(sharedPayment.getExchangeRate())
