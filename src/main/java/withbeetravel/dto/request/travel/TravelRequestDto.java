@@ -18,10 +18,8 @@ public class TravelRequestDto {
 
     private List<String> travelCountries;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private String travelStartDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private String travelEndDate;
 
     public TravelRequestDto(String travelName, Boolean isDomesticTravel, List<String> travelCountries, String travelStartDate, String travelEndDate) {

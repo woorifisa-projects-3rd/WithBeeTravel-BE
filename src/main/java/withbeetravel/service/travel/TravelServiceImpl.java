@@ -59,7 +59,8 @@ public class TravelServiceImpl implements TravelService {
         Travel savedTravel = travelRepository.save(travel);  // Travel 엔티티 저장
 
         // 해외 여행일 경우, 선택된 나라들에 대해 유효성 검증 후 TravelCountry 엔티티 생성
-        List<TravelCountry> travelCountries = null;
+        // TravelCountry 리스트를 빈 리스트로 초기화
+        List<TravelCountry> travelCountries = List.of();
         if (!requestDto.isDomesticTravel()) {
             travelCountries = requestDto.getTravelCountries().stream()
                     .map(countryName -> {
@@ -77,7 +78,7 @@ public class TravelServiceImpl implements TravelService {
         }
 
         // ResponseDto 생성 및 반환
-        TravelResponseDto travelResponseDto = TravelResponseDto.from(savedTravel, travelCountries != null ? travelCountries : List.of());
+        TravelResponseDto travelResponseDto = TravelResponseDto.from(savedTravel, travelCountries);
 
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponseDto);
     }
@@ -100,14 +101,10 @@ public class TravelServiceImpl implements TravelService {
                     .map(countryName -> {
                         Country country = findCountryByName(countryName);
                         return  TravelCountry.builder().country(country).travel(travel).build();
-                    }).collect(Collectors.toList());
+                    }).toList();
 
             travelCountryRepository.saveAll(updatedTravelCountries);
         }
-
-         travelRepository.save(travel);
-//
-//        List<TravelCountry> travelCountries = travelCountryRepository.findByTravelId(updatedTravel.getId());
 
         return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경");
     }
