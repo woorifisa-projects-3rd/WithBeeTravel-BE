@@ -3,6 +3,7 @@ package withbeetravel.service.settlement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
 import withbeetravel.dto.response.SuccessResponse;
@@ -34,6 +35,8 @@ public class SettlementServiceImpl implements SettlementService {
     private final SharedPaymentRepository sharedPaymentRepository;
     private final SettlementRequestLogRepository settlementRequestLogRepository;
     private final AccountRepository accountRepository;
+
+    private final SettlementPendingService settlementRequestLogService;
 
     @Override
     @Transactional(readOnly = true)
@@ -139,7 +142,7 @@ public class SettlementServiceImpl implements SettlementService {
 
             // 총 정산 금액이 마이너스인 사람만 잔액이 있는지 확인
             // insufficientBalanceMembers : 잔액이 부족한 여행멤버 리스트
-            List<TravelMember> insufficientBalanceMembers = new ArrayList<>(List.of());
+            List<TravelMember> insufficientBalanceMembers = new ArrayList<>();
             for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
                 int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
 
@@ -153,8 +156,6 @@ public class SettlementServiceImpl implements SettlementService {
                 }
             }
 
-            System.out.println(insufficientBalanceMembers.toString());
-
             // insufficientBalancedMembers에 한 명이라도 있을 경우, 정산 보류
             if (!insufficientBalanceMembers.isEmpty()) {
                 // 정산 보류 로그 추가
@@ -164,29 +165,21 @@ public class SettlementServiceImpl implements SettlementService {
                         .logMessage(LogTitle.SETTLEMENT_PENDING.getMessage(travel.getTravelName()))
                         .settlementRequest(settlementRequest)
                         .build();
-                settlementRequestLogRepository.save(settlementRequestLog);
-                System.out.println(settlementRequestLog.toString());
 
-                // 잔액 부족 멤버의 정산 동의를 true -> false로 변경
-                for (TravelMember insufficientBalanceMember : insufficientBalanceMembers) {
-                    TravelMemberSettlementHistory insufficientTravelMemberSettlementHistory =
-                            travelMemberSettlementHistoryRepository
-                                    .findTravelMemberSettlementHistoryBySettlementRequestIdAndTravelMemberId(
-                                    settlementRequest.getId(), insufficientBalanceMember.getId());
-                    insufficientTravelMemberSettlementHistory.updateIsAgreed(false);
-                }
+                // 롤백시 실행되도록 다른 서비스 클래스로 분리
+                settlementRequestLogService.handlePendingSettlementRequest(
+                        settlementRequestLog,
+                        insufficientBalanceMembers,
+                        settlementRequest,
+                        insufficientBalanceMembers.size(),
+                        travelMemberSettlementHistory);
 
-                // 정산 미동의 인원수 변경
-                settlementRequest.updateDisagreeCount(insufficientBalanceMembers.size());
-
-                throw(new CustomException(SettlementErrorCode.SETTLEMENT_INSUFFICIENT_BALANCE));
+                throw new CustomException(SettlementErrorCode.SETTLEMENT_INSUFFICIENT_BALANCE);
             }
 
-            // 잔액 부족 멤버가 없을 경우 나의 정산 동의 상태를 true로 변경, 정산 미동의 인원에서 1을 뺌
-            else {
-                travelMemberSettlementHistory.updateIsAgreed(true);
-                settlementRequest.updateDisagreeCount(-1);
-            }
+            // 나의 정산 동의 여부를 false -> true로 변경, disagreeCount에서 -1하기 (0으로 됨)
+            travelMemberSettlementHistory.updateIsAgreed(true);
+            settlementRequest.updateDisagreeCount(-1);
 
             // 모든 그룹원들의 계좌 잔액 
             // totalPaymentCost가 0보다 작은 경우, 해당 멤버의 계좌에서 totalPaymentCost를 인출
@@ -222,6 +215,7 @@ public class SettlementServiceImpl implements SettlementService {
             throw new CustomException(SettlementErrorCode.SETTLEMENT_DISAGREE_COUNT_NOT_CERTAIN);
         }
     }
+
 
     private void validateSettlementRequestAlreadyAgree(TravelMemberSettlementHistory travelMemberSettlementHistory) {
         if (travelMemberSettlementHistory.isAgreed()) {
