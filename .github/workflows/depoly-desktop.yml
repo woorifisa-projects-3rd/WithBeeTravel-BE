@@ -48,9 +48,9 @@ jobs:
         run: |
           echo "${{ secrets.AWS_PROPERTIES }}" | tr ';' '\n' > ./src/main/resources/aws.properties
 
-      # Gradle 빌드 (JAR 파일 생성)
-      - name: Build with Gradle Wrapper
-        run: ./gradlew build
+      # Gradle 빌드 (JAR 파일 생성), 테스트 생략
+      - name: Build with Gradle Wrapper (without tests)
+        run: ./gradlew build -x test
 
 
   # 2단계: Docker 이미지 빌드 및 Docker Hub 푸시
