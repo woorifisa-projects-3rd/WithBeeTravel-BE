@@ -7,7 +7,7 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: with-bee-dev  # Docker 이미지 이름
-  LOCAL_UBUNTU_HOST: 192.168.0.39  # 로컬 우분투 IP 주소
+  LOCAL_UBUNTU_HOST: ${{ secrets.LOCAL_UBUNTU_HOST }}   # 로컬 우분투 IP 주소
   LOCAL_UBUNTU_SSH_USER: team05  # 로컬 우분투 사용자 이름
   SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}  # SSH 접속 비밀번호 (GitHub Secrets에서 설정)
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
@@ -18,7 +18,6 @@ env:
 
 jobs:
   # 1단계: 빌드
-# 1단계: 빌드 및 테스트 (Gradle 빌드)
   build:
     runs-on: ubuntu-latest
 
@@ -33,6 +32,21 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
+
+      # 필요한 디렉토리 생성
+      - name: Create necessary directories
+        run: |
+          mkdir -p ./src/main/resources
+
+      # application.properties 파일 생성
+      - name: Create application.properties
+        run: |
+          echo "${{ secrets.APPLICATION_DEV }}" > ./src/main/resources/application.properties
+
+      # aws.properties 파일 생성
+      - name: Create aws.properties
+        run: |
+          echo "${{ secrets.AWS_PROPERTIES }}" | tr ';' '\n' > ./src/main/resources/aws.properties
 
       # Gradle 빌드 (JAR 파일 생성)
       - name: Build with Gradle Wrapper
