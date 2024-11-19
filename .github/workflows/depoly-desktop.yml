@@ -12,6 +12,9 @@ env:
   SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}  # SSH 접속 비밀번호 (GitHub Secrets에서 설정)
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
   DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/withbee-dev  # Docker Hub 이미지 이름 변경
+  SPRING_DATASOURCE_USERNAME: root
+  SPRING_DATASOURCE_PASSWORD: 1234
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
 
 jobs:
   # 빌드, 테스트 및 Docker 이미지 빌드
@@ -27,7 +30,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd='mysqladmin ping --silent'
           --health-interval=5s
           --health-timeout=3s
           --health-retries=5
@@ -63,7 +66,7 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/withbee?serverTimezone=UTC&characterEncoding=UTF-8  # MySQL 연결 설정
+          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/withbee?serverTimezone=UTC&characterEncoding=UTF-8  # GitHub Actions에서는 MySQL 서비스로 연결
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: 1234
           SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
@@ -94,9 +97,9 @@ jobs:
       - name: Deploy to Local Ubuntu
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.LOCAL_UBUNTU_HOST }}  # 로컬 우분투 IP 주소로 변경
-          username: team05  # 로컬 우분투 사용자 이름으로 변경
-          password: ${{ secrets.SSH_PASSWORD }}  # SSH 비밀번호 사용 (GitHub Secrets에서 설정)
+          host: ${{ secrets.LOCAL_UBUNTU_HOST }}  # 로컬 우분투 IP 주소
+          username: team05  # 로컬 우분투 사용자 이름
+          password: ${{ secrets.SSH_PASSWORD }}  # SSH 비밀번호
           script: |
             # 로컬 우분투에서 기존 컨테이너가 있을 경우 제거
             CONTAINER_ID=$(sudo docker ps -q --filter "publish=80-8080")
@@ -107,7 +110,7 @@ jobs:
             fi
             
             # Docker Hub에서 새 이미지 pull
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest  # Docker Hub 이미지 이름 변경
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
             
             # 새로운 컨테이너로 실행 (MySQL 연결)
-            sudo docker run --name with-bee-dev -d -p 80:8080 -e TZ=Asia/Seoul -e SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/withbee-dev?serverTimezone=UTC&characterEncoding=UTF-8 -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=1234 ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest  # MySQL 연결 정보
+            sudo docker run --name with-bee-dev -d -p 80:8080 -e TZ=Asia/Seoul -e SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/withbee?serverTimezone=UTC&characterEncoding=UTF-8 -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=1234 ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest  # 로컬에서는 MySQL 주소를 localhost로 설정
