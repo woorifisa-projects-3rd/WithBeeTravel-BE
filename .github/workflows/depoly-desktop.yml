@@ -30,7 +30,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd='mysqladmin ping --silent'
+          --health-cmd='mysqladmin -u root -p"$MYSQL_ROOT_PASSWORD" ping --silent'
           --health-interval=5s
           --health-timeout=3s
           --health-retries=5
@@ -66,7 +66,8 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/withbee?serverTimezone=UTC&characterEncoding=UTF-8  # GitHub Actions에서는 MySQL 서비스로 연결
+          # GitHub Actions에서는 MySQL 서비스 'mysql'로 연결
+          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/withbee?serverTimezone=UTC&characterEncoding=UTF-8
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: 1234
           SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
