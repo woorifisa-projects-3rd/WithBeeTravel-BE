@@ -10,6 +10,7 @@ import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
 import withbeetravel.dto.request.account.AccountNumberRequest;
 import withbeetravel.dto.request.account.CreateAccountRequest;
+import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.request.account.AccountRequest;
 import withbeetravel.dto.response.account.AccountResponse;
@@ -60,7 +61,7 @@ public class AccountServiceImpl implements AccountService {
                 .accountNumber(accountNumber)
                 .balance(0)
                 .product(product)
-                .isConnectedWibeeCard(false)
+                .isConnectedWibeeCard(true)
                 .build();
 
         accountRepository.save(account);
@@ -190,6 +191,19 @@ public class AccountServiceImpl implements AccountService {
                 HttpStatus.OK.value(),
                 "찾은 계좌 주인 이름",
                 accountOwnerNameResponse
+        );
+    }
+
+    public SuccessResponse<AccountConnectedWibeeResponse> connectedWibee(Long accountId){
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+        AccountConnectedWibeeResponse accountConnectedWibeeResponse
+                = new AccountConnectedWibeeResponse(account.isConnectedWibeeCard());
+
+        return SuccessResponse.of(
+                HttpStatus.OK.value(),
+                "위비 카드 연결 여부 확인 완료",
+                accountConnectedWibeeResponse
         );
     }
 }

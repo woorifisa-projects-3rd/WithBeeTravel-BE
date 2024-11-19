@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.dto.request.account.*;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.account.HistoryResponse;
@@ -85,6 +86,12 @@ public class AccountController {
     public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(@RequestBody AccountNumberRequest accountNumberRequest) {
         return accountService.findUserNameByAccountNumber(accountNumberRequest.getAccountNumber());
 
+    }
+
+    @GetMapping("/{accountId}/check-wibee")
+    public SuccessResponse<AccountConnectedWibeeResponse> connectedWibee(
+            @PathVariable Long accountId){
+        return accountService.connectedWibee(accountId);
     }
 
 }
