@@ -44,7 +44,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     @Transactional(readOnly = true)
-    public SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId) {
+    public ShowSettlementDetailResponse getSettlementDetails(Long userId, Long travelId) {
         Long settlementRequestId = findSettlementRequestByTravelId(travelId).getId();
 
         Long myTravelMemberId = findMyTravelMemberByTravelIdAndUserId(travelId, userId).getId();
@@ -65,11 +65,11 @@ public class SettlementServiceImpl implements SettlementService {
                 ShowSettlementDetailResponse.of(myTotalPayments, myDetailPayments, others);
 
 
-        return SuccessResponse.of(HttpStatus.OK.value(), "세부 지출 내역 조회 성공", showSettlementDetailResponse);
+        return showSettlementDetailResponse;
     }
 
     @Override
-    public SuccessResponse<Void> requestSettlement(Long userId, Long travelId) {
+    public void requestSettlement(Long userId, Long travelId) {
         TravelMember travelMember = findMyTravelMemberByTravelIdAndUserId(travelId, userId);
         validateIsCaptain(travelMember);
 
@@ -98,12 +98,10 @@ public class SettlementServiceImpl implements SettlementService {
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
 
         saveSettlementRequestLog(travel, newSettlementRequest, LogTitle.SETTLEMENT_REQUEST);
-
-        return SuccessResponse.of(HttpStatus.OK.value(), "정산 요청 성공");
     }
 
     @Override
-    public SuccessResponse<Void> agreeSettlement(Long userId, Long travelId) {
+    public String agreeSettlement(Long userId, Long travelId) {
         // 해당 멤버가 여행 멤버인지 확인
         TravelMember selfTravelMember = findMyTravelMemberByTravelIdAndUserId(travelId, userId);
 
@@ -131,7 +129,7 @@ public class SettlementServiceImpl implements SettlementService {
         if (disagreeCount >= 2) {
             updateIsAgreedAndDisagreeCount(travelMemberSettlementHistory, settlementRequest);
 
-            return SuccessResponse.of(HttpStatus.OK.value(), "정산 동의 완료");
+            return "정산 동의 완료";
         } else if (disagreeCount == 1) {
 
             // 총 정산 금액(ownPaymentCost - actualBurdenCost) 값의 오름차순으로 travelMemberSettlementHistory 리스트 정렬
@@ -192,7 +190,7 @@ public class SettlementServiceImpl implements SettlementService {
                     saveSettlementRequestLog(travel, settlementRequest, LogTitle.SETTLEMENT_COMPLETE);
             settlementRequestLogRepository.save(settlementRequestLog);
 
-            return SuccessResponse.of(HttpStatus.OK.value(), "모든 여행 멤버의 정산 동의 완료 후 정산 완료");
+            return "모든 여행 멤버의 정산 동의 완료 후 정산 완료";
         }
 
         // 정산 미동의 인원수가 0인 경우 에러 처리

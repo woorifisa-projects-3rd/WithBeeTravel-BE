@@ -4,8 +4,8 @@ import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.settlement.ShowSettlementDetailResponse;
 
 public interface SettlementService {
-    SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId);
-    SuccessResponse<Void> requestSettlement(Long userId, Long travelId);
+    ShowSettlementDetailResponse getSettlementDetails(Long userId, Long travelId);
+    void requestSettlement(Long userId, Long travelId);
 
-    SuccessResponse<Void> agreeSettlement(Long userId, Long travelId);
+    String agreeSettlement(Long userId, Long travelId);
 }

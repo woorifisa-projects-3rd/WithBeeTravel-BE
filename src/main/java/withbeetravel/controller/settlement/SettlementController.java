@@ -1,6 +1,7 @@
 package withbeetravel.controller.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.response.SuccessResponse;
@@ -18,19 +19,22 @@ public class SettlementController {
     @GetMapping
     @CheckTravelAccess
     SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(@PathVariable Long travelId) {
-        return settlementService.getSettlementDetails(userId, travelId);
+        ShowSettlementDetailResponse showSettlementDetailResponse = settlementService.getSettlementDetails(userId, travelId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "세부 지출 내역 조회 성공", showSettlementDetailResponse);
     }
 
     @PostMapping
     @CheckTravelAccess
     SuccessResponse<Void> requestSettlement(@PathVariable Long travelId) {
-        return settlementService.requestSettlement(userId, travelId);
+        settlementService.requestSettlement(userId, travelId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "정산 요청 성공");
     }
 
     @PostMapping("/agreement")
     @CheckTravelAccess
     SuccessResponse<Void> agreeSettlement(@PathVariable Long travelId) {
 
-        return settlementService.agreeSettlement(userId, travelId);
+        String message = settlementService.agreeSettlement(userId, travelId);
+        return SuccessResponse.of(HttpStatus.OK.value(), message);
     }
 }
