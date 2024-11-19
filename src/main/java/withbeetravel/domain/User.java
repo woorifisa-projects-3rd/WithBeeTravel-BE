@@ -30,7 +30,7 @@ public class User {
     private String name;
 
     @Column(name = "profile_image", nullable = false)
-    private String profileImage;
+    private int profileImage;
 
     @Column(name = "has_wibee_card", nullable = false)
     private boolean hasWibeeCard;
@@ -41,7 +41,7 @@ public class User {
                 String password,
                 String pinNumber,
                 String name,
-                String profileImage,
+                int profileImage,
                 boolean hasWibeeCard) {
         this.id = id;
         this.email = email;
