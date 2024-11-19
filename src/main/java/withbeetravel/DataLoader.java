@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class DataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
@@ -50,6 +51,53 @@ public class DataLoader implements CommandLineRunner {
         userRepository.save(user2);
         userRepository.save(user3);
 
+        // Account 더미 데이터 생성
+        Account account1 = Account.builder()
+                .user(user1)
+                .accountNumber("1234-5678-9012")
+                .balance(1000000)
+                .product(Product.WON통장)
+                .isConnectedWibeeCard(true)
+                .build();
+
+        Account account2 = Account.builder()
+                .user(user1)
+                .accountNumber("2345-6789-0123")
+                .balance(2000000)
+                .product(Product.WON파킹통장)
+                .isConnectedWibeeCard(false)
+                .build();
+
+        Account account3 = Account.builder()
+                .user(user2)
+                .accountNumber("3456-7890-1234")
+                .balance(1500000)
+                .product(Product.보통예금)
+                .isConnectedWibeeCard(true)
+                .build();
+
+        Account account4 = Account.builder()
+                .user(user2)
+                .accountNumber("4567-8901-2345")
+                .balance(3000000)
+                .product(Product.으쓱통장)
+                .isConnectedWibeeCard(false)
+                .build();
+
+        Account account5 = Account.builder()
+                .user(user3)
+                .accountNumber("5678-9012-3456")
+                .balance(2500000)
+                .product(Product.우리아이행복통장)
+                .isConnectedWibeeCard(false)
+                .build();
+
+        accountRepository.save(account1);
+        accountRepository.save(account2);
+        accountRepository.save(account3);
+        accountRepository.save(account4);
+        accountRepository.save(account5);
+
         // Travel 더미 데이터 생성
         Travel travel1 = Travel.builder()
                 .travelName("Summer Vacation 2024")
@@ -77,31 +125,31 @@ public class DataLoader implements CommandLineRunner {
                 .travel(travel1)
                 .user(user1)
                 .isCaptain(true)
-                .connectedAccount("user1_account")
+                .connectedAccount(account1)
                 .build();
         TravelMember travelMember2 = TravelMember.builder()
                 .travel(travel1)
                 .user(user2)
                 .isCaptain(false)
-                .connectedAccount("user2_account")
+                .connectedAccount(account3)
                 .build();
         TravelMember travelMember3 = TravelMember.builder()
                 .travel(travel2)
                 .user(user1)
                 .isCaptain(false)
-                .connectedAccount("user1_account")
+                .connectedAccount(account1)
                 .build();
         TravelMember travelMember4 = TravelMember.builder()
                 .travel(travel2)
                 .user(user2)
                 .isCaptain(true)
-                .connectedAccount("user2_account")
+                .connectedAccount(account3)
                 .build();
         TravelMember travelMember5 = TravelMember.builder()
                 .travel(travel1)
                 .user(user3)
                 .isCaptain(false)
-                .connectedAccount("user3_account")
+                .connectedAccount(account5)
                 .build();
         travelMemberRepository.save(travelMember1);
         travelMemberRepository.save(travelMember2);
@@ -109,125 +157,74 @@ public class DataLoader implements CommandLineRunner {
         travelMemberRepository.save(travelMember4);
         travelMemberRepository.save(travelMember5);
 
-        // SharedPayment 더미 데이터 생성
-        SharedPayment payment1 = SharedPayment.builder()
-                .addedByMember(travelMember1)
-                .travel(travel1)
-                .currencyUnit(CurrencyUnit.USD)
-                .paymentAmount(100)
-                .foreignPaymentAmount(100.0)
-                .exchangeRate(1.0)
-                .paymentComment("Lunch")
-                .paymentImage("https://withbee-travel.s3.ap-northeast-2.amazonaws.com/shared-payments/1/32b52c1e-7a53-4e25-80cd-4a8b5eedb0e4_%EA%BE%B8%EB%B2%85.png")
-                .isManuallyAdded(true)
-                .participantCount(3)
-                .category(Category.FOOD)
-                .storeName("Seafood Restaurant")
-                .paymentDate(LocalDateTime.of(2024, 6, 2, 12, 0))
-                .build();
+        // SharedPayment와 PaymentParticipatedMembers 더미 데이터 30개 추가 생성
+        for (int i = 0; i < 30; i++) {
+            SharedPayment payment = SharedPayment.builder()
+                    .addedByMember(i % 3 == 0 ? travelMember1 :
+                            i % 3 == 1 ? travelMember2 : travelMember5)
+                    .travel(travel1)
+                    .currencyUnit(i % 3 == 0 ? CurrencyUnit.USD :
+                            i % 3 == 1 ? CurrencyUnit.KRW : CurrencyUnit.JPY)
+                    .paymentAmount(10000 + (i * 1000))
+                    .foreignPaymentAmount(100.0 + i)
+                    .exchangeRate(i % 3 == 0 ? 1.0 :
+                            i % 3 == 1 ? 1000.0 : 100.0)
+                    .paymentComment("Payment " + (i + 5))
+                    .paymentImage(i % 2 == 0 ?
+                            "https://withbee-travel.s3.ap-northeast-2.amazonaws.com/shared-payments/1/payment_" + (i + 5) + ".png"
+                            : null)
+                    .isManuallyAdded(i % 2 == 0)
+                    .participantCount(i % 3 + 1)  // 1~3명이 참여
+                    .category(i % 5 == 0 ? Category.FOOD :
+                            i % 5 == 1 ? Category.TRANSPORTATION :
+                                    i % 5 == 2 ? Category.ACCOMMODATION :
+                                            i % 5 == 3 ? Category.SHOPPING :
+                                                    Category.ACTIVITY)
+                    .storeName("Store " + (i + 5))
+                    .paymentDate(LocalDateTime.of(2024, 6,
+                            2 + (i % 5),  // 6월 2일~6일
+                            10 + (i % 14),  // 10시~23시
+                            0 + (i % 60),  // 0분~59분
+                            0))
+                    .build();
 
-        SharedPayment payment2 = SharedPayment.builder()
-                .addedByMember(travelMember2)
-                .travel(travel1)
-                .currencyUnit(CurrencyUnit.KRW)
-                .paymentAmount(50000)
-                .foreignPaymentAmount(50.0)
-                .exchangeRate(1000.0)
-                .paymentComment("Taxi fare")
-                .paymentImage(null)
-                .isManuallyAdded(false)
-                .participantCount(3)
-                .category(Category.TRANSPORTATION)
-                .storeName("Seoul Taxi Co.")
-                .paymentDate(LocalDateTime.of(2024, 6, 2, 14, 30))
-                .build();
+            SharedPayment savedPayment = sharedPaymentRepository.save(payment);
 
-        SharedPayment payment3 = SharedPayment.builder()
-                .addedByMember(travelMember3)
-                .travel(travel2)
-                .currencyUnit(CurrencyUnit.JPY)
-                .paymentAmount(2000)
-                .foreignPaymentAmount(20.0)
-                .exchangeRate(100.0)
-                .paymentComment("Dinner")
-                .paymentImage(null)
-                .isManuallyAdded(true)
-                .participantCount(2)
-                .category(Category.FOOD)
-                .storeName("Ramen Shop")
-                .paymentDate(LocalDateTime.of(2024, 12, 2, 19, 0))
-                .build();
-
-        SharedPayment payment4 = SharedPayment.builder()
-                .addedByMember(travelMember4)
-                .travel(travel2)
-                .currencyUnit(CurrencyUnit.USD)
-                .paymentAmount(150)
-                .foreignPaymentAmount(150.0)
-                .exchangeRate(1.0)
-                .paymentComment("Hotel booking")
-                .paymentImage(null)
-                .isManuallyAdded(false)
-                .participantCount(2)
-                .category(Category.ACCOMMODATION)
-                .storeName("Tokyo Hotel")
-                .paymentDate(LocalDateTime.of(2024, 12, 1, 15, 0))
-                .build();
-
-        sharedPaymentRepository.save(payment1);
-        sharedPaymentRepository.save(payment2);
-        sharedPaymentRepository.save(payment3);
-        sharedPaymentRepository.save(payment4);
-
-        // PaymentParticipatedMembers 더미 데이터 생성
-        // payment1의 참여자들 (travelMember1, travelMember2, travelMember5)
-        PaymentParticipatedMember paymentParticipatedMember1 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment1)
-                .travelMember(travelMember1)
-                .build();
-        PaymentParticipatedMember paymentParticipatedMember2 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment1)
-                .travelMember(travelMember2)
-                .build();
-        PaymentParticipatedMember paymentParticipatedMember3 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment1)
-                .travelMember(travelMember5)
-                .build();
-
-        // payment2의 참여자들 (travelMember1, travelMember5)
-        PaymentParticipatedMember paymentParticipatedMember4 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment2)
-                .travelMember(travelMember1)
-                .build();
-        PaymentParticipatedMember paymentParticipatedMember6 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment2)
-                .travelMember(travelMember5)
-                .build();
-
-        // payment3의 참여자들 (travelMember3, travelMember4)
-        PaymentParticipatedMember paymentParticipatedMember7 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment3)
-                .travelMember(travelMember3)
-                .build();
-        PaymentParticipatedMember paymentParticipatedMember8 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment3)
-                .travelMember(travelMember4)
-                .build();
-
-        // payment4의 참여자들 (travelMember4)
-        PaymentParticipatedMember paymentParticipatedMember10 = PaymentParticipatedMember.builder()
-                .sharedPayment(payment4)
-                .travelMember(travelMember4)
-                .build();
-
-        // PaymentParticipatedMember 저장
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember1);
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember2);
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember3);
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember4);
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember6);
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember7);
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember8);
-        paymentParticipatedMemberRepository.save(paymentParticipatedMember10);
+            // 결제 참여자 추가 (participantCount에 따라 1~3명)
+            if (i % 3 == 0) {  // 1명 참여
+                PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()
+                        .sharedPayment(savedPayment)
+                        .travelMember(travelMember1)
+                        .build();
+                paymentParticipatedMemberRepository.save(participant1);
+            } else if (i % 3 == 1) {  // 2명 참여
+                PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()
+                        .sharedPayment(savedPayment)
+                        .travelMember(travelMember1)
+                        .build();
+                PaymentParticipatedMember participant2 = PaymentParticipatedMember.builder()
+                        .sharedPayment(savedPayment)
+                        .travelMember(travelMember2)
+                        .build();
+                paymentParticipatedMemberRepository.save(participant1);
+                paymentParticipatedMemberRepository.save(participant2);
+            } else {  // 3명 참여
+                PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()
+                        .sharedPayment(savedPayment)
+                        .travelMember(travelMember1)
+                        .build();
+                PaymentParticipatedMember participant2 = PaymentParticipatedMember.builder()
+                        .sharedPayment(savedPayment)
+                        .travelMember(travelMember2)
+                        .build();
+                PaymentParticipatedMember participant3 = PaymentParticipatedMember.builder()
+                        .sharedPayment(savedPayment)
+                        .travelMember(travelMember5)
+                        .build();
+                paymentParticipatedMemberRepository.save(participant1);
+                paymentParticipatedMemberRepository.save(participant2);
+                paymentParticipatedMemberRepository.save(participant3);
+            }
+        }
     }
 }
