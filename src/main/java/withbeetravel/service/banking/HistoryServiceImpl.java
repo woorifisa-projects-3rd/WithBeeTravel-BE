@@ -47,6 +47,10 @@ public class HistoryServiceImpl implements HistoryService {
             }
         }
 
+        if(account.getBalance()< historyRequest.getPayAm()){
+            throw new CustomException(BankingErrorCode.INSUFFICIENT_FUNDS);
+        }
+
 
 
         History history = History.builder().
