@@ -32,8 +32,16 @@ public class TravelServiceImpl implements TravelService {
     private final AccountRepository accountRepository;
 
     @Override
-    public TravelResponseDto saveTravel(TravelRequestDto requestDto) {
+    public SuccessResponse<TravelResponseDto> saveTravel(TravelRequestDto requestDto) {
 
+        List<Account> accounts = accountRepository.findByUserId(userId);
+        boolean hasConnectedWibeeCard = accounts.stream()
+                .anyMatch(Account::isConnectedWibeeCard);
+
+        if(!hasConnectedWibeeCard){
+            throw new CustomException(TravelErrorCode.TRAVEL_CAPTAIN_NOT);
+        }
+        
         // 초대 코드 생성
         String inviteCode = UUID.randomUUID().toString();
 
@@ -70,7 +78,9 @@ public class TravelServiceImpl implements TravelService {
         }
 
         // ResponseDto 생성 및 반환
-        return TravelResponseDto.from( savedTravel, travelCountries != null ? travelCountries : List.of());
+        TravelResponseDto travelResponseDto = TravelResponseDto.from(savedTravel, travelCountries != null ? travelCountries : List.of());
+        
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponseDto);
     }
 
     @Override

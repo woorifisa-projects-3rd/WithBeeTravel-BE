@@ -24,9 +24,9 @@ public class TravelController { // new TravelController();
 
     // 여행 생성 요청 처리
     @PostMapping
-    public ResponseEntity<TravelResponseDto> saveTravel(@RequestBody TravelRequestDto request) {
-        TravelResponseDto response = travelService.saveTravel(request);
-        return ResponseEntity.ok(response);
+    public SuccessResponse<TravelResponseDto> saveTravel(@RequestBody TravelRequestDto request) {
+
+        return travelService.saveTravel(request);
     }
 
     @CheckTravelAccess
