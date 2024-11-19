@@ -18,6 +18,20 @@ jobs:
   build-test-and-docker:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 1234
+          MYSQL_DATABASE: withbee-dev
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd='mysqladmin ping --silent'
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -49,7 +63,7 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://192.168.0.39:3305/withbee-dev?serverTimezone=UTC&characterEncoding=UTF-8  # MySQL 연결 설정
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/withbee-dev?serverTimezone=UTC&characterEncoding=UTF-8  # MySQL 연결 설정
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: 1234
           SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
