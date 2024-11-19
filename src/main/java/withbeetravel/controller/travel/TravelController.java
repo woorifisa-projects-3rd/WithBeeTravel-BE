@@ -20,6 +20,8 @@ public class TravelController { // new TravelController();
 
     private final TravelService travelService; // new TravelService();
 
+    private final Long userId = 1L;
+
     // 여행 생성 요청 처리
     @PostMapping
     public ResponseEntity<TravelResponseDto> saveTravel(@RequestBody TravelRequestDto request) {
@@ -27,11 +29,11 @@ public class TravelController { // new TravelController();
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{travel-id}")
     @CheckTravelAccess
-    public SuccessResponse<TravelResponseDto> editTravel(@RequestBody TravelRequestDto request, @PathVariable("travel-id") Long travelId) {
-        travelService.editTravel(request, travelId);  // 여행 정보 수정
-        return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경"); // ResponseEntity로 메시지 반환
+    @PatchMapping("/{travelId}")
+    public SuccessResponse<Void> editTravel(@PathVariable Long travelId, @RequestBody TravelRequestDto request) {
+          // 여행 정보 수정
+        return travelService.editTravel(request, travelId); // ResponseEntity로 메시지 반환
     }
 
 

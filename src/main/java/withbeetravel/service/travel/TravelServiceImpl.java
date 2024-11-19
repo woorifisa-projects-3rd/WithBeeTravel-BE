@@ -1,16 +1,19 @@
 package withbeetravel.service.travel;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import withbeetravel.domain.Country;
-import withbeetravel.domain.Travel;
-import withbeetravel.domain.TravelCountry;
+import withbeetravel.domain.*;
 import withbeetravel.dto.request.travel.TravelRequestDto;
+import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.travel.TravelResponseDto;
-import withbeetravel.repository.travel.TravelCountryRepository;
-import withbeetravel.repository.travel.TravelRepository;
-import withbeetravel.domain.SettlementStatus;
+import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.TravelErrorCode;
+import withbeetravel.repository.AccountRepository;
+import withbeetravel.repository.TravelCountryRepository;
+import withbeetravel.repository.TravelMemberRepository;
+import withbeetravel.repository.TravelRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,11 +25,15 @@ import java.util.stream.Collectors;
 @Transactional
 public class TravelServiceImpl implements TravelService {
 
+    private final Long userId = 1L;
+
     private final TravelRepository travelRepository;
     private final TravelCountryRepository travelCountryRepository;
+    private final AccountRepository accountRepository;
 
     @Override
     public TravelResponseDto saveTravel(TravelRequestDto requestDto) {
+
         // 초대 코드 생성
         String inviteCode = UUID.randomUUID().toString();
 
@@ -67,7 +74,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Override
-    public TravelResponseDto editTravel(TravelRequestDto requestDto, Long travelId){
+    public SuccessResponse<Void> editTravel(TravelRequestDto requestDto, Long travelId){
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel not found with ID : " + travelId));
 
@@ -89,11 +96,11 @@ public class TravelServiceImpl implements TravelService {
             travelCountryRepository.saveAll(updatedTravelCountries);
         }
 
-        Travel updatedTravel = travelRepository.save(travel);
+         travelRepository.save(travel);
+//
+//        List<TravelCountry> travelCountries = travelCountryRepository.findByTravelId(updatedTravel.getId());
 
-        List<TravelCountry> travelCountries = travelCountryRepository.findByTravelId(updatedTravel.getId());
-
-        return TravelResponseDto.from(updatedTravel, travelCountries);
+        return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경");
     }
 
     // 나라 이름으로 Country enum 찾는 메서드
