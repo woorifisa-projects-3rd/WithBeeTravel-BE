@@ -39,8 +39,8 @@ public class SharedPaymentResponse {
     @Schema(description = "모든 멤버가 참여했는지 여부")
     private Boolean isAllMemberParticipated;
 
-    @Schema(description = "참여한 여행 멤버 ID 목록")
-    private List<Long> participatingMembers;
+    @Schema(description = "참여한 여행 멤버 프로필 이미지 목록")
+    private List<String> participatingMembers;
 
     @Schema(description = "수동 추가 여부")
     private Boolean isManuallyAdded;
@@ -52,9 +52,9 @@ public class SharedPaymentResponse {
         // Travel의 전체 멤버 수를 가져오는 로직
         int totalTravelMembers = sharedPayment.getTravel().getTravelMembers().size();
 
-        // 해당 지출에 참여한 멤버들의 ID를 가져오는 로직
-        List<Long> participatingMembers = sharedPayment.getPaymentParticipatedMembers().stream()
-                .map(member -> member.getTravelMember().getId())
+        // 해당 지출에 참여한 멤버들의 프로필 이미지를 가져오는 로직
+        List<String> participatingMembers = sharedPayment.getPaymentParticipatedMembers().stream()
+                .map(member -> member.getTravelMember().getUser().getProfileImage())
                 .collect(Collectors.toList());
 
         return SharedPaymentResponse.builder()
