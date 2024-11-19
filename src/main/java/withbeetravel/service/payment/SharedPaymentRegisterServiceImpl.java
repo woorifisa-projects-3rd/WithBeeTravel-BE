@@ -269,13 +269,9 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
 
     void validateHistoryDate(Travel travel, History history) {
 
-        System.out.println(travel.getTravelStartDate());
-        System.out.println(history.getDate().toLocalDate());
-        System.out.println(travel.getTravelEndDate());
-
         // 여행일 이전이나 이후에 발생한 결제 내역이면 검사 통과
-        if (travel.getTravelStartDate().isBefore(history.getDate().toLocalDate())
-                || travel.getTravelEndDate().isAfter(history.getDate().toLocalDate()))
+        if (travel.getTravelStartDate().isAfter(history.getDate().toLocalDate())
+                || travel.getTravelEndDate().isBefore(history.getDate().toLocalDate()))
             return;
 
         throw new CustomException(ValidationErrorCode.DATE_RANGE_ERROR);
