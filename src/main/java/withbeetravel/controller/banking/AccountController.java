@@ -28,7 +28,12 @@ public class AccountController {
 
     @GetMapping()
     public SuccessResponse<List<AccountResponse>> showAllAccount(){
-        return accountService.showAll(userId);
+
+        return SuccessResponse.of(
+                HttpStatus.OK.value(),
+                "전체 계좌 조회 완료",
+                accountService.showAll(userId)
+        );
     }
 
     @GetMapping("/{accountId}/info")

@@ -36,14 +36,10 @@ public class AccountServiceImpl implements AccountService {
     private final HistoryRepository historyRepository;
 
     // 계좌 조회
-    public SuccessResponse<List<AccountResponse>> showAll(Long userId) {
+    public List<AccountResponse> showAll(Long userId) {
         List<Account> accounts = accountRepository.findByUserId(userId);
         List<AccountResponse> accountResponses = accounts.stream().map(AccountResponse::from).collect(Collectors.toList());
-        return SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "전체 계좌 조회 완료",
-                accountResponses
-        );
+        return accountResponses;
     }
     
     // TODO: 회원 계좌만 조회 해야함

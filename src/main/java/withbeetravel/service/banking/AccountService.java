@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface AccountService {
 
-    SuccessResponse<List<AccountResponse>> showAll(Long userId);
+    List<AccountResponse> showAll(Long userId);
 
     SuccessResponse<AccountResponse> createAccount(Long userId, CreateAccountRequest CreateAccountRequest);
 
