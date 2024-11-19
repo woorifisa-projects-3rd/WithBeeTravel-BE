@@ -17,8 +17,10 @@ import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
+import withbeetravel.service.banking.AccountService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +37,10 @@ public class SettlementServiceImpl implements SettlementService {
     private final TravelRepository travelRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
     private final SettlementRequestLogRepository settlementRequestLogRepository;
+    private final AccountRepository accountRepository;
 
     private final SettlementPendingService settlementRequestLogService;
+    private final AccountService accountService;
 
     @Override
     @Transactional(readOnly = true)
@@ -161,17 +165,19 @@ public class SettlementServiceImpl implements SettlementService {
             // 나의 정산 동의 여부를 false -> true로 변경, disagreeCount에서 -1하기 (0으로 됨)
             updateIsAgreedAndDisagreeCount(travelMemberSettlementHistory, settlementRequest);
 
-            // 모든 그룹원들의 계좌 잔액 
             // totalPaymentCost가 0보다 작은 경우, 해당 멤버의 계좌에서 totalPaymentCost를 인출
             // totalPaymentCost가 0 이상일 경우, 해당 멤버의 계좌에 totalPaymentCost를 송금
-            // 여기서도 연결 계좌 유효한지 확인 필요할까?
+            Account managerAccount = accountRepository
+                    .findById(9999L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+
             for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
                 int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
                 Account connectedAccount = settlementHistory.getTravelMember().getConnectedAccount();
                 if (totalPaymentCost < 0) {
-                    connectedAccount.transfer(totalPaymentCost);
+                    accountService.transfer(connectedAccount.getId(),
+                            managerAccount.getAccountNumber(), -totalPaymentCost, "위비트래블 정산금 출금");
                 } else {
-                    connectedAccount.transfer(totalPaymentCost);
+                    accountService.deposit(connectedAccount.getId(), totalPaymentCost, "위비트래블 정산금 입금");
                 }
             }
 
@@ -179,7 +185,7 @@ public class SettlementServiceImpl implements SettlementService {
             travel.updateSettlementStatus(SettlementStatus.DONE);
 
             // 정산 종료일을 현재로 변경
-            travel.updateTravelEndDate(LocalDate.now());
+            settlementRequest.updateRequestEndDate(LocalDateTime.now());
 
             // 정산 완료 로그 생성
             SettlementRequestLog settlementRequestLog =
