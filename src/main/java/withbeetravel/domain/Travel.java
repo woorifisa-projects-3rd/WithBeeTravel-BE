@@ -68,6 +68,7 @@ public class Travel {
     }
 
 
+
     public void updateMainImage(String newMainImage) {
         this.mainImage = newMainImage;
     }

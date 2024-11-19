@@ -12,7 +12,6 @@ import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.TravelCountryRepository;
-import withbeetravel.repository.TravelMemberRepository;
 import withbeetravel.repository.TravelRepository;
 
 import java.time.LocalDate;
@@ -41,7 +40,7 @@ public class TravelServiceImpl implements TravelService {
         if(!hasConnectedWibeeCard){
             throw new CustomException(TravelErrorCode.TRAVEL_CAPTAIN_NOT);
         }
-        
+
         // 초대 코드 생성
         String inviteCode = UUID.randomUUID().toString();
 
@@ -79,7 +78,7 @@ public class TravelServiceImpl implements TravelService {
 
         // ResponseDto 생성 및 반환
         TravelResponseDto travelResponseDto = TravelResponseDto.from(savedTravel, travelCountries != null ? travelCountries : List.of());
-        
+
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponseDto);
     }
 
