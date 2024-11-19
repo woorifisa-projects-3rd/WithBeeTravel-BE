@@ -65,7 +65,7 @@ public class TravelServiceImpl implements TravelService {
             travelCountries = requestDto.getTravelCountries().stream()
                     .map(countryName -> {
                         // Country enum에 존재하는지 검증
-                        Country country = findCountryByName(countryName);
+                        Country country = Country.findByName(countryName);
                         return TravelCountry.builder()
                                 .country(country)
                                 .travel(savedTravel)
@@ -93,29 +93,22 @@ public class TravelServiceImpl implements TravelService {
                 LocalDate.parse(requestDto.getTravelEndDate()),
                 requestDto.isDomesticTravel());
 
-        if(!requestDto.isDomesticTravel()){
+        travelCountryRepository.deleteByTravel(travel);
 
-            travelCountryRepository.deleteByTravel(travel);
+        if(!requestDto.isDomesticTravel()){
 
             List<TravelCountry> updatedTravelCountries = requestDto.getTravelCountries().stream()
                     .map(countryName -> {
-                        Country country = findCountryByName(countryName);
+                        Country country = Country.findByName(countryName);
                         return  TravelCountry.builder().country(country).travel(travel).build();
                     }).toList();
 
             travelCountryRepository.saveAll(updatedTravelCountries);
         }
 
+
+
         return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경");
     }
 
-    // 나라 이름으로 Country enum 찾는 메서드
-    private Country findCountryByName(String countryName) {
-        String name = countryName.trim();
-
-        return List.of(Country.values()).stream()
-                .filter(country -> country.getCountryName().equals(name))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No enum constant for country name: " + countryName));
-    }
 }
