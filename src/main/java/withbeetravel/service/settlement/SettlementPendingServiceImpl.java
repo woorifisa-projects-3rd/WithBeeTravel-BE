@@ -31,6 +31,18 @@ public class SettlementPendingServiceImpl implements SettlementPendingService {
         settlementRequestLogRepository.save(settlementRequestLog);
 
         // 잔액 부족 멤버의 정산 동의를 true -> false로 변경
+        changeIsAgreedToFalse(insufficientBalanceMembers, settlementRequest);
+
+        // 자신의 isAgreed는 true로 변경 (영속성 컨텍스트에서 관리하지 않기 때문에 수동으로 save 필요)
+        travelMemberSettlementHistory.updateIsAgreed(true);
+        travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
+
+        // 정산 미동의 인원수 변경 (영속성 컨텍스트에서 관리하지 않기 때문에 수동으로 save 필요)
+        settlementRequest.updateDisagreeCount(insufficientBalanceMembers.size() - 1);
+        settlementRequestRepository.save(settlementRequest);
+    }
+
+    private void changeIsAgreedToFalse(List<TravelMember> insufficientBalanceMembers, SettlementRequest settlementRequest) {
         for (TravelMember insufficientBalanceMember : insufficientBalanceMembers) {
             TravelMemberSettlementHistory insufficientTravelMemberSettlementHistory =
                     travelMemberSettlementHistoryRepository
@@ -38,14 +50,5 @@ public class SettlementPendingServiceImpl implements SettlementPendingService {
                                     settlementRequest.getId(), insufficientBalanceMember.getId());
             insufficientTravelMemberSettlementHistory.updateIsAgreed(false);
         }
-
-        // 자신의 isAgreed는 true로 변경 (영속성 컨텍스트에서 관리하지 않기 때문에 수동으로 save 필요)
-        travelMemberSettlementHistory.updateIsAgreed(true);
-        travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
-
-        // 정산 미동의 인원수 변경 (영속성 컨텍스트에서 관리하지 않기 때문에 수동으로 save 필요)
-        System.out.println("insufficientBalanceMembers.size(): " + insufficientBalanceMembers.size());
-        settlementRequest.updateDisagreeCount(insufficientBalanceMembers.size() - 1);
-        settlementRequestRepository.save(settlementRequest);
     }
 }

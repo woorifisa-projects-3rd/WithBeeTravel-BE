@@ -18,6 +18,7 @@ import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,6 @@ public class SettlementServiceImpl implements SettlementService {
     private final TravelRepository travelRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
     private final SettlementRequestLogRepository settlementRequestLogRepository;
-    private final AccountRepository accountRepository;
 
     private final SettlementPendingService settlementRequestLogService;
 
@@ -93,7 +93,7 @@ public class SettlementServiceImpl implements SettlementService {
 
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
 
-        saveSettlementRequestLog(travel, newSettlementRequest);
+        saveSettlementRequestLog(travel, newSettlementRequest, LogTitle.SETTLEMENT_REQUEST);
 
         return SuccessResponse.of(HttpStatus.OK.value(), "정산 요청 성공");
     }
@@ -116,23 +116,18 @@ public class SettlementServiceImpl implements SettlementService {
         validateSettlementRequestAlreadyAgree(travelMemberSettlementHistory);
 
         // 나의 총 정산 금액이 마이너스인 경우, 잔액이 부족하지 않은 지 확인
-        // 연결 계좌가 유효한지 확인하는 로직 추가 필요할까?
         int myTotalPaymentCost =
                 travelMemberSettlementHistory.getOwnPaymentCost() - travelMemberSettlementHistory.getActualBurdenCost();
         Account myConnectedAccount = selfTravelMember.getConnectedAccount();
-        if (myTotalPaymentCost < 0) {
-            if (myConnectedAccount.getBalance() + myTotalPaymentCost < 0) {
-                throw new CustomException(BankingErrorCode.INSUFFICIENT_FUNDS);
-            }
-        }
+        validateMyBalanceIsEnough(myTotalPaymentCost, myConnectedAccount);
 
-        // disagree_count가 2 이상이면 isAgreed를 true로 변경, 1이면 정산 진행
+        // disagree_count가 2 이상이면 isAgreed를 true로 변경, 1이면 정산 진행, 0이면 에러 발생
         int disagreeCount = settlementRequest.getDisagreeCount();
-        if (disagreeCount >= 2) {
-            travelMemberSettlementHistory.updateIsAgreed(true);
-            settlementRequest.updateDisagreeCount(-1);
-            return SuccessResponse.of(HttpStatus.OK.value(), "정산 동의 완료");
 
+        if (disagreeCount >= 2) {
+            updateIsAgreedAndDisagreeCount(travelMemberSettlementHistory, settlementRequest);
+
+            return SuccessResponse.of(HttpStatus.OK.value(), "정산 동의 완료");
         } else if (disagreeCount == 1) {
 
             // 총 정산 금액(ownPaymentCost - actualBurdenCost) 값의 오름차순으로 travelMemberSettlementHistory 리스트 정렬
@@ -143,28 +138,14 @@ public class SettlementServiceImpl implements SettlementService {
             // 총 정산 금액이 마이너스인 사람만 잔액이 있는지 확인
             // insufficientBalanceMembers : 잔액이 부족한 여행멤버 리스트
             List<TravelMember> insufficientBalanceMembers = new ArrayList<>();
-            for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
-                int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
-
-                if (totalPaymentCost < 0) {
-                    TravelMember travelMember = settlementHistory.getTravelMember();
-                    Account connectedAccount = travelMember.getConnectedAccount();
-
-                    if (connectedAccount.getBalance() + totalPaymentCost < 0) {
-                        insufficientBalanceMembers.add(travelMember);
-                    }
-                }
-            }
+            validateOtherMembersBalance(travelMemberSettlementHistories, insufficientBalanceMembers);
 
             // insufficientBalancedMembers에 한 명이라도 있을 경우, 정산 보류
             if (!insufficientBalanceMembers.isEmpty()) {
+
                 // 정산 보류 로그 추가
-                SettlementRequestLog settlementRequestLog = SettlementRequestLog
-                        .builder()
-                        .logTitle(LogTitle.SETTLEMENT_PENDING)
-                        .logMessage(LogTitle.SETTLEMENT_PENDING.getMessage(travel.getTravelName()))
-                        .settlementRequest(settlementRequest)
-                        .build();
+                SettlementRequestLog settlementRequestLog =
+                        saveSettlementRequestLog(travel, settlementRequest, LogTitle.SETTLEMENT_PENDING);
 
                 // 롤백시 실행되도록 다른 서비스 클래스로 분리
                 settlementRequestLogService.handlePendingSettlementRequest(
@@ -178,8 +159,7 @@ public class SettlementServiceImpl implements SettlementService {
             }
 
             // 나의 정산 동의 여부를 false -> true로 변경, disagreeCount에서 -1하기 (0으로 됨)
-            travelMemberSettlementHistory.updateIsAgreed(true);
-            settlementRequest.updateDisagreeCount(-1);
+            updateIsAgreedAndDisagreeCount(travelMemberSettlementHistory, settlementRequest);
 
             // 모든 그룹원들의 계좌 잔액 
             // totalPaymentCost가 0보다 작은 경우, 해당 멤버의 계좌에서 totalPaymentCost를 인출
@@ -198,13 +178,12 @@ public class SettlementServiceImpl implements SettlementService {
             // 정산 여부를 DONE으로 변경
             travel.updateSettlementStatus(SettlementStatus.DONE);
 
+            // 정산 종료일을 현재로 변경
+            travel.updateTravelEndDate(LocalDate.now());
+
             // 정산 완료 로그 생성
-            SettlementRequestLog settlementRequestLog = SettlementRequestLog
-                    .builder()
-                    .logTitle(LogTitle.SETTLEMENT_COMPLETE)
-                    .logMessage(LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName()))
-                    .settlementRequest(settlementRequest)
-                    .build();
+            SettlementRequestLog settlementRequestLog =
+                    saveSettlementRequestLog(travel, settlementRequest, LogTitle.SETTLEMENT_COMPLETE);
             settlementRequestLogRepository.save(settlementRequestLog);
 
             return SuccessResponse.of(HttpStatus.OK.value(), "모든 여행 멤버의 정산 동의 완료 후 정산 완료");
@@ -213,6 +192,34 @@ public class SettlementServiceImpl implements SettlementService {
         // 정산 미동의 인원수가 0인 경우 에러 처리
         else {
             throw new CustomException(SettlementErrorCode.SETTLEMENT_DISAGREE_COUNT_NOT_CERTAIN);
+        }
+    }
+
+    private void updateIsAgreedAndDisagreeCount(TravelMemberSettlementHistory travelMemberSettlementHistory, SettlementRequest settlementRequest) {
+        travelMemberSettlementHistory.updateIsAgreed(true);
+        settlementRequest.updateDisagreeCount(-1);
+    }
+
+    private void validateOtherMembersBalance(List<TravelMemberSettlementHistory> travelMemberSettlementHistories, List<TravelMember> insufficientBalanceMembers) {
+        for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
+            int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
+
+            if (totalPaymentCost < 0) {
+                TravelMember travelMember = settlementHistory.getTravelMember();
+                Account connectedAccount = travelMember.getConnectedAccount();
+
+                if (connectedAccount.getBalance() + totalPaymentCost < 0) {
+                    insufficientBalanceMembers.add(travelMember);
+                }
+            }
+        }
+    }
+
+    private void validateMyBalanceIsEnough(int myTotalPaymentCost, Account myConnectedAccount) {
+        if (myTotalPaymentCost < 0) {
+            if (myConnectedAccount.getBalance() + myTotalPaymentCost < 0) {
+                throw new CustomException(BankingErrorCode.INSUFFICIENT_FUNDS);
+            }
         }
     }
 
@@ -229,13 +236,14 @@ public class SettlementServiceImpl implements SettlementService {
         }
     }
 
-    private void saveSettlementRequestLog(Travel travel, SettlementRequest newSettlementRequest) {
-
-        settlementRequestLogRepository.save(
+    private SettlementRequestLog saveSettlementRequestLog(Travel travel,
+                                                          SettlementRequest newSettlementRequest,
+                                                          LogTitle logTitle) {
+        return settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .settlementRequest(newSettlementRequest)
-                        .logTitle(LogTitle.SETTLEMENT_REQUEST)
-                        .logMessage(LogTitle.SETTLEMENT_REQUEST.getMessage(travel.getTravelName()))
+                        .logTitle(logTitle)
+                        .logMessage(logTitle.getMessage(travel.getTravelName()))
                         .build());
     }
 

@@ -67,4 +67,8 @@ public class Travel {
     public void updateSettlementStatus(SettlementStatus newSettlementStatus) {
         this.settlementStatus = newSettlementStatus;
     }
+
+    public void updateTravelEndDate(LocalDate date) {
+        this.travelEndDate = date;
+    }
 }
