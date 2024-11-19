@@ -13,7 +13,7 @@ import withbeetravel.service.settlement.SettlementService;
 public class SettlementController {
     private final SettlementService settlementService;
 
-    private final Long userId = 1L;
+    private final Long userId = 3L;
 
     @GetMapping
     @CheckTravelAccess
@@ -25,5 +25,12 @@ public class SettlementController {
     @CheckTravelAccess
     SuccessResponse<Void> requestSettlement(@PathVariable Long travelId) {
         return settlementService.requestSettlement(userId, travelId);
+    }
+
+    @PostMapping("/agreement")
+    @CheckTravelAccess
+    SuccessResponse<Void> agreeSettlement(@PathVariable Long travelId) {
+
+        return settlementService.agreeSettlement(userId, travelId);
     }
 }

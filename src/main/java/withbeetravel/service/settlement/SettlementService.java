@@ -7,4 +7,5 @@ public interface SettlementService {
     SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(Long userId, Long travelId);
     SuccessResponse<Void> requestSettlement(Long userId, Long travelId);
 
+    SuccessResponse<Void> agreeSettlement(Long userId, Long travelId);
 }
