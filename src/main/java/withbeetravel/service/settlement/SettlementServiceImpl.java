@@ -73,10 +73,18 @@ public class SettlementServiceImpl implements SettlementService {
         TravelMember travelMember = findMyTravelMemberByTravelIdAndUserId(travelId, userId);
         validateIsCaptain(travelMember);
 
+        // 여행 멤버 인원수 카운트
         int totalMemberCount = travelMemberRepository.findAllByTravelId(travelId).size();
+
         Travel travel = findTravelById(travelId);
+
+        // 진행 중인 정산 요청이 있을 경우 에러 처리
+        validateSettlementStatusIsNotOngoing(travel);
+
+        // 정산 요청 생성
         SettlementRequest newSettlementRequest = createSettlementRequest(travel, totalMemberCount);
 
+        // 여행멤버정산내역 생ㅅ어
         for (TravelMember member : travelMemberRepository.findAllByTravelId(travelId)) {
             Long travelMemberId = member.getId();
 
@@ -95,9 +103,17 @@ public class SettlementServiceImpl implements SettlementService {
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
         }
 
+        // 정산 여부를 ONGOING으로 변경
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
 
+        // 정산 요청 저장
         saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_REQUEST);
+    }
+
+    private void validateSettlementStatusIsNotOngoing(Travel travel) {
+        if (travel.getSettlementStatus().equals(SettlementStatus.ONGOING)) {
+            throw new CustomException(SettlementErrorCode.SETTLEMENT_ONGOING_ALREADY_EXISTS);
+        }
     }
 
     @Override
