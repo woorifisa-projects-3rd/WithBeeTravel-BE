@@ -6,7 +6,7 @@ import withbeetravel.dto.response.travel.TravelResponseDto;
 
 public interface
 TravelService {
-    SuccessResponse<TravelResponseDto> saveTravel( TravelRequestDto request);
+    TravelResponseDto saveTravel( TravelRequestDto request);
 
-    SuccessResponse<Void> editTravel(TravelRequestDto request, Long travelId);
+    void editTravel(TravelRequestDto request, Long travelId);
 }

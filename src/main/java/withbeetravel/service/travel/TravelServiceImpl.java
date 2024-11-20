@@ -31,7 +31,7 @@ public class TravelServiceImpl implements TravelService {
     private final AccountRepository accountRepository;
 
     @Override
-    public SuccessResponse<TravelResponseDto> saveTravel(TravelRequestDto requestDto) {
+    public TravelResponseDto saveTravel(TravelRequestDto requestDto) {
 
         List<Account> accounts = accountRepository.findByUserId(userId);
         boolean hasConnectedWibeeCard = accounts.stream()
@@ -80,11 +80,11 @@ public class TravelServiceImpl implements TravelService {
         // ResponseDto 생성 및 반환
         TravelResponseDto travelResponseDto = TravelResponseDto.from(savedTravel, travelCountries);
 
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponseDto);
+        return travelResponseDto;
     }
 
     @Override
-    public SuccessResponse<Void> editTravel(TravelRequestDto requestDto, Long travelId){
+    public void editTravel(TravelRequestDto requestDto, Long travelId){
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel not found with ID : " + travelId));
 
@@ -105,10 +105,6 @@ public class TravelServiceImpl implements TravelService {
 
             travelCountryRepository.saveAll(updatedTravelCountries);
         }
-
-
-
-        return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경");
     }
 
 }
