@@ -1,14 +1,12 @@
 package withbeetravel.service.travel;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
-import withbeetravel.dto.request.travel.InviteCodeRequestDto;
+import withbeetravel.dto.request.travel.InviteCodeSignUpRequestDto;
 import withbeetravel.dto.request.travel.TravelRequestDto;
-import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.dto.response.travel.InviteCodeResponseDto;
+import withbeetravel.dto.response.travel.InviteCodeSignUpResponseDto;
 import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
@@ -112,7 +110,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Override
-    public InviteCodeResponseDto signUpTravel(InviteCodeRequestDto requestDto){
+    public InviteCodeSignUpResponseDto signUpTravel(InviteCodeSignUpRequestDto requestDto){
         String inviteCode = requestDto.getInviteCode();
 
         Travel travel = travelRepository.findByInviteCode(inviteCode).
@@ -131,7 +129,7 @@ public class TravelServiceImpl implements TravelService {
                 .isCaptain(false)       // 초대한 사람은 Captain이 아님
                 .build();
 
-        return InviteCodeResponseDto.builder()
+        return InviteCodeSignUpResponseDto.builder()
                 .travelId(travelId)
                 .build();
 

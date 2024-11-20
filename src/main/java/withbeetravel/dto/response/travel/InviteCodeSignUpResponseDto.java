@@ -4,15 +4,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
-public class InviteCodeResponseDto {
+public class InviteCodeSignUpResponseDto {
     private Long travelId;
 
     @Builder
-    public InviteCodeResponseDto(Long travelId) {
+    public InviteCodeSignUpResponseDto(Long travelId) {
         this.travelId = travelId;
     }
 }

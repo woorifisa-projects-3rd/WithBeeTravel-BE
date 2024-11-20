@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
-import withbeetravel.dto.request.travel.InviteCodeRequestDto;
+import withbeetravel.dto.request.travel.InviteCodeSignUpRequestDto;
 import withbeetravel.dto.request.travel.TravelRequestDto;
 import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.dto.response.travel.InviteCodeResponseDto;
+import withbeetravel.dto.response.travel.InviteCodeSignUpResponseDto;
 import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.service.travel.TravelService;
 
@@ -33,12 +33,13 @@ public class TravelController {
     }
 
     @PostMapping("/{travelId}/invite-code")
-    public SuccessResponse<InviteCodeResponseDto> signUpTravel( @RequestBody InviteCodeRequestDto request){
-
-        InviteCodeResponseDto inviteCodeResponseDto = travelService.signUpTravel(request);
+    public SuccessResponse<InviteCodeSignUpResponseDto> signUpTravel(@RequestBody InviteCodeSignUpRequestDto request){
+        InviteCodeSignUpResponseDto inviteCodeResponseDto = travelService.signUpTravel(request);
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 가입 성공", inviteCodeResponseDto);
-
     }
+
+    @GetMapping("/{travelId}/invite-code")
+    public  SuccessResponse<>
 
 
 }
