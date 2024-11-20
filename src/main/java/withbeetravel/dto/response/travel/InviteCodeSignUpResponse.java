@@ -6,11 +6,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class InviteCodeSignUpResponseDto {
+public class InviteCodeSignUpResponse {
     private Long travelId;
 
     @Builder
-    public InviteCodeSignUpResponseDto(Long travelId) {
+    public InviteCodeSignUpResponse(Long travelId) {
         this.travelId = travelId;
     }
 }

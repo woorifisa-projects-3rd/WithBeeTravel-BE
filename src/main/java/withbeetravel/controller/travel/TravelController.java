@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
-import withbeetravel.dto.request.travel.InviteCodeSignUpRequestDto;
-import withbeetravel.dto.request.travel.TravelRequestDto;
+import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
+import withbeetravel.dto.request.travel.TravelRequest;
 import withbeetravel.dto.response.SuccessResponse;
-import withbeetravel.dto.response.travel.InviteCodeSignUpResponseDto;
-import withbeetravel.dto.response.travel.TravelResponseDto;
+import withbeetravel.dto.response.travel.InviteCodeGetResponse;
+import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
+import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.service.travel.TravelService;
 
 @RequiredArgsConstructor
@@ -19,27 +20,31 @@ public class TravelController {
     private final TravelService travelService;
 
     @PostMapping
-    public SuccessResponse<TravelResponseDto> saveTravel(@RequestBody TravelRequestDto request) {
-        TravelResponseDto travelResponseDto = travelService.saveTravel(request);
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponseDto);
+    public SuccessResponse<TravelResponse> saveTravel(@RequestBody TravelRequest request) {
+        TravelResponse travelResponse = travelService.saveTravel(request);
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponse);
     }
 
     @CheckTravelAccess
     @PatchMapping("/{travelId}")
-    public SuccessResponse<Void> editTravel(@PathVariable Long travelId, @RequestBody TravelRequestDto request) {
+    public SuccessResponse<Void> editTravel(@PathVariable Long travelId, @RequestBody TravelRequest request) {
         // 여행 정보 수정
         travelService.editTravel(request, travelId);
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공");
     }
 
     @PostMapping("/{travelId}/invite-code")
-    public SuccessResponse<InviteCodeSignUpResponseDto> signUpTravel(@RequestBody InviteCodeSignUpRequestDto request){
-        InviteCodeSignUpResponseDto inviteCodeResponseDto = travelService.signUpTravel(request);
+    public SuccessResponse<InviteCodeSignUpResponse> signUpTravel(@RequestBody InviteCodeSignUpRequest request){
+        InviteCodeSignUpResponse inviteCodeResponseDto = travelService.signUpTravel(request);
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 가입 성공", inviteCodeResponseDto);
     }
 
     @GetMapping("/{travelId}/invite-code")
-    public  SuccessResponse<>
+    @CheckTravelAccess
+    public SuccessResponse<InviteCodeGetResponse> getInviteCode(@PathVariable Long travelId){
+        InviteCodeGetResponse inviteCodeGetReponse = travelService.getInviteCode(travelId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "초대 코드 조회 성공", inviteCodeGetReponse);
+    }
 
 
 }
