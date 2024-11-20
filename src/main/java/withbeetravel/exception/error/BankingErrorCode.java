@@ -15,6 +15,9 @@ public class BankingErrorCode extends ErrorCode{
     public static final BankingErrorCode TRANSFER_LIMIT_EXCEEDED
             = new BankingErrorCode(HttpStatus.BAD_REQUEST,"TRANSFER_LIMIT_EXCEEDED","BANKING-003","하루 이체 한도 초과");
 
+    public static final BankingErrorCode INSUFFICIENT_MANAGER_ACCOUNT_BALANCE
+            = new BankingErrorCode(HttpStatus.BAD_REQUEST,"INSUFFICIENT_MANAGER_ACCOUNT_BALANCE","BANKING-008","관리자 계좌의 잔액 부족");
+
 
 
     public BankingErrorCode(HttpStatus status,

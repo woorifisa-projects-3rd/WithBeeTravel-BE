@@ -184,19 +184,14 @@ public class SettlementServiceImpl implements SettlementService {
             Account managerAccount = accountRepository
                     .findById(9999L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
-            int additionalValue = 0;
-            for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
-                int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
-                Account connectedAccount = settlementHistory.getTravelMember().getConnectedAccount();
-                if (totalPaymentCost < 0) {
-                    accountService.transfer(connectedAccount.getId(),
-                            managerAccount.getAccountNumber(), -totalPaymentCost, "위비트래블 정산금 출금");
-                    additionalValue += totalPaymentCost;
-                } else {
-                    accountService.deposit(connectedAccount.getId(), totalPaymentCost, "위비트래블 정산금 입금");
-                    additionalValue += totalPaymentCost;
-                }
-            }
+            // 총 정산 금액의 합산 계산
+            int totalPaymentCostSum = getTotalPaymentCostSum(travelMemberSettlementHistories);
+
+            // 위비트래블 계좌(관리자 계좌)의 잔액 부족 확인
+            validateManagerBalance(managerAccount, totalPaymentCostSum);
+
+            // 정산 처리
+            processSettlement(travelMemberSettlementHistories, managerAccount, travel);
 
             // 정산 여부를 DONE으로 변경
             travel.updateSettlementStatus(SettlementStatus.DONE);
@@ -206,7 +201,7 @@ public class SettlementServiceImpl implements SettlementService {
 
             // 정산 완료 로그 생성
             SettlementRequestLog settlementRequestLog =
-                    saveCompleteSettlementRequestLog(travel, additionalValue);
+                    saveCompleteSettlementRequestLog(travel, totalPaymentCostSum);
             settlementRequestLogRepository.save(settlementRequestLog);
 
             return "모든 여행 멤버의 정산 동의 완료 후 정산 완료";
@@ -215,6 +210,35 @@ public class SettlementServiceImpl implements SettlementService {
         // 정산 미동의 인원수가 0인 경우 에러 처리
         else {
             throw new CustomException(SettlementErrorCode.SETTLEMENT_DISAGREE_COUNT_NOT_CERTAIN);
+        }
+    }
+
+    private void processSettlement(List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Account managerAccount, Travel travel) {
+        for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
+            int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
+            Account connectedAccount = settlementHistory.getTravelMember().getConnectedAccount();
+            if (totalPaymentCost < 0) {
+                accountService.transfer(connectedAccount.getId(),
+                        managerAccount.getAccountNumber(), -totalPaymentCost, "위비트래블 정산금 출금");
+            } else {
+                // 관리자 계좌의 송금 메시지를 "{여행명}의 정산금 출금"으로 표시
+                accountService.transfer(managerAccount.getId(),
+                        connectedAccount.getAccountNumber(), totalPaymentCost, travel.getTravelName() + "의 정산금 출금");
+            }
+        }
+    }
+
+    private int getTotalPaymentCostSum(List<TravelMemberSettlementHistory> travelMemberSettlementHistories) {
+        int totalPaymentCostSum = 0;
+        for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
+            totalPaymentCostSum += settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
+        }
+        return totalPaymentCostSum;
+    }
+
+    private void validateManagerBalance(Account managerAccount, int totalPaymentCostSum) {
+        if (managerAccount.getBalance() < totalPaymentCostSum) {
+            throw new CustomException(BankingErrorCode.INSUFFICIENT_MANAGER_ACCOUNT_BALANCE);
         }
     }
 
