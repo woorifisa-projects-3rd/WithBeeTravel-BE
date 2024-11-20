@@ -28,6 +28,7 @@ public class SharedPaymentController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
     ) {
-        return sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, userId, startDate, endDate);
+        Page<SharedPaymentResponse> sharedPaymentAll = sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, userId, startDate, endDate);
+        return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", sharedPaymentAll);
     }
 }

@@ -27,7 +27,7 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(Long travelId,
+    public Page<SharedPaymentResponse> getSharedPaymentAll(Long travelId,
                                                                             int page,
                                                                             String sortBy,
                                                                             Long userId,
@@ -63,9 +63,6 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
             throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);
         }
 
-        // Response DTO 변환
-        Page<SharedPaymentResponse> responseDtos = SharedPaymentResponse.from(sharedPayments);
-
-        return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", responseDtos);
+        return SharedPaymentResponse.from(sharedPayments);
     }
 }
