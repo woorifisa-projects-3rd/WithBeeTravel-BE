@@ -17,6 +17,9 @@ import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelMemberRepository;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +33,7 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
     public Page<SharedPaymentResponse> getSharedPaymentAll(Long travelId,
                                                                             int page,
                                                                             String sortBy,
-                                                                            Long userId,
+                                                                            Long memberId,
                                                                             LocalDate startDate,
                                                                             LocalDate endDate) {
         // 정렬 타입 검증
@@ -44,8 +47,8 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
         }
 
         // 멤버 ID가 제공된 경우, 해당 멤버가 이 여행의 멤버인지 확인
-        if (userId != null) {
-            boolean isMemberOfTravel = travelMemberRepository.existsByTravelIdAndId(travelId, userId);
+        if (memberId != null) {
+            boolean isMemberOfTravel = travelMemberRepository.existsByTravelIdAndId(travelId, memberId);
             if (!isMemberOfTravel) {
                 throw new CustomException(PaymentErrorCode.NON_TRAVEL_MEMBER_INCLUDED);
             }
@@ -57,12 +60,23 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
 
         // 해당 여행의 공동 결제 내역 페이지 조회
         Page<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelIdAndMemberIdAndDateRange(
-                travelId, userId, startDate, endDate, pageable);
+                travelId, memberId, startDate, endDate, pageable);
 
         if (sharedPayments.isEmpty()) {
             throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);
         }
 
-        return SharedPaymentResponse.from(sharedPayments);
+        int totalTravelMembers = sharedPayments.getContent().get(0).getTravel().getTravelMembers().size();
+        // 각 SharedPayment의 참여 멤버 Map 생성
+        Map<Long, List<String>> participatingMembersMap = sharedPayments.getContent().stream()
+                .collect(Collectors.toMap(
+                        SharedPayment::getId,
+                        payment -> payment.getPaymentParticipatedMembers()
+                                .stream()
+                                .map(member -> member.getTravelMember().getUser().getProfileImage())
+                                .toList()
+                ));
+
+        return SharedPaymentResponse.of(sharedPayments, totalTravelMembers, participatingMembersMap);
     }
 }

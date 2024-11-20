@@ -8,7 +8,7 @@ import withbeetravel.domain.SharedPayment;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Data
 @Builder
@@ -48,32 +48,25 @@ public class SharedPaymentResponse {
     @Schema(description = "결제 일시")
     private LocalDateTime paymentDate;
 
-    public static SharedPaymentResponse from(SharedPayment sharedPayment) {
-        // Travel의 전체 멤버 수를 가져오는 로직
-        int totalTravelMembers = sharedPayment.getTravel().getTravelMembers().size();
-
-        // 해당 지출에 참여한 멤버들의 프로필 이미지를 가져오는 로직
-        List<String> participatingMembers = sharedPayment.getPaymentParticipatedMembers().stream()
-                .map(member -> member.getTravelMember().getUser().getProfileImage())
-                .collect(Collectors.toList());
-
-        return SharedPaymentResponse.builder()
-                .sharedPaymentId(sharedPayment.getId())
-                .adderProfileIcon(sharedPayment.getAddedByMember().getUser().getProfileImage())
-                .paymentAmount(sharedPayment.getPaymentAmount())
-                .foreignPaymentAmount(sharedPayment.getForeignPaymentAmount())
-                .exchangeRate(sharedPayment.getExchangeRate())
-                .unit(sharedPayment.getCurrencyUnit().name())
-                .storeName(sharedPayment.getStoreName())
-                .isAllMemberParticipated(sharedPayment.getPaymentParticipatedMembers().size() == totalTravelMembers)
-                .participatingMembers(participatingMembers)
-                .isManuallyAdded(sharedPayment.isManuallyAdded())
-                .paymentDate(sharedPayment.getPaymentDate())
-                .build();
-    }
-
-    // Page<SharedPayment>를 Page<SharedPaymentResponse>로 변환
-    public static Page<SharedPaymentResponse> from(Page<SharedPayment> sharedPayments) {
-        return sharedPayments.map(SharedPaymentResponse::from);
+    public static Page<SharedPaymentResponse> of(
+            Page<SharedPayment> sharedPayments,
+            int totalTravelMembers,
+            Map<Long, List<String>> participatingMembersMap
+    ) {
+        return sharedPayments.map(payment ->
+                SharedPaymentResponse.builder()
+                        .sharedPaymentId(payment.getId())
+                        .adderProfileIcon(payment.getAddedByMember().getUser().getProfileImage())
+                        .paymentAmount(payment.getPaymentAmount())
+                        .foreignPaymentAmount(payment.getForeignPaymentAmount())
+                        .exchangeRate(payment.getExchangeRate())
+                        .unit(payment.getCurrencyUnit().name())
+                        .storeName(payment.getStoreName())
+                        .isAllMemberParticipated(payment.getPaymentParticipatedMembers().size() == totalTravelMembers)
+                        .participatingMembers(participatingMembersMap.get(payment.getId()))
+                        .isManuallyAdded(payment.isManuallyAdded())
+                        .paymentDate(payment.getPaymentDate())
+                        .build()
+        );
     }
 }
