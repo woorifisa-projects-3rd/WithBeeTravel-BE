@@ -1,17 +1,18 @@
 package withbeetravel.service.travel;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
+import withbeetravel.dto.request.travel.InviteCodeSignUpRequestDto;
 import withbeetravel.dto.request.travel.TravelRequestDto;
-import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.travel.InviteCodeSignUpResponseDto;
 import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.TravelCountryRepository;
+import withbeetravel.repository.TravelMemberRepository;
 import withbeetravel.repository.TravelRepository;
 
 import java.time.LocalDate;
@@ -29,9 +30,10 @@ public class TravelServiceImpl implements TravelService {
     private final TravelRepository travelRepository;
     private final TravelCountryRepository travelCountryRepository;
     private final AccountRepository accountRepository;
+    private final TravelMemberRepository travelMemberRepository;
 
     @Override
-    public SuccessResponse<TravelResponseDto> saveTravel(TravelRequestDto requestDto) {
+    public TravelResponseDto saveTravel(TravelRequestDto requestDto) {
 
         List<Account> accounts = accountRepository.findByUserId(userId);
         boolean hasConnectedWibeeCard = accounts.stream()
@@ -80,11 +82,11 @@ public class TravelServiceImpl implements TravelService {
         // ResponseDto 생성 및 반환
         TravelResponseDto travelResponseDto = TravelResponseDto.from(savedTravel, travelCountries);
 
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponseDto);
+        return travelResponseDto;
     }
 
     @Override
-    public SuccessResponse<Void> editTravel(TravelRequestDto requestDto, Long travelId){
+    public void editTravel(TravelRequestDto requestDto, Long travelId){
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel not found with ID : " + travelId));
 
@@ -105,10 +107,32 @@ public class TravelServiceImpl implements TravelService {
 
             travelCountryRepository.saveAll(updatedTravelCountries);
         }
+    }
+
+    @Override
+    public InviteCodeSignUpResponseDto signUpTravel(InviteCodeSignUpRequestDto requestDto){
+        String inviteCode = requestDto.getInviteCode();
+
+        Travel travel = travelRepository.findByInviteCode(inviteCode).
+                orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_INVITECODE_NOT));
+
+        Long travelId = travel.getId();
+        int curMemberCount = travelMemberRepository.countByTravelId(travelId);
 
 
+        if(curMemberCount >= 10){
+            throw new CustomException(TravelErrorCode.TRAVEL_MEMBER_LIMIT);
+        }
 
-        return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경");
+        TravelMember newMember = TravelMember.builder()
+                .travel(travel)
+                .isCaptain(false)       // 초대한 사람은 Captain이 아님
+                .build();
+
+        return InviteCodeSignUpResponseDto.builder()
+                .travelId(travelId)
+                .build();
+
     }
 
 }
