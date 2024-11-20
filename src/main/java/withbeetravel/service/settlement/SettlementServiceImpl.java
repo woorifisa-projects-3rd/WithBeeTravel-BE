@@ -97,7 +97,7 @@ public class SettlementServiceImpl implements SettlementService {
 
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
 
-        saveSettlementRequestLog(travel, newSettlementRequest, LogTitle.SETTLEMENT_REQUEST);
+        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_REQUEST);
     }
 
     @Override
@@ -147,7 +147,7 @@ public class SettlementServiceImpl implements SettlementService {
 
                 // 정산 보류 로그 추가
                 SettlementRequestLog settlementRequestLog =
-                        saveSettlementRequestLog(travel, settlementRequest, LogTitle.SETTLEMENT_PENDING);
+                        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_PENDING);
 
                 // 롤백시 실행되도록 다른 서비스 클래스로 분리
                 settlementRequestLogService.handlePendingSettlementRequest(
@@ -168,14 +168,17 @@ public class SettlementServiceImpl implements SettlementService {
             Account managerAccount = accountRepository
                     .findById(9999L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
+            int additionalValue = 0;
             for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
                 int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
                 Account connectedAccount = settlementHistory.getTravelMember().getConnectedAccount();
                 if (totalPaymentCost < 0) {
                     accountService.transfer(connectedAccount.getId(),
                             managerAccount.getAccountNumber(), -totalPaymentCost, "위비트래블 정산금 출금");
+                    additionalValue += totalPaymentCost;
                 } else {
                     accountService.deposit(connectedAccount.getId(), totalPaymentCost, "위비트래블 정산금 입금");
+                    additionalValue += totalPaymentCost;
                 }
             }
 
@@ -187,7 +190,7 @@ public class SettlementServiceImpl implements SettlementService {
 
             // 정산 완료 로그 생성
             SettlementRequestLog settlementRequestLog =
-                    saveSettlementRequestLog(travel, settlementRequest, LogTitle.SETTLEMENT_COMPLETE);
+                    saveCompleteSettlementRequestLog(travel, additionalValue);
             settlementRequestLogRepository.save(settlementRequestLog);
 
             return "모든 여행 멤버의 정산 동의 완료 후 정산 완료";
@@ -241,13 +244,21 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     private SettlementRequestLog saveSettlementRequestLog(Travel travel,
-                                                          SettlementRequest newSettlementRequest,
                                                           LogTitle logTitle) {
         return settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
-                        .settlementRequest(newSettlementRequest)
+                        .travel(travel)
                         .logTitle(logTitle)
                         .logMessage(logTitle.getMessage(travel.getTravelName()))
+                        .build());
+    }
+
+    private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, int additionalValue) {
+        return settlementRequestLogRepository.save(
+                SettlementRequestLog.builder()
+                        .travel(travel)
+                        .logTitle(LogTitle.SETTLEMENT_COMPLETE)
+                        .logMessage( LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName(), additionalValue))
                         .build());
     }
 
