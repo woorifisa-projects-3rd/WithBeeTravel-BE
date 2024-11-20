@@ -84,7 +84,7 @@ public class SettlementServiceImpl implements SettlementService {
         // 정산 요청 생성
         SettlementRequest newSettlementRequest = createSettlementRequest(travel, totalMemberCount);
 
-        // 여행멤버정산내역 생ㅅ어
+        // 여행멤버정산내역 생성
         for (TravelMember member : travelMemberRepository.findAllByTravelId(travelId)) {
             Long travelMemberId = member.getId();
 
@@ -216,6 +216,29 @@ public class SettlementServiceImpl implements SettlementService {
         else {
             throw new CustomException(SettlementErrorCode.SETTLEMENT_DISAGREE_COUNT_NOT_CERTAIN);
         }
+    }
+
+    @Override
+    public void cancelSettlement(Long userId, Long travelId) {
+
+        // 정산 요청이 있는지 확인
+        SettlementRequest settlementRequest = findSettlementRequestByTravelId(travelId);
+
+        // 진행 중인 정산인지 확인
+        Travel travel = findTravelById(travelId);
+        validateSettlementRequestOngoing(travel);
+
+        // 멤버들의 정산 내역을 먼저 삭제
+        travelMemberSettlementHistoryRepository.deleteAllBySettlementRequestId(settlementRequest.getId());
+
+        // 정산 요청 삭제
+        settlementRequestRepository.deleteById(settlementRequest.getId());
+
+        // 정산 여부를 ONGOING -> PENDING으로 변경
+        travel.updateSettlementStatus(SettlementStatus.PENDING);
+
+        // 정산 취소 로그 저장
+        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_CANCEL);
     }
 
     private void updateIsAgreedAndDisagreeCount(TravelMemberSettlementHistory travelMemberSettlementHistory, SettlementRequest settlementRequest) {
