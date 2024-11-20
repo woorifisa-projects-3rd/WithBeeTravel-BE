@@ -60,6 +60,15 @@ public class Travel {
         this.settlementStatus = settlementStatus;
     }
 
+    public void updateTravel(String travelName, LocalDate travelStartDate, LocalDate travelEndDate, boolean isDomesticTravel) {
+        this.travelName = travelName;
+        this.travelStartDate = travelStartDate;
+        this.travelEndDate = travelEndDate;
+        this.isDomesticTravel = isDomesticTravel;
+    }
+
+
+
     public void updateMainImage(String newMainImage) {
         this.mainImage = newMainImage;
     }
