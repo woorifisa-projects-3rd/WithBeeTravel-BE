@@ -1,6 +1,7 @@
 package withbeetravel.controller.banking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.dto.request.account.HistoryRequest;
 import withbeetravel.dto.response.SuccessResponse;
@@ -17,8 +18,11 @@ public class HistoryController {
     public SuccessResponse addPayment(@PathVariable Long accountId,
                                       @RequestBody HistoryRequest historyRequest){
 
-        return historyService.addHistory(accountId, historyRequest);
-
+        historyService.addHistory(accountId,historyRequest);
+        return SuccessResponse.of(
+                HttpStatus.CREATED.value(),
+                "결제 내역 등록 완료"
+        );
     }
 
 }

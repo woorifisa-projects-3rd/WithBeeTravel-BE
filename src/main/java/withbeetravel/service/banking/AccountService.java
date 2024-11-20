@@ -14,7 +14,7 @@ public interface AccountService {
 
     List<AccountResponse> showAll(Long userId);
 
-    SuccessResponse<AccountResponse> createAccount(Long userId, CreateAccountRequest CreateAccountRequest);
+    AccountResponse createAccount(Long userId, CreateAccountRequest CreateAccountRequest);
 
     String generateUniqueAccountNumber();
 
@@ -26,11 +26,11 @@ public interface AccountService {
 
     void deposit(Long accountId, int amount, String rqspeNm);
 
-    SuccessResponse<AccountResponse> accountInfo(Long accountId);
+    AccountResponse accountInfo(Long accountId);
 
-    SuccessResponse verifyAccount(String accountNumber);
+    void verifyAccount(String accountNumber);
 
-    SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber);
+    AccountOwnerNameResponse findUserNameByAccountNumber(String accountNumber);
 
-    SuccessResponse<AccountConnectedWibeeResponse> connectedWibee(Long accountId);
+    AccountConnectedWibeeResponse connectedWibee(Long accountId);
 }

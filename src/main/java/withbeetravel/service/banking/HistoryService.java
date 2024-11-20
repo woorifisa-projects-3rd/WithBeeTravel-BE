@@ -7,7 +7,7 @@ import withbeetravel.dto.response.SuccessResponse;
 import java.util.List;
 
 public interface HistoryService {
-    SuccessResponse<List<HistoryResponse>> showAll(Long AccountId);
+    List<HistoryResponse> showAll(Long AccountId);
 
-    SuccessResponse addHistory(Long accountId, HistoryRequest historyRequest);
+    void addHistory(Long accountId, HistoryRequest historyRequest);
 }

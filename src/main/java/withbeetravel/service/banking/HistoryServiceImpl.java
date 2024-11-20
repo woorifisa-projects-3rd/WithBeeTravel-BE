@@ -24,19 +24,15 @@ public class HistoryServiceImpl implements HistoryService {
     private final HistoryRepository historyRepository;
     private final AccountRepository accountRepository;
 
-    public SuccessResponse<List<HistoryResponse>> showAll(Long accountId) {
+    public List<HistoryResponse> showAll(Long accountId) {
         List<History> histories = historyRepository.findByAccountIdOrderByDateDesc(accountId);
         List<HistoryResponse> historyResponses = histories.stream().map(HistoryResponse::from).toList();
-        return SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "계좌 거래내역 조회 성공",
-                historyResponses
-        );
+        return historyResponses;
     }
 
     // 거래 내역 추가하기
     @Transactional
-    public SuccessResponse addHistory(Long accountId, HistoryRequest historyRequest){
+    public void addHistory(Long accountId, HistoryRequest historyRequest){
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
@@ -60,11 +56,6 @@ public class HistoryServiceImpl implements HistoryService {
         historyRepository.save(history);
 
         account.transfer(-historyRequest.getPayAm());
-
-        return SuccessResponse.of(
-                HttpStatus.CREATED.value(),
-                "결제 내역 등록 완료"
-        );
     }
 
 

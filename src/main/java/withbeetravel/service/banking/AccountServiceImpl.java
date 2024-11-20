@@ -46,7 +46,7 @@ public class AccountServiceImpl implements AccountService {
 
     //계좌 생성
     @Transactional
-    public SuccessResponse<AccountResponse> createAccount(Long userId, CreateAccountRequest createAccountRequest){
+    public AccountResponse createAccount(Long userId, CreateAccountRequest createAccountRequest){
         User thisUser = userRepository.findById(userId).orElseThrow();
 
         Product product = createAccountRequest.getProduct();
@@ -64,11 +64,7 @@ public class AccountServiceImpl implements AccountService {
 
         AccountResponse accountResponse = AccountResponse.from(account);
 
-        return SuccessResponse.of(
-                HttpStatus.CREATED.value(),
-                "계좌 생성 완료",
-                accountResponse
-        );
+        return accountResponse;
     }
 
     // 유니크 계좌번호 확인
@@ -153,54 +149,39 @@ public class AccountServiceImpl implements AccountService {
     }
 
     // accountId로 계좌 조회하기
-    public SuccessResponse<AccountResponse> accountInfo(Long accountId) {
+    public AccountResponse accountInfo(Long accountId) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
-        return  SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "accountId로 계좌 조회 성공",
-                AccountResponse.from(account)
-        );
+        return AccountResponse.from(account);
 
     }
 
-    public SuccessResponse verifyAccount(String accountNumber) {
+    public void verifyAccount(String accountNumber) {
         Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         if(account.isEmpty()){
             throw new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND);
 
         }
-        return SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "계좌 번호 존재 확인 완료"
-        );
+
     }
 
-    public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber) {
+    public AccountOwnerNameResponse findUserNameByAccountNumber(String accountNumber) {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
         String name = account.getUser().getName();
         AccountOwnerNameResponse accountOwnerNameResponse = new AccountOwnerNameResponse(name);
 
-        return  SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "찾은 계좌 주인 이름",
-                accountOwnerNameResponse
-        );
+        return accountOwnerNameResponse;
     }
 
-    public SuccessResponse<AccountConnectedWibeeResponse> connectedWibee(Long accountId){
+    public AccountConnectedWibeeResponse connectedWibee(Long accountId){
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
         AccountConnectedWibeeResponse accountConnectedWibeeResponse
                 = new AccountConnectedWibeeResponse(account.isConnectedWibeeCard());
 
-        return SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "위비 카드 연결 여부 확인 완료",
-                accountConnectedWibeeResponse
-        );
+        return accountConnectedWibeeResponse;
     }
 }
 
