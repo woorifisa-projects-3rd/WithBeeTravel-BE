@@ -13,6 +13,7 @@ import withbeetravel.dto.request.account.CreateAccountRequest;
 import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.request.account.AccountRequest;
+import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;

@@ -1,5 +1,10 @@
 package withbeetravel.domain;
 
+import lombok.Getter;
+
+import java.util.List;
+
+@Getter
 public enum Country {
     US("미국", "USD"),
     ES("스페인", "EUR"),
@@ -59,4 +64,14 @@ public enum Country {
         this.countryName = countryName;
         this.currencyCode = currencyCode;
     }
+
+    public static Country findByName(String countryName){
+        String name = countryName.trim();
+
+        return List.of(Country.values()).stream()
+                .filter(country -> country.getCountryName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No enum constant for country name: " + countryName));
+    }
+
 }

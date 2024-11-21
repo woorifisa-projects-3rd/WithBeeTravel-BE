@@ -48,4 +48,8 @@ public class TravelMemberSettlementHistory {
         this.actualBurdenCost = actualBurdenCost;
         this.isAgreed = isAgreed;
     }
+
+    public void updateIsAgreed(boolean isAgreed) {
+        this.isAgreed = isAgreed;
+    }
 }

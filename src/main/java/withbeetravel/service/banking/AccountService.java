@@ -1,6 +1,5 @@
 package withbeetravel.service.banking;
 
-import withbeetravel.dto.request.account.AccountNumberRequest;
 import withbeetravel.dto.request.account.CreateAccountRequest;
 import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;

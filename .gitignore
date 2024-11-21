@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,git,java,gradle,intellij,eclipse,netbeans
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,git,java,gradle,intellij,eclipse,netbeans
 
+# 더미데이터 파일
+src/main/java/withbeetravel/DataLoader.java
+
 ### Eclipse ###
 .metadata
 bin/
