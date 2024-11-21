@@ -130,10 +130,11 @@ public class TravelServiceImpl implements TravelService {
                 .isCaptain(false)       // 초대한 사람은 Captain이 아님
                 .build();
 
+        travelMemberRepository.save(newMember);
+
         return InviteCodeSignUpResponse.builder()
                 .travelId(travelId)
                 .build();
-
     }
 
 
