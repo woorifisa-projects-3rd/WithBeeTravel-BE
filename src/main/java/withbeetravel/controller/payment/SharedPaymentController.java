@@ -10,6 +10,7 @@ import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.TravelMember;
 import withbeetravel.dto.request.payment.SharedPaymentSearchRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.payment.SharedPaymentParticipatingMemberResponse;
 import withbeetravel.dto.response.payment.SharedPaymentResponse;
 import withbeetravel.service.payment.SharedPaymentService;
 import withbeetravel.service.travel.TravelMemberService;
@@ -33,7 +34,7 @@ public class SharedPaymentController {
             @Valid @ModelAttribute SharedPaymentSearchRequest condition
     ) {
         Page<SharedPayment> payments = sharedPaymentService.getSharedPayments(travelId, condition);
-        Map<Long, List<Integer>> participatingMembersMap = sharedPaymentService.getParticipatingMembersMap(payments);
+        Map<Long, List<SharedPaymentParticipatingMemberResponse>> participatingMembersMap = sharedPaymentService.getParticipatingMembersMap(payments);
 
         return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", SharedPaymentResponse.of(
                 payments,

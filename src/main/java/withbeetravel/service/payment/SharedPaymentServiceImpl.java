@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.dto.request.payment.SharedPaymentSearchRequest;
+import withbeetravel.dto.response.payment.SharedPaymentParticipatingMemberResponse;
 import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelMemberRepository;
 
@@ -36,13 +37,16 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
     }
 
     @Override
-    public Map<Long, List<Integer>> getParticipatingMembersMap(Page<SharedPayment> payments) {
+    public Map<Long, List<SharedPaymentParticipatingMemberResponse>> getParticipatingMembersMap(Page<SharedPayment> payments) {
         return payments.getContent().stream()
                 .collect(Collectors.toMap(
                         SharedPayment::getId,
                         payment -> payment.getPaymentParticipatedMembers().stream()
-                                .map(ppm -> ppm.getTravelMember().getUser().getProfileImage())
-                                .collect(Collectors.toList())
+                                .map(ppm -> SharedPaymentParticipatingMemberResponse.builder()
+                                        .id(ppm.getTravelMember().getId())
+                                        .profileImage(ppm.getTravelMember().getUser().getProfileImage())
+                                        .build())
+                                .toList()
                 ));
     }
 }
