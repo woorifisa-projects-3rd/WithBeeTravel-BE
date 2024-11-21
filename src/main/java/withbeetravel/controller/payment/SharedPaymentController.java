@@ -1,15 +1,23 @@
 package withbeetravel.controller.payment;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
+import withbeetravel.domain.SharedPayment;
+import withbeetravel.domain.TravelMember;
+import withbeetravel.dto.request.payment.SharedPaymentSearchRequest;
+import withbeetravel.dto.response.payment.SharedPaymentListResponse;
 import withbeetravel.dto.response.payment.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.payment.SharedPaymentService;
+import withbeetravel.service.travel.TravelMemberService;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,18 +25,23 @@ import java.time.LocalDate;
 public class SharedPaymentController {
 
     private final SharedPaymentService sharedPaymentService;
+    private final TravelMemberService travelMemberService;
 
     @CheckTravelAccess
     @GetMapping()
-    public SuccessResponse<Page<SharedPaymentResponse>> getSharedPaymentAll(
+    public SuccessResponse<SharedPaymentListResponse> getSharedPayments(
             @PathVariable Long travelId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "latest") String sortBy, // latest 또는 amount
-            @RequestParam(required = false) Long memberId, // 특정 여행멤버 ID로 필터링
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
+            @Valid @ModelAttribute SharedPaymentSearchRequest condition
     ) {
-        Page<SharedPaymentResponse> sharedPaymentAll = sharedPaymentService.getSharedPaymentAll(travelId, page, sortBy, memberId, startDate, endDate);
-        return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", sharedPaymentAll);
+        Page<SharedPayment> payments = sharedPaymentService.getSharedPayments(travelId, condition);
+        List<TravelMember> travelMembers = travelMemberService.getTravelMembers(travelId);
+        Map<Long, List<String>> participatingMembersMap = sharedPaymentService.getParticipatingMembersMap(payments);
+
+        return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", SharedPaymentListResponse.of(
+                payments,
+                travelMembers,
+                travelMembers.size(),
+                participatingMembersMap
+        ));
     }
 }

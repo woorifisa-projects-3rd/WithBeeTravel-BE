@@ -7,13 +7,13 @@ import withbeetravel.domain.TravelMember;
 @Data
 @Builder
 public class TravelMemberResponse {
-    private Long TravelMemberId;
+    private Long id;
     private String name;
     private String profileImage;
 
     public static TravelMemberResponse from(TravelMember travelMember) {
         return TravelMemberResponse.builder()
-                .TravelMemberId(travelMember.getId())
+                .id(travelMember.getId())
                 .name(travelMember.getUser().getName())
                 .profileImage(travelMember.getUser().getProfileImage())
                 .build();

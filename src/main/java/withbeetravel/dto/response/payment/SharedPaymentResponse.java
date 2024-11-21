@@ -16,7 +16,7 @@ import java.util.Map;
 public class SharedPaymentResponse {
 
     @Schema(description = "공동 결제 내역 ID")
-    private Long sharedPaymentId;
+    private Long id;
 
     @Schema(description = "결제 추가한 사람의 프로필 이미지")
     private String adderProfileIcon;
@@ -55,7 +55,7 @@ public class SharedPaymentResponse {
     ) {
         return sharedPayments.map(payment ->
                 SharedPaymentResponse.builder()
-                        .sharedPaymentId(payment.getId())
+                        .id(payment.getId())
                         .adderProfileIcon(payment.getAddedByMember().getUser().getProfileImage())
                         .paymentAmount(payment.getPaymentAmount())
                         .foreignPaymentAmount(payment.getForeignPaymentAmount())

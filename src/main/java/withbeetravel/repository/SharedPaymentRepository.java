@@ -17,7 +17,6 @@ public interface SharedPaymentRepository extends JpaRepository<SharedPayment, Lo
 
     public Optional<SharedPayment> findByIdAndTravelId(Long id, Long travelId);
 
-
     List<SharedPayment> findAllByTravelId(Long travelId);
 
     List<SharedPayment> findAllByAddedByMemberId(Long addedByMemberId);
