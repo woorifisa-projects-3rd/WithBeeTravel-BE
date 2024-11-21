@@ -36,7 +36,7 @@ public class User {
     private String name;
 
     @Column(name = "profile_image", nullable = false)
-    private String profileImage;
+    private int profileImage;
 
     @Builder
     public User(Long id,
@@ -45,7 +45,7 @@ public class User {
                 String password,
                 String pinNumber,
                 String name,
-                String profileImage) {
+                int profileImage) {
         this.id = id;
         this.wibeeCardAccount = wibeeCardAccount;
         this.email = email;
