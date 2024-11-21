@@ -46,4 +46,12 @@ public class SettlementRequest {
         this.requestEndTime = requestEndTime;
         this.disagreeCount = disagreeCount;
     }
+
+    public void updateDisagreeCount(int count) {
+        this.disagreeCount += count;
+    }
+
+    public void updateRequestEndDate(LocalDateTime endTime) {
+        this.requestEndTime = endTime;
+    }
 }

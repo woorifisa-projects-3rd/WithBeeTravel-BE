@@ -43,8 +43,8 @@ public class TravelAccessAspect {
     private Long getTravelIdFromArgs(JoinPoint joinPoint, String travelIdParam) {
 
         // 메소드 파라미터와 이름을 매핑하여 travelId를 찾아 반환
-        var paramNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames();
-        var args = joinPoint.getArgs();
+        String[] paramNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames();
+        Object[] args = joinPoint.getArgs();
 
         for (int i = 0; i < paramNames.length; i++) {
             if(paramNames[i].equals(travelIdParam) && args[i] instanceof Long) {

@@ -104,4 +104,26 @@ public class SharedPayment {
     public void updateParticipantCount(int newParticipantCount) {
         this.participantCount = newParticipantCount;
     }
+
+    public void updateManuallyPayment(
+            CurrencyUnit currencyUnit,
+            int paymentAmount,
+            Double foreignPaymentAmount,
+            Double exchangeRate,
+            String paymentComment,
+            String paymentImage,
+            Category category,
+            String storeName,
+            LocalDateTime paymentDate
+    ) {
+        this.currencyUnit = currencyUnit;
+        this.paymentAmount = paymentAmount;
+        this.foreignPaymentAmount = foreignPaymentAmount;
+        this.exchangeRate = exchangeRate;
+        this.paymentComment = paymentComment;
+        this.paymentImage = paymentImage;
+        this.category = category;
+        this.storeName = storeName;
+        this.paymentDate = paymentDate;
+    }
 }
