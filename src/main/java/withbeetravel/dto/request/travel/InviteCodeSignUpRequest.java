@@ -7,11 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class InviteCodeSignUpRequestDto {
+public class InviteCodeSignUpRequest {
 
     private String inviteCode;
 
-    public InviteCodeSignUpRequestDto(String inviteCode) {
+    public InviteCodeSignUpRequest(String inviteCode) {
         this.inviteCode = inviteCode;
     }
 }

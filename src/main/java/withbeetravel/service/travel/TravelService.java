@@ -1,15 +1,15 @@
 package withbeetravel.service.travel;
 
-import withbeetravel.dto.request.travel.InviteCodeSignUpRequestDto;
-import withbeetravel.dto.request.travel.TravelRequestDto;
-import withbeetravel.dto.response.travel.InviteCodeSignUpResponseDto;
-import withbeetravel.dto.response.travel.TravelResponseDto;
+import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
+import withbeetravel.dto.request.travel.TravelRequest;
+import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
+import withbeetravel.dto.response.travel.TravelResponse;
 
 public interface
 TravelService {
-    TravelResponseDto saveTravel( TravelRequestDto request);
+    TravelResponse saveTravel(TravelRequest request);
 
-    void editTravel(TravelRequestDto request, Long travelId);
+    void editTravel(TravelRequest request, Long travelId);
 
-    InviteCodeSignUpResponseDto signUpTravel(InviteCodeSignUpRequestDto request);
+    InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest request);
 }
