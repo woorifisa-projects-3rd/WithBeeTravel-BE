@@ -39,7 +39,7 @@ public class HistoryServiceImpl implements HistoryService {
 
         if(!account.isConnectedWibeeCard()){
             if(historyRequest.isWibeeCard()){ //위비 카드 연결되어있지 않았을 때, 위비 카드로결제했다하면 오류
-                throw new CustomException(BankingErrorCode.NOT_CONNECTED_WIBEE_ACCOUNT);
+                throw new CustomException(BankingErrorCode.WIBEE_CARD_NOT_ISSUED);
             }
         }
 
