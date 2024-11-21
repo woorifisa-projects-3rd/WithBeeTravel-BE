@@ -28,24 +28,21 @@ public class DataLoader implements CommandLineRunner {
                 .password("password123")
                 .pinNumber("123456")
                 .name("User One")
-                .profileImage("profile1.jpg")
-                .hasWibeeCard(true)
+                .profileImage(1)
                 .build();
         User user2 = User.builder()
                 .email("user2@example.com")
                 .password("password123")
                 .pinNumber("567890")
                 .name("User Two")
-                .profileImage("profile2.jpg")
-                .hasWibeeCard(false)
+                .profileImage(2)
                 .build();
         User user3 = User.builder()
                 .email("user3@example.com")
                 .password("password123")
                 .pinNumber("567890")
                 .name("User Three")
-                .profileImage("profile3.jpg")
-                .hasWibeeCard(false)
+                .profileImage(3)
                 .build();
         userRepository.save(user1);
         userRepository.save(user2);

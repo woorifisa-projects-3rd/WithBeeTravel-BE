@@ -13,5 +13,5 @@ import java.util.Map;
 public interface SharedPaymentService {
     Page<SharedPayment> getSharedPayments(Long travelId, SharedPaymentSearchRequest condition);
 
-    public Map<Long, List<String>> getParticipatingMembersMap(Page<SharedPayment> payments);
+    public Map<Long, List<Integer>> getParticipatingMembersMap(Page<SharedPayment> payments);
 }

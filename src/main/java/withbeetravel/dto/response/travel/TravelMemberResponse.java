@@ -9,7 +9,7 @@ import withbeetravel.domain.TravelMember;
 public class TravelMemberResponse {
     private Long id;
     private String name;
-    private String profileImage;
+    private int profileImage;
 
     public static TravelMemberResponse from(TravelMember travelMember) {
         return TravelMemberResponse.builder()

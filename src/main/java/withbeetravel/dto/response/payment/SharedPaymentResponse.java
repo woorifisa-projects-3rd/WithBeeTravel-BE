@@ -19,7 +19,7 @@ public class SharedPaymentResponse {
     private Long id;
 
     @Schema(description = "결제 추가한 사람의 프로필 이미지")
-    private String adderProfileIcon;
+    private int adderProfileIcon;
 
     @Schema(description = "결제 금액")
     private int paymentAmount;
@@ -40,7 +40,7 @@ public class SharedPaymentResponse {
     private Boolean isAllMemberParticipated;
 
     @Schema(description = "참여한 여행 멤버 프로필 이미지 목록")
-    private List<String> participatingMembers;
+    private List<Integer> participatingMembers;
 
     @Schema(description = "수동 추가 여부")
     private Boolean isManuallyAdded;
@@ -51,7 +51,7 @@ public class SharedPaymentResponse {
     public static Page<SharedPaymentResponse> of(
             Page<SharedPayment> sharedPayments,
             int totalTravelMembers,
-            Map<Long, List<String>> participatingMembersMap
+            Map<Long, List<Integer>> participatingMembersMap
     ) {
         return sharedPayments.map(payment ->
                 SharedPaymentResponse.builder()

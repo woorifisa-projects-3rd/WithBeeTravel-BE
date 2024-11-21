@@ -27,7 +27,7 @@ public class SharedPaymentListResponse {
             Page<SharedPayment> sharedPayments,
             List<TravelMember> travelMembers,
             int totalTravelMembers,
-            Map<Long, List<String>> participatingMembersMap
+            Map<Long, List<Integer>> participatingMembersMap
     ) {
         return SharedPaymentListResponse.builder()
                 .travelMembers(travelMembers.stream()

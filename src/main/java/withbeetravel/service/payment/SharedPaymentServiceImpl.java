@@ -44,7 +44,7 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
         );
     }
 
-    public Map<Long, List<String>> getParticipatingMembersMap(Page<SharedPayment> payments) {
+    public Map<Long, List<Integer>> getParticipatingMembersMap(Page<SharedPayment> payments) {
         return payments.getContent().stream()
                 .collect(Collectors.toMap(
                         SharedPayment::getId,

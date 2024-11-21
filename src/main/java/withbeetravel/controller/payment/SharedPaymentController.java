@@ -35,7 +35,7 @@ public class SharedPaymentController {
     ) {
         Page<SharedPayment> payments = sharedPaymentService.getSharedPayments(travelId, condition);
         List<TravelMember> travelMembers = travelMemberService.getTravelMembers(travelId);
-        Map<Long, List<String>> participatingMembersMap = sharedPaymentService.getParticipatingMembersMap(payments);
+        Map<Long, List<Integer>> participatingMembersMap = sharedPaymentService.getParticipatingMembersMap(payments);
 
         return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", SharedPaymentListResponse.of(
                 payments,
