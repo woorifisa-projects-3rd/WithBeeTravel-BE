@@ -1,7 +1,9 @@
 package withbeetravel.service.banking;
 
-import withbeetravel.dto.request.account.AccountRequest;
+import withbeetravel.dto.request.account.CreateAccountRequest;
+import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
+import withbeetravel.dto.request.account.AccountRequest;
 import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.SuccessResponse;
 
@@ -9,9 +11,9 @@ import java.util.List;
 
 public interface AccountService {
 
-    SuccessResponse<List<AccountResponse>> showAll(Long userId);
+    List<AccountResponse> showAll(Long userId);
 
-    SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest);
+    AccountResponse createAccount(Long userId, CreateAccountRequest CreateAccountRequest);
 
     String generateUniqueAccountNumber();
 
@@ -23,9 +25,11 @@ public interface AccountService {
 
     void deposit(Long accountId, int amount, String rqspeNm);
 
-    SuccessResponse<AccountResponse> accountInfo(Long accountId);
+    AccountResponse accountInfo(Long accountId);
 
-    SuccessResponse verifyAccount(String accountNumber);
+    void verifyAccount(String accountNumber);
 
-    SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber);
+    AccountOwnerNameResponse findUserNameByAccountNumber(String accountNumber);
+
+    AccountConnectedWibeeResponse connectedWibee(Long accountId);
 }
