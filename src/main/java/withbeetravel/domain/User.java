@@ -1,5 +1,6 @@
 package withbeetravel.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,6 +18,11 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private Long id;
 
+    @OneToOne
+    @JoinColumn(name = "wibee_card_account")
+    @JsonManagedReference
+    private Account wibeeCardAccount;
+
     @Column(name = "email", nullable = false)
     private String email;
 
@@ -30,25 +36,26 @@ public class User {
     private String name;
 
     @Column(name = "profile_image", nullable = false)
-    private String profileImage;
-
-    @Column(name = "has_wibee_card", nullable = false)
-    private boolean hasWibeeCard;
+    private int profileImage;
 
     @Builder
     public User(Long id,
+                Account wibeeCardAccount,
                 String email,
                 String password,
                 String pinNumber,
                 String name,
-                String profileImage,
-                boolean hasWibeeCard) {
+                int profileImage) {
         this.id = id;
+        this.wibeeCardAccount = wibeeCardAccount;
         this.email = email;
         this.password = password;
         this.pinNumber = pinNumber;
         this.name = name;
         this.profileImage = profileImage;
-        this.hasWibeeCard = hasWibeeCard;
+    }
+
+    public void updateWibeeCardAccount(Account account) {
+        this.wibeeCardAccount = account;
     }
 }

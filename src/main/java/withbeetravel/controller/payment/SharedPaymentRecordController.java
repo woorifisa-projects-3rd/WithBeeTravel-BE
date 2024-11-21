@@ -19,7 +19,7 @@ public class SharedPaymentRecordController implements SharedPaymentRecordControl
     @Override
     @CheckTravelAndSharedPaymentAccess
     @PatchMapping(value = "/{sharedPaymentId}/records", consumes = "multipart/form-data")
-    public SuccessResponse addAndUpdatePaymentRecord(
+    public SuccessResponse<Void> addAndUpdatePaymentRecord(
             @PathVariable Long travelId,
             @PathVariable Long sharedPaymentId,
             @RequestPart(value = "paymentImage") MultipartFile paymentImage,
