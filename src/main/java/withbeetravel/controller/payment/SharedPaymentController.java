@@ -3,19 +3,16 @@ package withbeetravel.controller.payment;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.TravelMember;
 import withbeetravel.dto.request.payment.SharedPaymentSearchRequest;
 import withbeetravel.dto.response.payment.SharedPaymentListResponse;
-import withbeetravel.dto.response.payment.SharedPaymentResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.payment.SharedPaymentService;
 import withbeetravel.service.travel.TravelMemberService;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +25,7 @@ public class SharedPaymentController {
     private final TravelMemberService travelMemberService;
 
     @CheckTravelAccess
-    @GetMapping()
+    @GetMapping
     public SuccessResponse<SharedPaymentListResponse> getSharedPayments(
             @PathVariable Long travelId,
             @Valid @ModelAttribute SharedPaymentSearchRequest condition
