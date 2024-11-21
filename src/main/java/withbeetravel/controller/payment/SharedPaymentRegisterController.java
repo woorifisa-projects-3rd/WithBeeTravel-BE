@@ -78,8 +78,10 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
             @PathVariable Long travelId,
             @RequestBody SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
     ) {
-        return sharedPaymentRegisterService.addWibeeCardSharedPayment(
+        sharedPaymentRegisterService.addWibeeCardSharedPayment(
                 userId, travelId, sharedPaymentWibeeCardRegisterRequest
         );
+
+        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역이 추가되었습니다.");
     }
 }

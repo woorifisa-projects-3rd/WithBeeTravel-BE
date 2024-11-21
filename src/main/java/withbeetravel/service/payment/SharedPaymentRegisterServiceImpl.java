@@ -155,7 +155,7 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
 
     @Override
     @Transactional
-    public SuccessResponse<Void> addWibeeCardSharedPayment(
+    public void addWibeeCardSharedPayment(
             Long userId,
             Long travelId,
             SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
@@ -180,8 +180,6 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
                 travelMember,
                 account
         );
-
-        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역이 추가되었습니다.");
     }
 
     Travel getTravel(Long travelId) {

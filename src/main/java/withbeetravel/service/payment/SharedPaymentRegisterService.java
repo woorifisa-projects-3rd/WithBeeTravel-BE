@@ -35,7 +35,7 @@ public interface SharedPaymentRegisterService {
             boolean isMainImage
     );
 
-    SuccessResponse<Void> addWibeeCardSharedPayment(
+    void addWibeeCardSharedPayment(
             Long userId,
             Long travelId,
             SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
