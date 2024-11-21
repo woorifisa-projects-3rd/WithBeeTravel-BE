@@ -38,14 +38,16 @@ public class User {
     @Column(name = "profile_image", nullable = false)
     private int profileImage;
 
+    @Column(name = "failed_pin_count", nullable = false)
+    private int failedPinCount;
+
+    @Column(name = "pinLocked", nullable = false)
+    private boolean accountLocked;
+
     @Builder
-    public User(Long id,
-                Account wibeeCardAccount,
-                String email,
-                String password,
-                String pinNumber,
-                String name,
-                int profileImage) {
+    public User(Long id, Account wibeeCardAccount, String email,
+                String password, String pinNumber, String name,
+                int profileImage, int failedPinCount, boolean accountLocked) {
         this.id = id;
         this.wibeeCardAccount = wibeeCardAccount;
         this.email = email;
@@ -53,6 +55,8 @@ public class User {
         this.pinNumber = pinNumber;
         this.name = name;
         this.profileImage = profileImage;
+        this.failedPinCount = failedPinCount;
+        this.accountLocked = accountLocked;
     }
 
     public void updateWibeeCardAccount(Account account) {
