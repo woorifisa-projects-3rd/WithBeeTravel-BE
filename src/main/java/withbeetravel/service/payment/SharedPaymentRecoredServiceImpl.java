@@ -28,11 +28,11 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
     private final SharedPaymentRepository sharedPaymentRepository;
 
     // S3에 이미지를 저장할 경로
-    private static final String SHARED_PAYMENT_IMAGE_DIR = "shared-payments";
+    private static final String SHARED_PAYMENT_IMAGE_DIR = "shared-payments/";
 
     @Override
     @Transactional
-    public SuccessResponse addAndUpdatePaymentRecord(
+    public SuccessResponse<Void> addAndUpdatePaymentRecord(
             Long travelId,
             Long sharedPaymentId,
             MultipartFile image,
@@ -89,10 +89,10 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
         String newImage = null;
 
         // image가 새로 들어왔다면 S3에 저장
-        if(image != null) {
+        if(!image.isEmpty()) {
 
             // 이미지 저장할 S3 디렉토리 정보
-            String dirName = SHARED_PAYMENT_IMAGE_DIR + "/" + travelId;
+            String dirName = SHARED_PAYMENT_IMAGE_DIR + travelId;
 
             try {
                 if(paymentImage != null) { // 해당 공동결제 내역에 이미 이미지가 있다면 업데이트

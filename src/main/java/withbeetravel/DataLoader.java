@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import withbeetravel.domain.*;
-import withbeetravel.repository.*;
+import withbeetravel.repository.SharedPaymentRepository;
+import withbeetravel.repository.TravelMemberRepository;
+import withbeetravel.repository.TravelRepository;
+import withbeetravel.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -18,18 +20,17 @@ public class DataLoader implements CommandLineRunner {
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
-    private final AccountRepository accountRepository;
-    private final HistoryRepository historyRepository;
 
     @Override
     public void run(String... args) throws Exception {
-        // User dummy data
+        // User 더미 데이터 생성
         User user1 = User.builder()
                 .email("user1@example.com")
                 .password("password123")
                 .pinNumber("123456")
                 .name("User One")
                 .profileImage("profile1.jpg")
+                .hasWibeeCard(true)
                 .build();
         User user2 = User.builder()
                 .email("user2@example.com")
@@ -37,245 +38,147 @@ public class DataLoader implements CommandLineRunner {
                 .pinNumber("567890")
                 .name("User Two")
                 .profileImage("profile2.jpg")
+                .hasWibeeCard(false)
                 .build();
-
-        userRepository.saveAll(Arrays.asList(user1, user2));
-
-        // Account dummy data
-        Account account1 = Account.builder()
-                .user(user1)
-                .accountNumber("123-456-789")
-                .balance(5000)
-                .product(Product.WON통장)
-                .isConnectedWibeeCard(true)
+        User user3 = User.builder()
+                .email("user3@example.com")
+                .password("password123")
+                .pinNumber("567890")
+                .name("User Three")
+                .profileImage("profile3.jpg")
+                .hasWibeeCard(false)
                 .build();
+        userRepository.save(user1);
+        userRepository.save(user2);
+        userRepository.save(user3);
 
-        Account account2 = Account.builder()
-                .user(user1)
-                .accountNumber("987-654-321")
-                .balance(20000)
-                .product(Product.우리닷컴통장)
-                .isConnectedWibeeCard(false)
-                .build();
-
-        Account account3 = Account.builder()
-                .user(user1)
-                .accountNumber("111-222-333")
-                .balance(15000)
-                .product(Product.우리아이행복통장)
-                .isConnectedWibeeCard(false)
-                .build();
-
-        Account account4 = Account.builder()
-                .user(user2)
-                .accountNumber("444-555-666")
-                .balance(8000)
-                .product(Product.WON파킹통장)
-                .isConnectedWibeeCard(false)
-                .build();
-
-        Account account5 = Account.builder()
-                .user(user2)
-                .accountNumber("777-888-999")
-                .balance(30000)
-                .product(Product.으쓱통장)
-                .isConnectedWibeeCard(false)
-                .build();
-
-        // Save accounts to the repository
-        accountRepository.saveAll(Arrays.asList(account1, account2, account3, account4, account5));
-
-        // Save updated users with linked accounts
-        userRepository.saveAll(Arrays.asList(user1));
-
-        History history1 = History.builder()
-                .account(account1)
-                .date(LocalDateTime.of(2024, 11, 1, 0, 0))
-                .rcvAm(1000)
-                .payAM(0)
-                .balance(6000)
-                .rqspeNm("Deposit")
-                .isWibeeCard(false)
-                .build();
-
-        History history2 = History.builder()
-                .account(account1)
-                .date(LocalDateTime.of(2024, 11, 1, 0, 0))
-                .rcvAm(0)
-                .payAM(1000)
-                .balance(5000)
-                .rqspeNm("Deposit")
-                .isWibeeCard(true)
-                .build();
-
-        History history3 = History.builder()
-                .account(account1)
-                .date(LocalDateTime.of(2024, 11, 2, 0, 0))
-                .rcvAm(0)
-                .payAM(1000)
-                .balance(5000)
-                .rqspeNm("Deposit")
-                .isWibeeCard(true)
-                .build();
-
-        History history4 = History.builder()
-                .account(account1)
-                .date(LocalDateTime.of(2024, 11, 4, 0, 0))
-                .rcvAm(0)
-                .payAM(1000)
-                .balance(5000)
-                .rqspeNm("Deposit")
-                .isWibeeCard(true)
-                .build();
-
-        History history5 = History.builder()
-                .account(account2)
-                .date(LocalDateTime.of(2024, 11, 4, 0, 0))
-                .rcvAm(0)
-                .payAM(1000)
-                .balance(5000)
-                .rqspeNm("Deposit")
-                .isWibeeCard(true)
-                .build();
-
-        // Save histories to the repository
-        historyRepository.saveAll(Arrays.asList(history1, history2, history3, history4, history5));
-
-        // Travel dummy data
+        // Travel 더미 데이터 생성
         Travel travel1 = Travel.builder()
-                .travelName("Vacation to Bali")
-                .travelStartDate(LocalDate.of(2024, 11, 2))
-                .travelEndDate(LocalDate.of(2024, 11, 3))
-                .inviteCode("BALI1234")
-                .mainImage("bali_trip.jpg")
-                .isDomesticTravel(false)
-                .settlementStatus(SettlementStatus.PENDING)
-                .build();
-
-        Travel travel2 = Travel.builder()
-                .travelName("Summer Trip to Jeju")
-                .travelStartDate(LocalDate.of(2024, 6, 15))
-                .travelEndDate(LocalDate.of(2024, 6, 22))
-                .inviteCode("JEJU2024")
-                .mainImage("jeju_trip.jpg")
+                .travelName("Summer Vacation 2024")
+                .travelStartDate(LocalDate.of(2024, 6, 1))
+                .travelEndDate(LocalDate.of(2024, 6, 7))
+                .inviteCode("SUMMER2024")
+                .mainImage("summer_vacation.jpg")
                 .isDomesticTravel(true)
                 .settlementStatus(SettlementStatus.PENDING)
                 .build();
+        Travel travel2 = Travel.builder()
+                .travelName("Winter Trip 2024")
+                .travelStartDate(LocalDate.of(2024, 12, 1))
+                .travelEndDate(LocalDate.of(2024, 12, 5))
+                .inviteCode("WINTER2024")
+                .mainImage("winter_trip.jpg")
+                .isDomesticTravel(false)
+                .settlementStatus(SettlementStatus.DONE)
+                .build();
+        travelRepository.save(travel1);
+        travelRepository.save(travel2);
 
-        travelRepository.saveAll(Arrays.asList(travel1, travel2));
-
-        // TravelMember dummy data
+        // TravelMember 더미 데이터 생성
         TravelMember travelMember1 = TravelMember.builder()
                 .travel(travel1)
                 .user(user1)
                 .isCaptain(true)
-                .connectedAccount(account1)
+                .connectedAccount("user1_account")
                 .build();
-
         TravelMember travelMember2 = TravelMember.builder()
                 .travel(travel1)
                 .user(user2)
                 .isCaptain(false)
-                .connectedAccount(account2)
+                .connectedAccount("user2_account")
                 .build();
-
         TravelMember travelMember3 = TravelMember.builder()
                 .travel(travel2)
                 .user(user1)
-                .isCaptain(true)
-                .connectedAccount(account3)
+                .isCaptain(false)
+                .connectedAccount("user1_account")
                 .build();
-
         TravelMember travelMember4 = TravelMember.builder()
                 .travel(travel2)
                 .user(user2)
-                .isCaptain(false)
-                .connectedAccount(account4)
+                .isCaptain(true)
+                .connectedAccount("user2_account")
                 .build();
-
-        // Save TravelMember data
-        travelMemberRepository.saveAll(Arrays.asList(travelMember1, travelMember2, travelMember3, travelMember4));
-
-        SharedPayment sharedPayment1 = SharedPayment.builder()
-                .addedByMember(travelMember1)
+        TravelMember travelMember5 = TravelMember.builder()
                 .travel(travel1)
-                .currencyUnit(CurrencyUnit.KRW)
-                .paymentAmount(150000)
-                .foreignPaymentAmount(120.0)
-                .exchangeRate(1250.5)
-                .paymentComment("Lunch at restaurant")
-                .paymentImage("lunch_image.jpg")
-                .isManuallyAdded(false)
-                .participantCount(4)
-                .category(Category.FOOD)
-                .storeName("Kimchi Restaurant")
-                .paymentDate(LocalDateTime.of(2024, 11, 18, 12, 30))
+                .user(user3)
+                .isCaptain(false)
+                .connectedAccount("user3_account")
                 .build();
+        travelMemberRepository.save(travelMember1);
+        travelMemberRepository.save(travelMember2);
+        travelMemberRepository.save(travelMember3);
+        travelMemberRepository.save(travelMember4);
+        travelMemberRepository.save(travelMember5);
 
-        SharedPayment sharedPayment2 = SharedPayment.builder()
+        // SharedPayment 더미 데이터 생성
+        SharedPayment payment1 = SharedPayment.builder()
                 .addedByMember(travelMember1)
                 .travel(travel1)
                 .currencyUnit(CurrencyUnit.USD)
-                .paymentAmount(200)
-                .foreignPaymentAmount(200.0)
+                .paymentAmount(100)
+                .foreignPaymentAmount(100.0)
                 .exchangeRate(1.0)
-                .paymentComment("Train ticket to museum")
-                .paymentImage("train_ticket.jpg")
+                .paymentComment("Lunch")
+                .paymentImage("https://withbee-travel.s3.ap-northeast-2.amazonaws.com/shared-payments/1/32b52c1e-7a53-4e25-80cd-4a8b5eedb0e4_%EA%BE%B8%EB%B2%85.png")
                 .isManuallyAdded(true)
-                .participantCount(5)
-                .category(Category.TRANSPORTATION)
-                .storeName("Museum Train Ticket Booth")
-                .paymentDate(LocalDateTime.of(2024, 11, 18, 14, 15))
+                .participantCount(3)
+                .category(Category.FOOD)
+                .storeName("Seafood Restaurant")
+                .paymentDate(LocalDateTime.of(2024, 6, 2, 12, 0))
                 .build();
 
-        SharedPayment sharedPayment3 = SharedPayment.builder()
-                .addedByMember(travelMember1)
+        SharedPayment payment2 = SharedPayment.builder()
+                .addedByMember(travelMember2)
                 .travel(travel1)
-                .currencyUnit(CurrencyUnit.EUR)
-                .paymentAmount(75)
-                .foreignPaymentAmount(85.0)
-                .exchangeRate(1.14)
-                .paymentComment("Hotel stay for 2 nights")
-                .paymentImage("hotel_stay.jpg")
-                .isManuallyAdded(true)
-                .participantCount(2)
-                .category(Category.ACCOMMODATION)
-                .storeName("City Hotel")
-                .paymentDate(LocalDateTime.of(2024, 11, 17, 18, 0))
-                .build();
-
-        SharedPayment sharedPayment4 = SharedPayment.builder()
-                .addedByMember(travelMember1)
-                .travel(travel1)
-                .currencyUnit(CurrencyUnit.CNY)
-                .paymentAmount(500)
-                .foreignPaymentAmount(72.0)
-                .exchangeRate(6.94)
-                .paymentComment("Shopping in the mall")
-                .paymentImage("shopping_receipt.jpg")
+                .currencyUnit(CurrencyUnit.KRW)
+                .paymentAmount(50000)
+                .foreignPaymentAmount(50.0)
+                .exchangeRate(1000.0)
+                .paymentComment("Taxi fare")
+                .paymentImage(null)
                 .isManuallyAdded(false)
                 .participantCount(3)
-                .category(Category.SHOPPING)
-                .storeName("Beijing Mall")
-                .paymentDate(LocalDateTime.of(2024, 11, 19, 10, 0))
+                .category(Category.TRANSPORTATION)
+                .storeName("Seoul Taxi Co.")
+                .paymentDate(LocalDateTime.of(2024, 6, 2, 14, 30))
                 .build();
 
-        SharedPayment sharedPayment5 = SharedPayment.builder()
-                .addedByMember(travelMember1)
-                .travel(travel1)
+        SharedPayment payment3 = SharedPayment.builder()
+                .addedByMember(travelMember3)
+                .travel(travel2)
                 .currencyUnit(CurrencyUnit.JPY)
-                .paymentAmount(3000)
-                .foreignPaymentAmount(3000.0)
-                .exchangeRate(0.008)
-                .paymentComment("Flight booking")
-                .paymentImage("flight_booking.jpg")
-                .isManuallyAdded(false)
-                .participantCount(6)
-                .category(Category.FLIGHT)
-                .storeName("Airline Booking")
-                .paymentDate(LocalDateTime.of(2024, 11, 20, 11, 45))
+                .paymentAmount(2000)
+                .foreignPaymentAmount(20.0)
+                .exchangeRate(100.0)
+                .paymentComment("Dinner")
+                .paymentImage(null)
+                .isManuallyAdded(true)
+                .participantCount(2)
+                .category(Category.FOOD)
+                .storeName("Ramen Shop")
+                .paymentDate(LocalDateTime.of(2024, 12, 2, 19, 0))
                 .build();
 
-        sharedPaymentRepository.saveAll(Arrays.asList(sharedPayment1, sharedPayment2, sharedPayment3, sharedPayment4, sharedPayment5));
+        SharedPayment payment4 = SharedPayment.builder()
+                .addedByMember(travelMember4)
+                .travel(travel2)
+                .currencyUnit(CurrencyUnit.USD)
+                .paymentAmount(150)
+                .foreignPaymentAmount(150.0)
+                .exchangeRate(1.0)
+                .paymentComment("Hotel booking")
+                .paymentImage(null)
+                .isManuallyAdded(false)
+                .participantCount(2)
+                .category(Category.ACCOMMODATION)
+                .storeName("Tokyo Hotel")
+                .paymentDate(LocalDateTime.of(2024, 12, 1, 15, 0))
+                .build();
+
+        sharedPaymentRepository.save(payment1);
+        sharedPaymentRepository.save(payment2);
+        sharedPaymentRepository.save(payment3);
+        sharedPaymentRepository.save(payment4);
     }
 }
