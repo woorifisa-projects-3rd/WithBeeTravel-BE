@@ -1,6 +1,7 @@
 package withbeetravel.service.payment;
 
 import org.springframework.web.multipart.MultipartFile;
+import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.SuccessResponse;
 
 public interface SharedPaymentRegisterService {
@@ -32,5 +33,11 @@ public interface SharedPaymentRegisterService {
             MultipartFile paymentImage,
             String paymentComment,
             boolean isMainImage
+    );
+
+    void addWibeeCardSharedPayment(
+            Long userId,
+            Long travelId,
+            SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
     );
 }

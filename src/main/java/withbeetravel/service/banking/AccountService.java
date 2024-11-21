@@ -1,7 +1,7 @@
 package withbeetravel.service.banking;
 
-import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.request.account.AccountRequest;
+import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.SuccessResponse;
 

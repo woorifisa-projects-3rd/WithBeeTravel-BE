@@ -2,22 +2,20 @@ package withbeetravel.service.payment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.*;
+import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
-import withbeetravel.exception.error.PaymentErrorCode;
-import withbeetravel.exception.error.TravelErrorCode;
-import withbeetravel.exception.error.ValidationErrorCode;
-import withbeetravel.repository.PaymentParticipatedMemberRepository;
-import withbeetravel.repository.SharedPaymentRepository;
-import withbeetravel.repository.TravelMemberRepository;
-import withbeetravel.repository.TravelRepository;
+import withbeetravel.exception.error.*;
+import withbeetravel.repository.*;
 import withbeetravel.service.global.S3Uploader;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -31,6 +29,9 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
+    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
+    private final HistoryRepository historyRepository;
 
     private final S3Uploader s3Uploader;
 
@@ -152,6 +153,35 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         );
     }
 
+    @Override
+    @Transactional
+    public void addWibeeCardSharedPayment(
+            Long userId,
+            Long travelId,
+            SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
+    ) {
+
+        // 회원 정보 가져오기
+        User user = getUser(userId);
+
+        // 위비 트래블 카드가 연동되어 있는 계좌
+        Account account = getConnectedWibeeCardAccount(user);
+
+        // 여행 정보 가져오기
+        Travel travel = getTravel(travelId);
+
+        // 여행 멤버 가져오기
+        TravelMember travelMember = getTravelMember(userId, travelId);
+
+        // 입력으로 들어온 거래 내역을 공동 결제 내역으로 저장
+        registerWibeeCardSharedPayment(
+                sharedPaymentWibeeCardRegisterRequest.getHistoryId(),
+                travel,
+                travelMember,
+                account
+        );
+    }
+
     Travel getTravel(Long travelId) {
         return travelRepository.findById(travelId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
@@ -177,6 +207,25 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         return Category.ETC;
     }
 
+    User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED));
+    }
+
+    Account getConnectedWibeeCardAccount(User user) {
+
+        // 위비 카드를 발급 받지 않은 회원인 경우
+        if(user.getWibeeCardAccount() == null)
+            throw new CustomException(BankingErrorCode.WIBEE_CARD_NOT_ISSUED);
+
+        return user.getWibeeCardAccount();
+    }
+
+    History getHistory(Long historyId) {
+        return historyRepository.findById(historyId)
+                .orElseThrow(() -> new CustomException(BankingErrorCode.HISTORY_NOT_FOUND));
+    }
+
     void validatePaymentAmount(Double foreignPaymentAmount, Double exchangeRate) {
 
         // 둘 다 null 값이거나, null 값이 아니거나
@@ -196,6 +245,34 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         TravelMember travelMember = getTravelMember(userId, travelId);
         if(!sharedPayment.getAddedByMember().equals(travelMember))
             throw new CustomException(PaymentErrorCode.NO_PERMISSION_TO_MODIFY_SHARED_PAYMENT);
+    }
+
+    void validateHistoryToAccount(History history, Account account) {
+
+        if(history.getAccount() != account)
+            throw new CustomException(BankingErrorCode.HISTORY_ACCESS_FORBIDDEN);
+    }
+
+    void validateisWibeeCardUsedHistory(History history) {
+
+        if(!history.isWibeeCard()) {
+            throw new CustomException(BankingErrorCode.HISTORY_ACCESS_FORBIDDEN);
+        }
+    }
+
+    void validateHistoryDate(Travel travel, History history) {
+
+        // 여행일 이전이나 이후에 발생한 결제 내역이면 검사 통과
+        if (travel.getTravelStartDate().isAfter(history.getDate().toLocalDate())
+                || travel.getTravelEndDate().isBefore(history.getDate().toLocalDate()))
+            return;
+
+        throw new CustomException(ValidationErrorCode.DATE_RANGE_ERROR);
+    }
+
+    void validateisAddedHistory(History history) {
+        if(history.isAddedSharedPayment())
+            throw new CustomException(BankingErrorCode.PAYMENT_ALREADY_EXISTS);
     }
 
     LocalDateTime dateTimeFormatter(String date) {
@@ -227,5 +304,54 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
             throw new CustomException(ValidationErrorCode.MISSING_REQUIRED_FIELDS);
 
         travel.updateMainImage(imageUrl);
+    }
+
+    void saveWibeeCardSharedPayment(
+            TravelMember travelMember,
+            Travel travel,
+            History history
+    ) {
+        sharedPaymentRepository.save(
+                SharedPayment.builder()
+                        .addedByMember(travelMember)
+                        .travel(travel)
+                        .currencyUnit(CurrencyUnit.KRW)
+                        .paymentAmount(history.getPayAM())
+                        .isManuallyAdded(false)
+                        .category(getCategory(history.getRqspeNm()))
+                        .storeName(history.getRqspeNm())
+                        .paymentDate(history.getDate())
+                        .build()
+        );
+    }
+
+    void registerWibeeCardSharedPayment(
+            List<Long> historyId,
+            Travel travel,
+            TravelMember travelMember,
+            Account account
+    ) {
+        for (Long id : historyId) {
+            // 거래 내역 가져오기
+            History history = getHistory(id);
+
+            // 위비 카드에 연결된 계좌의 거래 내역이 맞는지 확인
+            validateHistoryToAccount(history, account);
+
+            // 위비 카드 결제 내역이 맞는지 확인
+            validateisWibeeCardUsedHistory(history);
+
+            // 해당 거래 내역이 여행 기간 전이나 후에 발생한 거래내역이 맞는지
+            validateHistoryDate(travel, history);
+
+            // 이미 가져온 거래 내역인지 확인
+            validateisAddedHistory(history);
+
+            // 공동 결제 내역에 추가
+            saveWibeeCardSharedPayment(travelMember, travel, history);
+
+            // 추가 후 상태 변경
+            history.addedSharedPayment();
+        }
     }
 }

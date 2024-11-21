@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.payment.docs.SharedPaymentRegisterControllerDocs;
+import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.payment.SharedPaymentRegisterService;
 
@@ -68,5 +69,19 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
         );
 
         return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역 정보가 수정되었습니다.");
+    }
+
+    @Override
+    @CheckTravelAccess
+    @PostMapping("/manual-wibee-card")
+    public SuccessResponse<Void> addWibeeCardSharedPayment(
+            @PathVariable Long travelId,
+            @RequestBody SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
+    ) {
+        sharedPaymentRegisterService.addWibeeCardSharedPayment(
+                userId, travelId, sharedPaymentWibeeCardRegisterRequest
+        );
+
+        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역이 추가되었습니다.");
     }
 }
