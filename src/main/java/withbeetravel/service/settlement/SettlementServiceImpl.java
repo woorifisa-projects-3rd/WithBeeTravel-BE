@@ -1,12 +1,13 @@
+
+
+
+
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
-import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.settlement.ShowMyDetailPaymentResponse;
 import withbeetravel.dto.response.settlement.ShowMyTotalPaymentResponse;
 import withbeetravel.dto.response.settlement.ShowOtherSettlementResponse;
@@ -134,9 +135,10 @@ public class SettlementServiceImpl implements SettlementService {
         validateSettlementRequestAlreadyAgree(travelMemberSettlementHistory);
 
         // 나의 총 정산 금액이 마이너스인 경우, 잔액이 부족하지 않은 지 확인
+        User user = validateUser(userId);
         int myTotalPaymentCost =
                 travelMemberSettlementHistory.getOwnPaymentCost() - travelMemberSettlementHistory.getActualBurdenCost();
-        Account myConnectedAccount = selfTravelMember.getConnectedAccount();
+        Account myConnectedAccount = user.getConnectedAccount();
         validateMyBalanceIsEnough(myTotalPaymentCost, myConnectedAccount);
 
         // disagree_count가 2 이상이면 isAgreed를 true로 변경, 1이면 정산 진행, 0이면 에러 발생
@@ -213,10 +215,15 @@ public class SettlementServiceImpl implements SettlementService {
         }
     }
 
+    private User validateUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED));
+    }
+
     private void processSettlement(List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Account managerAccount, Travel travel) {
         for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
             int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
-            Account connectedAccount = settlementHistory.getTravelMember().getConnectedAccount();
+            User user = settlementHistory.getTravelMember().getUser();
+            Account connectedAccount = user.getConnectedAccount();
             if (totalPaymentCost < 0) {
                 accountService.transfer(connectedAccount.getId(),
                         managerAccount.getAccountNumber(), -totalPaymentCost, "위비트래블 정산금 출금");
@@ -276,7 +283,7 @@ public class SettlementServiceImpl implements SettlementService {
 
             if (totalPaymentCost < 0) {
                 TravelMember travelMember = settlementHistory.getTravelMember();
-                Account connectedAccount = travelMember.getConnectedAccount();
+                Account connectedAccount = travelMember.getUser().getConnectedAccount();
 
                 if (connectedAccount.getBalance() + totalPaymentCost < 0) {
                     insufficientBalanceMembers.add(travelMember);
