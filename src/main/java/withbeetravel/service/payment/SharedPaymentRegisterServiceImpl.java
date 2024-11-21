@@ -39,7 +39,7 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
 
     @Override
     @Transactional
-    public SuccessResponse<Void> addManualSharedPayment(
+    public void addManualSharedPayment(
             Long userId,
             Long travelId,
             String paymentDate,
@@ -96,13 +96,11 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
 
         // 공동 결제 내역 참여 멤버 수정
         setParticipatedMembers(sharedPayment, members);
-
-        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역이 추가되었습니다.");
     }
 
     @Override
     @Transactional
-    public SuccessResponse<Void> updateManualSharedPayment(
+    public void updateManualSharedPayment(
             Long userId,
             Long travelId,
             Long sharedPaymentId,
@@ -152,9 +150,6 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
                 storeName,
                 dateTimeFormatter(paymentDate)
         );
-
-
-        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역 정보가 수정되었습니다.");
     }
 
     Travel getTravel(Long travelId) {
