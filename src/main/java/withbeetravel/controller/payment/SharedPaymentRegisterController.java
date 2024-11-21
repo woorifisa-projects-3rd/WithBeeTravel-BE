@@ -1,6 +1,7 @@
 package withbeetravel.controller.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.aspect.CheckTravelAccess;
@@ -36,11 +37,13 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
         
-        return sharedPaymentRegisterService.addManualSharedPayment(
+        sharedPaymentRegisterService.addManualSharedPayment(
                 userId, travelId, paymentDate, storeName, paymentAmount,
                 foreignPaymentAmount, currencyUnit, exchangeRate, paymentImage, paymentComment,
                 isMainImage
         );
+
+        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역이 추가되었습니다.");
     }
 
     @Override
@@ -59,11 +62,13 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
             @RequestParam(value = "paymentComment", required = false) String paymentComment,
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
-        return sharedPaymentRegisterService.updateManualSharedPayment(
+        sharedPaymentRegisterService.updateManualSharedPayment(
                 userId, travelId, sharedPaymentId, paymentDate, storeName,
                 paymentAmount, foreignPaymentAmount, currencyUnit, exchangeRate, paymentImage,
                 paymentComment, isMainImage
         );
+
+        return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역 정보가 수정되었습니다.");
     }
 
     @Override

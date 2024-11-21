@@ -6,7 +6,7 @@ import withbeetravel.dto.response.SuccessResponse;
 
 public interface SharedPaymentRegisterService {
 
-    SuccessResponse<Void> addManualSharedPayment(
+    void addManualSharedPayment(
             Long userId,
             Long travelId,
             String paymentDate,
@@ -20,7 +20,7 @@ public interface SharedPaymentRegisterService {
             boolean isMainImage
     );
 
-    SuccessResponse<Void> updateManualSharedPayment(
+    void updateManualSharedPayment(
             Long userId,
             Long travelId,
             Long sharedPaymentId,
