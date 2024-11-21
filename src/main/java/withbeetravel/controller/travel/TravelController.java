@@ -1,12 +1,16 @@
 package withbeetravel.controller.travel;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.request.travel.TravelRequestDto;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.travel.TravelListResponse;
 import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.service.travel.TravelService;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,4 +31,9 @@ public class TravelController {
         return travelService.editTravel(request, travelId); // ResponseEntity로 메시지 반환
     }
 
+    @GetMapping
+    public SuccessResponse<List<TravelListResponse>> getTravelList() {
+        List<TravelListResponse> travelListResponse = travelService.getTravelList();
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 리스트 조회 성공", travelListResponse);
+    }
 }
