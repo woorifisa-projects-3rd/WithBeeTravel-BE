@@ -124,9 +124,13 @@ public class TravelServiceImpl implements TravelService {
             throw new CustomException(TravelErrorCode.TRAVEL_MEMBER_LIMIT);
         }
 
+        boolean userAlreadyMember = travelMemberRepository.existsByTravelIdAndUserId(travelId, userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
+        if (userAlreadyMember) {
+            throw new CustomException(TravelErrorCode.TRAVEL_USER_ALREADY_MEMBER);
+        }
 
         TravelMember newMember = TravelMember.builder()
                 .travel(travel)
