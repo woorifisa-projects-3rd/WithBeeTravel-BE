@@ -131,31 +131,26 @@ public class DataLoader implements CommandLineRunner {
                 .travel(travel1)
                 .user(user1)
                 .isCaptain(true)
-                .connectedAccount(account1)
                 .build();
         TravelMember travelMember2 = TravelMember.builder()
                 .travel(travel1)
                 .user(user2)
                 .isCaptain(false)
-                .connectedAccount(account3)
                 .build();
         TravelMember travelMember3 = TravelMember.builder()
                 .travel(travel2)
                 .user(user1)
                 .isCaptain(false)
-                .connectedAccount(account1)
                 .build();
         TravelMember travelMember4 = TravelMember.builder()
                 .travel(travel2)
                 .user(user2)
                 .isCaptain(true)
-                .connectedAccount(account3)
                 .build();
         TravelMember travelMember5 = TravelMember.builder()
                 .travel(travel1)
                 .user(user3)
                 .isCaptain(false)
-                .connectedAccount(account5)
                 .build();
         travelMemberRepository.save(travelMember1);
         travelMemberRepository.save(travelMember2);

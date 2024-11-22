@@ -10,10 +10,8 @@ import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
-import withbeetravel.repository.AccountRepository;
-import withbeetravel.repository.TravelCountryRepository;
-import withbeetravel.repository.TravelMemberRepository;
-import withbeetravel.repository.TravelRepository;
+import withbeetravel.exception.error.UserErrorCode;
+import withbeetravel.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,6 +29,7 @@ public class TravelServiceImpl implements TravelService {
     private final TravelCountryRepository travelCountryRepository;
     private final AccountRepository accountRepository;
     private final TravelMemberRepository travelMemberRepository;
+    private final UserRepository userRepository;
 
     @Override
     public TravelResponse saveTravel(TravelRequest requestDto) {
@@ -124,8 +123,14 @@ public class TravelServiceImpl implements TravelService {
             throw new CustomException(TravelErrorCode.TRAVEL_MEMBER_LIMIT);
         }
 
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+
+
         TravelMember newMember = TravelMember.builder()
                 .travel(travel)
+                .user(user)
                 .isCaptain(false)       // 초대한 사람은 Captain이 아님
                 .build();
 
