@@ -32,7 +32,7 @@ public class TravelController {
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공");
     }
 
-    @PostMapping("/{travelId}/invite-code")
+    @PostMapping("/invite-code")
     public SuccessResponse<InviteCodeSignUpResponse> signUpTravel(@RequestBody InviteCodeSignUpRequest request){
         InviteCodeSignUpResponse inviteCodeResponseDto = travelService.signUpTravel(request);
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 가입 성공", inviteCodeResponseDto);
