@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.settlementRequestLog.SettlementRequestLogDto;
 import withbeetravel.repository.SettlementRequestLogRepository;
+import withbeetravel.repository.SettlementRequestRepository;
 import withbeetravel.repository.TravelMemberRepository;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class SettlementRequestLogServiceIml implements SettlementRequestLogServi
 
     private final SettlementRequestLogRepository settlementRequestLogRepository;
     private final TravelMemberRepository travelMemberRepository;
+    private final SettlementRequestRepository settlementRequestRepository;
 
     @Override
     public List<SettlementRequestLogDto> getSettlementRequestLogs(Long userId) {
@@ -68,7 +70,9 @@ public class SettlementRequestLogServiceIml implements SettlementRequestLogServi
         if (logTitle.equals(LogTitle.PAYMENT_REQUEST)) {
             link = "travel/" + travelId + "/payments";
         } else if (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) || logTitle.equals(LogTitle.SETTLEMENT_RE_REQUEST)) {
-            link = "travel/" + travelId + "/settlement";
+            if (settlementRequestRepository.existsByTravelId(travelId)) {
+                link = "travel/" + travelId + "/settlement";
+            }
         }
         return link;
     }
