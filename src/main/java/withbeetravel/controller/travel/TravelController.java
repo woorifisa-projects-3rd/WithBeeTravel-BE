@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.request.travel.TravelRequestDto;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.service.travel.TravelService;
 
@@ -14,6 +15,12 @@ import withbeetravel.service.travel.TravelService;
 public class TravelController {
 
     private final TravelService travelService;
+
+    @CheckTravelAccess
+    @GetMapping("/{travelId}")
+    public SuccessResponse<TravelHomeResponse> getTravel(@PathVariable Long travelId) {
+        return SuccessResponse.of(200, "여행 홈 데이터 불러오기 성공", travelService.getTravel(travelId));
+    }
 
     @PostMapping
     public SuccessResponse<TravelResponseDto> saveTravel(@RequestBody TravelRequestDto request) {

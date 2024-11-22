@@ -7,15 +7,18 @@ import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.travel.TravelRequestDto;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.AccountRepository;
+import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelCountryRepository;
 import withbeetravel.repository.TravelRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,6 +32,7 @@ public class TravelServiceImpl implements TravelService {
     private final TravelRepository travelRepository;
     private final TravelCountryRepository travelCountryRepository;
     private final AccountRepository accountRepository;
+    private final SharedPaymentRepository sharedPaymentRepository;
 
     @Override
     public SuccessResponse<TravelResponseDto> saveTravel(TravelRequestDto requestDto) {
@@ -109,6 +113,34 @@ public class TravelServiceImpl implements TravelService {
 
 
         return  SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경");
+    }
+
+    @Override
+    public TravelHomeResponse getTravel(Long travelId) {
+        // Aspect에서 이미 검증했으므로 Travel은 반드시 존재
+        Travel travel = travelRepository.findById(travelId).get();
+        Map<String, Double> statistics = calculateStatistics(travelId);
+        return TravelHomeResponse.of(travel, statistics);
+    }
+
+    private Map<String, Double> calculateStatistics(Long travelId) {
+        // 지출 데이터 조회
+        List<SharedPayment> expenses = sharedPaymentRepository.findAllByTravelId(travelId);
+
+        // 총 지출액 계산
+        double totalAmount = expenses.stream()
+                .mapToDouble(SharedPayment::getPaymentAmount)
+                .sum();
+
+        // 카테고리별 비율 계산
+        return expenses.stream()
+                .collect(Collectors.groupingBy(
+                        payment -> payment.getCategory().getDescription(),
+                        Collectors.collectingAndThen(
+                                Collectors.summingDouble(SharedPayment::getPaymentAmount),
+                                amount -> Math.round((amount / totalAmount) * 1000.0) / 10.0  // 소수점 첫째자리까지 반올림
+                        )
+                ));
     }
 
 }

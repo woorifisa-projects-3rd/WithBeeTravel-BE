@@ -19,6 +19,7 @@ public class DataLoader implements CommandLineRunner {
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
+    private final TravelCountryRepository travelCountryRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -101,8 +102,8 @@ public class DataLoader implements CommandLineRunner {
                 .travelStartDate(LocalDate.of(2024, 6, 1))
                 .travelEndDate(LocalDate.of(2024, 6, 7))
                 .inviteCode("SUMMER2024")
-                .mainImage("summer_vacation.jpg")
-                .isDomesticTravel(true)
+                .mainImage(null)
+                .isDomesticTravel(false)
                 .settlementStatus(SettlementStatus.PENDING)
                 .build();
         Travel travel2 = Travel.builder()
@@ -110,8 +111,8 @@ public class DataLoader implements CommandLineRunner {
                 .travelStartDate(LocalDate.of(2024, 12, 1))
                 .travelEndDate(LocalDate.of(2024, 12, 5))
                 .inviteCode("WINTER2024")
-                .mainImage("winter_trip.jpg")
-                .isDomesticTravel(false)
+                .mainImage(null)
+                .isDomesticTravel(true)
                 .settlementStatus(SettlementStatus.DONE)
                 .build();
         travelRepository.save(travel1);
@@ -122,31 +123,26 @@ public class DataLoader implements CommandLineRunner {
                 .travel(travel1)
                 .user(user1)
                 .isCaptain(true)
-                .connectedAccount(account1)
                 .build();
         TravelMember travelMember2 = TravelMember.builder()
                 .travel(travel1)
                 .user(user2)
                 .isCaptain(false)
-                .connectedAccount(account3)
                 .build();
         TravelMember travelMember3 = TravelMember.builder()
                 .travel(travel2)
                 .user(user1)
                 .isCaptain(false)
-                .connectedAccount(account1)
                 .build();
         TravelMember travelMember4 = TravelMember.builder()
                 .travel(travel2)
                 .user(user2)
                 .isCaptain(true)
-                .connectedAccount(account3)
                 .build();
         TravelMember travelMember5 = TravelMember.builder()
                 .travel(travel1)
                 .user(user3)
                 .isCaptain(false)
-                .connectedAccount(account5)
                 .build();
         travelMemberRepository.save(travelMember1);
         travelMemberRepository.save(travelMember2);
@@ -221,5 +217,23 @@ public class DataLoader implements CommandLineRunner {
                 paymentParticipatedMemberRepository.save(participant3);
             }
         }
+
+        TravelCountry travelCountry1 = TravelCountry.builder()
+                .travel(travel1)
+                .country(Country.JP)
+                .build();
+        TravelCountry travelCountry2 = TravelCountry.builder()
+                .travel(travel1)
+                .country(Country.CN)
+                .build();
+        TravelCountry travelCountry3 = TravelCountry.builder()
+                .travel(travel2)
+                .country(Country.KR)
+                .build();
+
+        // TravelCountry 저장
+        travelCountryRepository.save(travelCountry1);
+        travelCountryRepository.save(travelCountry2);
+        travelCountryRepository.save(travelCountry3);
     }
 }
