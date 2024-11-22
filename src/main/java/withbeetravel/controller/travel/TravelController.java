@@ -7,6 +7,7 @@ import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.service.travel.TravelService;
@@ -20,8 +21,8 @@ public class TravelController {
 
     @PostMapping
     public SuccessResponse<TravelResponse> saveTravel(@RequestBody TravelRequest request) {
-        TravelResponse travelResponseDto = travelService.saveTravel(request);
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponseDto);
+        TravelResponse travelResponse = travelService.saveTravel(request);
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponse);
     }
 
     @CheckTravelAccess
@@ -34,8 +35,16 @@ public class TravelController {
 
     @PostMapping("/invite-code")
     public SuccessResponse<InviteCodeSignUpResponse> signUpTravel(@RequestBody InviteCodeSignUpRequest request){
-        InviteCodeSignUpResponse inviteCodeResponseDto = travelService.signUpTravel(request);
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 가입 성공", inviteCodeResponseDto);
+        InviteCodeSignUpResponse inviteCodeResponse = travelService.signUpTravel(request);
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 가입 성공", inviteCodeResponse);
     }
+
+    @GetMapping("/{travelId}/invite-code")
+    @CheckTravelAccess
+    public SuccessResponse<InviteCodeGetResponse> getInviteCode(@PathVariable Long travelId){
+        InviteCodeGetResponse inviteCodeGetReponse = travelService.getInviteCode(travelId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "초대 코드 조회 성공", inviteCodeGetReponse);
+    }
+
 
 }

@@ -1,5 +1,4 @@
 package withbeetravel;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import java.util.Random;
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
-
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final TravelRepository travelRepository;
@@ -65,7 +63,6 @@ public class DataLoader implements CommandLineRunner {
                 .product(Product.WON통장)
                 .isConnectedWibeeCard(true)
                 .build();
-
         Account account2 = Account.builder()
                 .user(user1)
                 .accountNumber("2345-6789-0123")
@@ -73,7 +70,6 @@ public class DataLoader implements CommandLineRunner {
                 .product(Product.WON파킹통장)
                 .isConnectedWibeeCard(false)
                 .build();
-
         Account account3 = Account.builder()
                 .user(user2)
                 .accountNumber("3456-7890-1234")
@@ -81,7 +77,6 @@ public class DataLoader implements CommandLineRunner {
                 .product(Product.보통예금)
                 .isConnectedWibeeCard(true)
                 .build();
-
         Account account4 = Account.builder()
                 .user(user2)
                 .accountNumber("4567-8901-2345")
@@ -89,7 +84,6 @@ public class DataLoader implements CommandLineRunner {
                 .product(Product.으쓱통장)
                 .isConnectedWibeeCard(false)
                 .build();
-
         Account account5 = Account.builder()
                 .user(user3)
                 .accountNumber("5678-9012-3456")
@@ -97,13 +91,11 @@ public class DataLoader implements CommandLineRunner {
                 .product(Product.우리아이행복통장)
                 .isConnectedWibeeCard(false)
                 .build();
-
         accountRepository.save(account1);
         accountRepository.save(account2);
         accountRepository.save(account3);
         accountRepository.save(account4);
         accountRepository.save(account5);
-
         // Travel 더미 데이터 생성
         Travel travel1 = Travel.builder()
                 .travelName("Summer Vacation 2024")
@@ -125,7 +117,6 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         travelRepository.save(travel1);
         travelRepository.save(travel2);
-
         // TravelMember 더미 데이터 생성
         TravelMember travelMember1 = TravelMember.builder()
                 .travel(travel1)
@@ -157,7 +148,6 @@ public class DataLoader implements CommandLineRunner {
         travelMemberRepository.save(travelMember3);
         travelMemberRepository.save(travelMember4);
         travelMemberRepository.save(travelMember5);
-
         // SharedPayment와 PaymentParticipatedMembers 더미 데이터 30개 추가 생성
         for (int i = 0; i < 30; i++) {
             SharedPayment payment = SharedPayment.builder()
@@ -186,9 +176,7 @@ public class DataLoader implements CommandLineRunner {
                             0 + (i % 60),  // 0분~59분
                             0))
                     .build();
-
             SharedPayment savedPayment = sharedPaymentRepository.save(payment);
-
             // 결제 참여자 추가 (participantCount에 따라 1~3명)
             if (i % 3 == 0) {  // 1명 참여
                 PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()

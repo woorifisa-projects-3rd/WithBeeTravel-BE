@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
+import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.exception.CustomException;
@@ -123,7 +124,6 @@ public class TravelServiceImpl implements TravelService {
             throw new CustomException(TravelErrorCode.TRAVEL_MEMBER_LIMIT);
         }
 
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
@@ -134,12 +134,19 @@ public class TravelServiceImpl implements TravelService {
                 .isCaptain(false)       // 초대한 사람은 Captain이 아님
                 .build();
 
+
         travelMemberRepository.save(newMember);
 
         return InviteCodeSignUpResponse.builder()
                 .travelId(travelId)
                 .build();
-
     }
 
+
+    @Override
+    public InviteCodeGetResponse getInviteCode(Long travelId){
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
+
+        return new InviteCodeGetResponse(travel.getInviteCode());
+    }
 }
