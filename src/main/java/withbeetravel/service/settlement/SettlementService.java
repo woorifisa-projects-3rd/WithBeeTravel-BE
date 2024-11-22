@@ -8,4 +8,6 @@ public interface SettlementService {
     void requestSettlement(Long userId, Long travelId);
 
     String agreeSettlement(Long userId, Long travelId);
+
+    void cancelSettlement(Long userId, Long travelId);
 }

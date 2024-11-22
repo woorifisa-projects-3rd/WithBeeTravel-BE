@@ -37,4 +37,11 @@ public class SettlementController {
         String message = settlementService.agreeSettlement(userId, travelId);
         return SuccessResponse.of(HttpStatus.OK.value(), message);
     }
+
+    @DeleteMapping
+    @CheckTravelAccess
+    SuccessResponse<Void> cancelSettlement(@PathVariable Long travelId) {
+        settlementService.cancelSettlement(userId, travelId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "정산 취소 성공");
+    }
 }

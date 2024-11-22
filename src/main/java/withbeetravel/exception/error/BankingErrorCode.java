@@ -27,6 +27,9 @@ public class BankingErrorCode extends ErrorCode{
     public static final BankingErrorCode PAYMENT_ALREADY_EXISTS
             = new BankingErrorCode(HttpStatus.NOT_FOUND,"PAYMENT_ALREADY_EXISTS","BANKING-007","이미 추가된 결제 내역입니다");
 
+    public static final BankingErrorCode INSUFFICIENT_MANAGER_ACCOUNT_BALANCE
+            = new BankingErrorCode(HttpStatus.BAD_REQUEST,"INSUFFICIENT_MANAGER_ACCOUNT_BALANCE","BANKING-008","관리자 계좌의 잔액 부족");
+
     public static final BankingErrorCode INVALID_PIN_NUMBER
             = new BankingErrorCode(HttpStatus.BAD_REQUEST, "INVALID_PIN_NUMBER", "BANKING-009", "잘못된 핀 번호입니다");
 

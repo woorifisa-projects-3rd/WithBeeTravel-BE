@@ -127,12 +127,23 @@ public class AccountServiceImpl implements AccountService {
         // 타겟 계좌 입금 처리
 
         // 타겟 계좌 내역 객체 생성, 저장
-        History targetHistory = History.builder().account(targetAccount).rcvAm(amount).rqspeNm(account.getUser().getName())
-                .date(LocalDateTime.now()).balance(targetAccount.getBalance()+amount).isWibeeCard(false).build();
+        // 관리자 계좌에서 사용자에게 송금할 경우, 송금 메시지를 "위비트래블 정산금 입금"으로 지정
+        History targetHistory;
+        if (account.getId() == 9999L) {
+            targetHistory = createTargetHistory(amount, targetAccount, account, "위비트래블 정산금 입금");
+        } else {
+            targetHistory = createTargetHistory(amount, targetAccount, account, account.getUser().getName());
+        }
+
         historyRepository.save(targetHistory);
 
         // 상대 계좌 입금 처리
         targetAccount.transfer(amount);
+    }
+
+    private History createTargetHistory(int amount, Account targetAccount, Account account, String rqspeNm) {
+        return History.builder().account(targetAccount).rcvAm(amount).rqspeNm(rqspeNm)
+                .date(LocalDateTime.now()).balance(targetAccount.getBalance() + amount).isWibeeCard(false).build();
     }
 
     @Transactional
