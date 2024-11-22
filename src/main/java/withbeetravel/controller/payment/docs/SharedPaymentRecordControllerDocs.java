@@ -63,7 +63,7 @@ public interface SharedPaymentRecordControllerDocs {
             @ApiResponse(responseCode = "404", description = "TRAVEL-001\nPAYMENT-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "422", description = "VALIDATION-004", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    public SuccessResponse addAndUpdatePaymentRecord(Long travelId, Long sharedPaymentId,
+    public SuccessResponse<Void> addAndUpdatePaymentRecord(Long travelId, Long sharedPaymentId,
                                                      MultipartFile paymentImage, String paymentComment, boolean isMainImage);
 
     @Operation(
