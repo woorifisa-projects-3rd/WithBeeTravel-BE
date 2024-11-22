@@ -23,6 +23,11 @@ public class User {
     @JsonManagedReference
     private Account wibeeCardAccount;
 
+    @OneToOne
+    @JoinColumn(name = "connected_account")
+    @JsonManagedReference
+    private Account connectedAccount;
+
     @Column(name = "email", nullable = false)
     private String email;
 
@@ -45,11 +50,12 @@ public class User {
     private boolean accountLocked;
 
     @Builder
-    public User(Long id, Account wibeeCardAccount, String email,
+    public User(Long id, Account wibeeCardAccount, Account connectedAccount, String email,
                 String password, String pinNumber, String name,
                 int profileImage, int failedPinCount, boolean accountLocked) {
         this.id = id;
         this.wibeeCardAccount = wibeeCardAccount;
+        this.connectedAccount = connectedAccount;
         this.email = email;
         this.password = password;
         this.pinNumber = pinNumber;
