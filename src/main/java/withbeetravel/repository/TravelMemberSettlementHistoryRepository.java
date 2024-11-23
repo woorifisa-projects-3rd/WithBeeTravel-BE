@@ -16,4 +16,6 @@ public interface TravelMemberSettlementHistoryRepository extends JpaRepository<T
             "ORDER BY (t.ownPaymentCost - t.actualBurdenCost)")
     List<TravelMemberSettlementHistory>
     findAllBySettlementRequestIdOrderByCalculatedCost(@Param("settlementRequestId") Long settlementRequestId);
+
+   void deleteAllBySettlementRequestId(Long settlementRequestId);
 }
