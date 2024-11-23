@@ -24,29 +24,46 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // User 더미 데이터 생성
         User user1 = User.builder()
-                .email("user1@example.com")
+                .email("lee@example.com")
                 .password("password123")
                 .pinNumber("123456")
-                .name("User One")
+                .name("이도이")
                 .profileImage(1)
                 .build();
         User user2 = User.builder()
-                .email("user2@example.com")
+                .email("gong@example.com")
                 .password("password123")
-                .pinNumber("567890")
-                .name("User Two")
+                .pinNumber("234567")
+                .name("공소연")
                 .profileImage(2)
                 .build();
         User user3 = User.builder()
-                .email("user3@example.com")
+                .email("yoo@example.com")
                 .password("password123")
-                .pinNumber("567890")
-                .name("User Three")
+                .pinNumber("345678")
+                .name("유승아")
                 .profileImage(3)
                 .build();
+        User user4 = User.builder()
+                .email("kim@example.com")
+                .password("password123")
+                .pinNumber("456789")
+                .name("김호철")
+                .profileImage(4)
+                .build();
+        User user5 = User.builder()
+                .email("kong@example.com")
+                .password("password123")
+                .pinNumber("567890")
+                .name("공예진")
+                .profileImage(5)
+                .build();
+
         userRepository.save(user1);
         userRepository.save(user2);
         userRepository.save(user3);
+        userRepository.save(user4);
+        userRepository.save(user5);
 
         // Account 더미 데이터 생성
         Account account1 = Account.builder()
@@ -97,20 +114,20 @@ public class DataLoader implements CommandLineRunner {
 
         // Travel 더미 데이터 생성
         Travel travel1 = Travel.builder()
-                .travelName("Summer Vacation 2024")
+                .travelName("제주도 여름 여행")
                 .travelStartDate(LocalDate.of(2024, 6, 1))
                 .travelEndDate(LocalDate.of(2024, 6, 7))
-                .inviteCode("SUMMER2024")
-                .mainImage("summer_vacation.jpg")
+                .inviteCode("JEJU2024")
+                .mainImage("jeju_vacation.jpg")
                 .isDomesticTravel(true)
                 .settlementStatus(SettlementStatus.PENDING)
                 .build();
         Travel travel2 = Travel.builder()
-                .travelName("Winter Trip 2024")
+                .travelName("일본 겨울 여행")
                 .travelStartDate(LocalDate.of(2024, 12, 1))
                 .travelEndDate(LocalDate.of(2024, 12, 5))
-                .inviteCode("WINTER2024")
-                .mainImage("winter_trip.jpg")
+                .inviteCode("JAPAN2024")
+                .mainImage("japan_trip.jpg")
                 .isDomesticTravel(false)
                 .settlementStatus(SettlementStatus.DONE)
                 .build();
@@ -122,43 +139,56 @@ public class DataLoader implements CommandLineRunner {
                 .travel(travel1)
                 .user(user1)
                 .isCaptain(true)
-                .connectedAccount(account1)
                 .build();
         TravelMember travelMember2 = TravelMember.builder()
                 .travel(travel1)
                 .user(user2)
                 .isCaptain(false)
-                .connectedAccount(account3)
                 .build();
         TravelMember travelMember3 = TravelMember.builder()
-                .travel(travel2)
-                .user(user1)
-                .isCaptain(false)
-                .connectedAccount(account1)
-                .build();
-        TravelMember travelMember4 = TravelMember.builder()
-                .travel(travel2)
-                .user(user2)
-                .isCaptain(true)
-                .connectedAccount(account3)
-                .build();
-        TravelMember travelMember5 = TravelMember.builder()
                 .travel(travel1)
                 .user(user3)
                 .isCaptain(false)
-                .connectedAccount(account5)
                 .build();
+        TravelMember travelMember4 = TravelMember.builder()
+                .travel(travel1)
+                .user(user4)
+                .isCaptain(false)
+                .build();
+        TravelMember travelMember5 = TravelMember.builder()
+                .travel(travel1)
+                .user(user5)
+                .isCaptain(false)
+                .build();
+
+        // travel2의 멤버
+        TravelMember travelMember6 = TravelMember.builder()
+                .travel(travel2)
+                .user(user1)
+                .isCaptain(false)
+                .build();
+        TravelMember travelMember7 = TravelMember.builder()
+                .travel(travel2)
+                .user(user2)
+                .isCaptain(true)
+                .build();
+
         travelMemberRepository.save(travelMember1);
         travelMemberRepository.save(travelMember2);
         travelMemberRepository.save(travelMember3);
         travelMemberRepository.save(travelMember4);
         travelMemberRepository.save(travelMember5);
+        travelMemberRepository.save(travelMember6);
+        travelMemberRepository.save(travelMember7);
 
         // SharedPayment와 PaymentParticipatedMembers 더미 데이터 30개 추가 생성
         for (int i = 0; i < 30; i++) {
             SharedPayment payment = SharedPayment.builder()
-                    .addedByMember(i % 3 == 0 ? travelMember1 :
-                            i % 3 == 1 ? travelMember2 : travelMember5)
+                    .addedByMember(i % 5 == 0 ? travelMember1 :  // 5명이 돌아가면서 결제
+                            i % 5 == 1 ? travelMember2 :
+                                    i % 5 == 2 ? travelMember3 :
+                                            i % 5 == 3 ? travelMember4 :
+                                                    travelMember5)
                     .travel(travel1)
                     .currencyUnit(i % 3 == 0 ? CurrencyUnit.USD :
                             i % 3 == 1 ? CurrencyUnit.KRW : CurrencyUnit.JPY)
@@ -166,16 +196,24 @@ public class DataLoader implements CommandLineRunner {
                     .foreignPaymentAmount(100.0 + i)
                     .exchangeRate(i % 3 == 0 ? 1.0 :
                             i % 3 == 1 ? 1000.0 : 100.0)
-                    .paymentComment("Payment " + (i + 5))
+                    .paymentComment(i % 5 == 0 ? "흑돼지 삼겹살 2인분" :
+                            i % 5 == 1 ? "아메리카노 3잔" :
+                                    i % 5 == 2 ? "숙박비 1박" :
+                                            i % 5 == 3 ? "기념품 구매" :
+                                                    "호텔 수영장 이용")
                     .paymentImage(null)
                     .isManuallyAdded(i % 2 == 0)
-                    .participantCount(i % 3 + 1)  // 1~3명이 참여
+                    .participantCount(5)  // 모든 멤버가 참여하므로 5로 고정
                     .category(i % 5 == 0 ? Category.FOOD :
                             i % 5 == 1 ? Category.TRANSPORTATION :
                                     i % 5 == 2 ? Category.ACCOMMODATION :
                                             i % 5 == 3 ? Category.SHOPPING :
                                                     Category.ACTIVITY)
-                    .storeName("Store " + (i + 5))
+                    .storeName(i % 5 == 0 ? "제주 흑돼지 맛집" :
+                            i % 5 == 1 ? "서귀포 카페" :
+                                    i % 5 == 2 ? "제주 게스트하우스" :
+                                            i % 5 == 3 ? "올레마켓" :
+                                                    "제주관광호텔")
                     .paymentDate(LocalDateTime.of(2024, 6,
                             2 + (i % 5),  // 6월 2일~6일
                             10 + (i % 14),  // 10시~23시
@@ -185,41 +223,33 @@ public class DataLoader implements CommandLineRunner {
 
             SharedPayment savedPayment = sharedPaymentRepository.save(payment);
 
-            // 결제 참여자 추가 (participantCount에 따라 1~3명)
-            if (i % 3 == 0) {  // 1명 참여
-                PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()
-                        .sharedPayment(savedPayment)
-                        .travelMember(travelMember1)
-                        .build();
-                paymentParticipatedMemberRepository.save(participant1);
-            } else if (i % 3 == 1) {  // 2명 참여
-                PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()
-                        .sharedPayment(savedPayment)
-                        .travelMember(travelMember1)
-                        .build();
-                PaymentParticipatedMember participant2 = PaymentParticipatedMember.builder()
-                        .sharedPayment(savedPayment)
-                        .travelMember(travelMember2)
-                        .build();
-                paymentParticipatedMemberRepository.save(participant1);
-                paymentParticipatedMemberRepository.save(participant2);
-            } else {  // 3명 참여
-                PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()
-                        .sharedPayment(savedPayment)
-                        .travelMember(travelMember1)
-                        .build();
-                PaymentParticipatedMember participant2 = PaymentParticipatedMember.builder()
-                        .sharedPayment(savedPayment)
-                        .travelMember(travelMember2)
-                        .build();
-                PaymentParticipatedMember participant3 = PaymentParticipatedMember.builder()
-                        .sharedPayment(savedPayment)
-                        .travelMember(travelMember5)
-                        .build();
-                paymentParticipatedMemberRepository.save(participant1);
-                paymentParticipatedMemberRepository.save(participant2);
-                paymentParticipatedMemberRepository.save(participant3);
-            }
+            // 모든 멤버를 참여자로 추가
+            PaymentParticipatedMember participant1 = PaymentParticipatedMember.builder()
+                    .sharedPayment(savedPayment)
+                    .travelMember(travelMember1)
+                    .build();
+            PaymentParticipatedMember participant2 = PaymentParticipatedMember.builder()
+                    .sharedPayment(savedPayment)
+                    .travelMember(travelMember2)
+                    .build();
+            PaymentParticipatedMember participant3 = PaymentParticipatedMember.builder()
+                    .sharedPayment(savedPayment)
+                    .travelMember(travelMember3)
+                    .build();
+            PaymentParticipatedMember participant4 = PaymentParticipatedMember.builder()
+                    .sharedPayment(savedPayment)
+                    .travelMember(travelMember4)
+                    .build();
+            PaymentParticipatedMember participant5 = PaymentParticipatedMember.builder()
+                    .sharedPayment(savedPayment)
+                    .travelMember(travelMember5)
+                    .build();
+
+            paymentParticipatedMemberRepository.save(participant1);
+            paymentParticipatedMemberRepository.save(participant2);
+            paymentParticipatedMemberRepository.save(participant3);
+            paymentParticipatedMemberRepository.save(participant4);
+            paymentParticipatedMemberRepository.save(participant5);
         }
     }
 }
