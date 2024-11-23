@@ -1,6 +1,11 @@
 package withbeetravel.domain;
 
 import lombok.Getter;
+import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.PaymentErrorCode;
+import withbeetravel.exception.error.TravelErrorCode;
+
+import java.util.Arrays;
 
 @Getter
 public enum Category {
@@ -17,5 +22,12 @@ public enum Category {
 
     Category(String description) {
         this.description = description;
+    }
+
+    public static Category fromString(String description) {
+        return Arrays.stream(values())
+                .filter(category -> category.description.equals(description))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_CATEGORY_NOT_FOUND));
     }
 }

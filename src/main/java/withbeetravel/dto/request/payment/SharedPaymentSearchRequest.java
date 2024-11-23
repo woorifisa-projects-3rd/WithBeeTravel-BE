@@ -27,4 +27,9 @@ public class SharedPaymentSearchRequest {
 
     @Schema(description = "특정 멤버의 결제만 보기")
     private Long memberId;
+
+    @Schema(description = "여행 카테고리", allowableValues = {"항공", "교통", "숙박", "식비", "관광", "액티비티", "쇼핑", "기타"})
+    @Pattern(regexp = "^(항공|교통|숙박|식비|관광|액티비티|쇼핑|기타)?$",
+            message = "유효하지 않은 카테고리입니다.")
+    private String category;
 }
