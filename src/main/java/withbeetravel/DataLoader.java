@@ -19,6 +19,7 @@ public class DataLoader implements CommandLineRunner {
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
+    private final TravelCountryRepository travelCountryRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -62,8 +63,6 @@ public class DataLoader implements CommandLineRunner {
         userRepository.save(user1);
         userRepository.save(user2);
         userRepository.save(user3);
-        userRepository.save(user4);
-        userRepository.save(user5);
 
         // Account 더미 데이터 생성
         Account account1 = Account.builder()
@@ -120,6 +119,9 @@ public class DataLoader implements CommandLineRunner {
                 .inviteCode("JEJU2024")
                 .mainImage("jeju_vacation.jpg")
                 .isDomesticTravel(true)
+                .inviteCode("SUMMER2024")
+                .mainImage(null)
+                .isDomesticTravel(false)
                 .settlementStatus(SettlementStatus.PENDING)
                 .build();
         Travel travel2 = Travel.builder()
@@ -129,6 +131,9 @@ public class DataLoader implements CommandLineRunner {
                 .inviteCode("JAPAN2024")
                 .mainImage("japan_trip.jpg")
                 .isDomesticTravel(false)
+                .inviteCode("WINTER2024")
+                .mainImage(null)
+                .isDomesticTravel(true)
                 .settlementStatus(SettlementStatus.DONE)
                 .build();
         travelRepository.save(travel1);
@@ -251,5 +256,23 @@ public class DataLoader implements CommandLineRunner {
             paymentParticipatedMemberRepository.save(participant4);
             paymentParticipatedMemberRepository.save(participant5);
         }
+
+        TravelCountry travelCountry1 = TravelCountry.builder()
+                .travel(travel1)
+                .country(Country.JP)
+                .build();
+        TravelCountry travelCountry2 = TravelCountry.builder()
+                .travel(travel1)
+                .country(Country.CN)
+                .build();
+        TravelCountry travelCountry3 = TravelCountry.builder()
+                .travel(travel2)
+                .country(Country.KR)
+                .build();
+
+        // TravelCountry 저장
+        travelCountryRepository.save(travelCountry1);
+        travelCountryRepository.save(travelCountry2);
+        travelCountryRepository.save(travelCountry3);
     }
 }
