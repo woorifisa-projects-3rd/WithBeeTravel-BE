@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import withbeetravel.domain.TravelMember;
 import java.util.List;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,6 +14,9 @@ public interface TravelMemberRepository extends JpaRepository<TravelMember, Long
 
     List<TravelMember> findAllByTravelId(Long travelId);
 
+    int countByTravelId(Long travelId);
+
     List<TravelMember> findAllByUserId(Long userId);
-    Boolean existsByTravelIdAndId(Long travelId, Long memberId);
+
+    boolean existsByTravelIdAndUserId(Long travelId, Long userId);
 }
