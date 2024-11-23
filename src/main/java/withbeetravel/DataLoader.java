@@ -5,8 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import withbeetravel.domain.*;
 import withbeetravel.repository.*;
-import withbeetravel.service.payment.SharedPaymentRegisterService;
-import withbeetravel.service.payment.SharedPaymentRegisterServiceImpl;
+import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +21,7 @@ public class DataLoader implements CommandLineRunner {
     private final SharedPaymentRepository sharedPaymentRepository;
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
     private final TravelCountryRepository travelCountryRepository;
-    private final SharedPaymentRegisterServiceImpl sharedPaymentRegisterService;
+    private final SharedPaymentCategoryClassificationService sharedPaymentCategoryClassificationService;
 
 
     @Override
@@ -216,7 +215,7 @@ public class DataLoader implements CommandLineRunner {
                                     i % 5 == 2 ? "제주 게스트하우스" :
                                             i % 5 == 3 ? "올레마켓" :
                                                     "제주관광호텔")
-                    .category(sharedPaymentRegisterService.getCategory(
+                    .category(sharedPaymentCategoryClassificationService.getCategory(
                             i % 5 == 0 ? "제주 흑돼지 맛집" :
                                     i % 5 == 1 ? "서귀포 카페" :
                                             i % 5 == 2 ? "제주 게스트하우스" :
