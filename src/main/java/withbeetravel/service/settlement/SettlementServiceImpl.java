@@ -1,12 +1,13 @@
+
+
+
+
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
-import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.settlement.ShowMyDetailPaymentResponse;
 import withbeetravel.dto.response.settlement.ShowMyTotalPaymentResponse;
 import withbeetravel.dto.response.settlement.ShowOtherSettlementResponse;
@@ -84,7 +85,7 @@ public class SettlementServiceImpl implements SettlementService {
         // 정산 요청 생성
         SettlementRequest newSettlementRequest = createSettlementRequest(travel, totalMemberCount);
 
-        // 여행멤버정산내역 생ㅅ어
+        // 여행멤버정산내역 생성
         for (TravelMember member : travelMemberRepository.findAllByTravelId(travelId)) {
             Long travelMemberId = member.getId();
 
@@ -134,9 +135,10 @@ public class SettlementServiceImpl implements SettlementService {
         validateSettlementRequestAlreadyAgree(travelMemberSettlementHistory);
 
         // 나의 총 정산 금액이 마이너스인 경우, 잔액이 부족하지 않은 지 확인
+        User user = validateUser(userId);
         int myTotalPaymentCost =
                 travelMemberSettlementHistory.getOwnPaymentCost() - travelMemberSettlementHistory.getActualBurdenCost();
-        Account myConnectedAccount = selfTravelMember.getConnectedAccount();
+        Account myConnectedAccount = user.getConnectedAccount();
         validateMyBalanceIsEnough(myTotalPaymentCost, myConnectedAccount);
 
         // disagree_count가 2 이상이면 isAgreed를 true로 변경, 1이면 정산 진행, 0이면 에러 발생
@@ -184,19 +186,14 @@ public class SettlementServiceImpl implements SettlementService {
             Account managerAccount = accountRepository
                     .findById(9999L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
-            int additionalValue = 0;
-            for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
-                int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
-                Account connectedAccount = settlementHistory.getTravelMember().getConnectedAccount();
-                if (totalPaymentCost < 0) {
-                    accountService.transfer(connectedAccount.getId(),
-                            managerAccount.getAccountNumber(), -totalPaymentCost, "위비트래블 정산금 출금");
-                    additionalValue += totalPaymentCost;
-                } else {
-                    accountService.deposit(connectedAccount.getId(), totalPaymentCost, "위비트래블 정산금 입금");
-                    additionalValue += totalPaymentCost;
-                }
-            }
+            // 총 정산 금액의 합산 계산
+            int totalPaymentCostSum = getTotalPaymentCostSum(travelMemberSettlementHistories);
+
+            // 위비트래블 계좌(관리자 계좌)의 잔액 부족 확인
+            validateManagerBalance(managerAccount, totalPaymentCostSum);
+
+            // 정산 처리
+            processSettlement(travelMemberSettlementHistories, managerAccount, travel);
 
             // 정산 여부를 DONE으로 변경
             travel.updateSettlementStatus(SettlementStatus.DONE);
@@ -206,7 +203,7 @@ public class SettlementServiceImpl implements SettlementService {
 
             // 정산 완료 로그 생성
             SettlementRequestLog settlementRequestLog =
-                    saveCompleteSettlementRequestLog(travel, additionalValue);
+                    saveCompleteSettlementRequestLog(travel, totalPaymentCostSum);
             settlementRequestLogRepository.save(settlementRequestLog);
 
             return "모든 여행 멤버의 정산 동의 완료 후 정산 완료";
@@ -216,6 +213,63 @@ public class SettlementServiceImpl implements SettlementService {
         else {
             throw new CustomException(SettlementErrorCode.SETTLEMENT_DISAGREE_COUNT_NOT_CERTAIN);
         }
+    }
+
+    private User validateUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED));
+    }
+
+    private void processSettlement(List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Account managerAccount, Travel travel) {
+        for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
+            int totalPaymentCost = settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
+            User user = settlementHistory.getTravelMember().getUser();
+            Account connectedAccount = user.getConnectedAccount();
+            if (totalPaymentCost < 0) {
+                accountService.transfer(connectedAccount.getId(),
+                        managerAccount.getAccountNumber(), -totalPaymentCost, "위비트래블 정산금 출금");
+            } else {
+                // 관리자 계좌의 송금 메시지를 "{여행명}의 정산금 출금"으로 표시
+                accountService.transfer(managerAccount.getId(),
+                        connectedAccount.getAccountNumber(), totalPaymentCost, travel.getTravelName() + "의 정산금 출금");
+            }
+        }
+    }
+
+    private int getTotalPaymentCostSum(List<TravelMemberSettlementHistory> travelMemberSettlementHistories) {
+        int totalPaymentCostSum = 0;
+        for (TravelMemberSettlementHistory settlementHistory : travelMemberSettlementHistories) {
+            totalPaymentCostSum += settlementHistory.getOwnPaymentCost() - settlementHistory.getActualBurdenCost();
+        }
+        return totalPaymentCostSum;
+    }
+
+    private void validateManagerBalance(Account managerAccount, int totalPaymentCostSum) {
+        if (managerAccount.getBalance() < totalPaymentCostSum) {
+            throw new CustomException(BankingErrorCode.INSUFFICIENT_MANAGER_ACCOUNT_BALANCE);
+        }
+    }
+
+    @Override
+    public void cancelSettlement(Long userId, Long travelId) {
+
+        // 정산 요청이 있는지 확인
+        SettlementRequest settlementRequest = findSettlementRequestByTravelId(travelId);
+
+        // 진행 중인 정산인지 확인
+        Travel travel = findTravelById(travelId);
+        validateSettlementRequestOngoing(travel);
+
+        // 멤버들의 정산 내역을 먼저 삭제
+        travelMemberSettlementHistoryRepository.deleteAllBySettlementRequestId(settlementRequest.getId());
+
+        // 정산 요청 삭제
+        settlementRequestRepository.deleteById(settlementRequest.getId());
+
+        // 정산 여부를 ONGOING -> PENDING으로 변경
+        travel.updateSettlementStatus(SettlementStatus.PENDING);
+
+        // 정산 취소 로그 저장
+        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_CANCEL);
     }
 
     private void updateIsAgreedAndDisagreeCount(TravelMemberSettlementHistory travelMemberSettlementHistory, SettlementRequest settlementRequest) {
@@ -229,7 +283,7 @@ public class SettlementServiceImpl implements SettlementService {
 
             if (totalPaymentCost < 0) {
                 TravelMember travelMember = settlementHistory.getTravelMember();
-                Account connectedAccount = travelMember.getConnectedAccount();
+                Account connectedAccount = travelMember.getUser().getConnectedAccount();
 
                 if (connectedAccount.getBalance() + totalPaymentCost < 0) {
                     insufficientBalanceMembers.add(travelMember);

@@ -6,9 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.Account;
 import withbeetravel.domain.History;
+import withbeetravel.domain.Product;
 import withbeetravel.domain.User;
+import withbeetravel.dto.request.account.AccountNumberRequest;
+import withbeetravel.dto.request.account.CreateAccountRequest;
+import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.request.account.AccountRequest;
+import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
@@ -32,41 +37,35 @@ public class AccountServiceImpl implements AccountService {
     private final HistoryRepository historyRepository;
 
     // 계좌 조회
-    public SuccessResponse<List<AccountResponse>> showAll(Long userId) {
+    public List<AccountResponse> showAll(Long userId) {
         List<Account> accounts = accountRepository.findByUserId(userId);
         List<AccountResponse> accountResponses = accounts.stream().map(AccountResponse::from).collect(Collectors.toList());
-        return SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "전체 계좌 조회 완료",
-                accountResponses
-        );
+        return accountResponses;
     }
     
     // TODO: 회원 계좌만 조회 해야함
 
     //계좌 생성
     @Transactional
-    public SuccessResponse<AccountResponse> createAccount(Long userId, AccountRequest accountRequest){
+    public AccountResponse createAccount(Long userId, CreateAccountRequest createAccountRequest){
         User thisUser = userRepository.findById(userId).orElseThrow();
+
+        Product product = createAccountRequest.getProduct();
 
         String accountNumber = generateUniqueAccountNumber();
 
         Account account = Account.builder().user(thisUser)
                 .accountNumber(accountNumber)
                 .balance(0)
-                .product(accountRequest.getProduct())
-                .isConnectedWibeeCard(false)
+                .product(product)
+                .isConnectedWibeeCard(true)
                 .build();
 
         accountRepository.save(account);
 
         AccountResponse accountResponse = AccountResponse.from(account);
 
-        return SuccessResponse.of(
-                HttpStatus.CREATED.value(),
-                "계좌 생성 완료",
-                accountResponse
-        );
+        return accountResponse;
     }
 
     // 유니크 계좌번호 확인
@@ -128,12 +127,23 @@ public class AccountServiceImpl implements AccountService {
         // 타겟 계좌 입금 처리
 
         // 타겟 계좌 내역 객체 생성, 저장
-        History targetHistory = History.builder().account(targetAccount).rcvAm(amount).rqspeNm(account.getUser().getName())
-                .date(LocalDateTime.now()).balance(targetAccount.getBalance()+amount).isWibeeCard(false).build();
+        // 관리자 계좌에서 사용자에게 송금할 경우, 송금 메시지를 "위비트래블 정산금 입금"으로 지정
+        History targetHistory;
+        if (account.getId() == 9999L) {
+            targetHistory = createTargetHistory(amount, targetAccount, account, "위비트래블 정산금 입금");
+        } else {
+            targetHistory = createTargetHistory(amount, targetAccount, account, account.getUser().getName());
+        }
+
         historyRepository.save(targetHistory);
 
         // 상대 계좌 입금 처리
         targetAccount.transfer(amount);
+    }
+
+    private History createTargetHistory(int amount, Account targetAccount, Account account, String rqspeNm) {
+        return History.builder().account(targetAccount).rcvAm(amount).rqspeNm(rqspeNm)
+                .date(LocalDateTime.now()).balance(targetAccount.getBalance() + amount).isWibeeCard(false).build();
     }
 
     @Transactional
@@ -151,41 +161,39 @@ public class AccountServiceImpl implements AccountService {
     }
 
     // accountId로 계좌 조회하기
-    public SuccessResponse<AccountResponse> accountInfo(Long accountId) {
+    public AccountResponse accountInfo(Long accountId) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()->new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
-        return  SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "accountId로 계좌 조회 성공",
-                AccountResponse.from(account)
-        );
+        return AccountResponse.from(account);
 
     }
 
-    public SuccessResponse verifyAccount(String accountNumber) {
+    public void verifyAccount(String accountNumber) {
         Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         if(account.isEmpty()){
             throw new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND);
 
         }
-        return SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "계좌 번호 존재 확인 완료"
-        );
+
     }
 
-    public SuccessResponse<AccountOwnerNameResponse> findUserNameByAccountNumber(String accountNumber) {
+    public AccountOwnerNameResponse findUserNameByAccountNumber(String accountNumber) {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
         String name = account.getUser().getName();
         AccountOwnerNameResponse accountOwnerNameResponse = new AccountOwnerNameResponse(name);
 
-        return  SuccessResponse.of(
-                HttpStatus.OK.value(),
-                "찾은 계좌 주인 이름",
-                accountOwnerNameResponse
-        );
+        return accountOwnerNameResponse;
+    }
+
+    public AccountConnectedWibeeResponse connectedWibee(Long accountId){
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+        AccountConnectedWibeeResponse accountConnectedWibeeResponse
+                = new AccountConnectedWibeeResponse(account.isConnectedWibeeCard());
+
+        return accountConnectedWibeeResponse;
     }
 }
 

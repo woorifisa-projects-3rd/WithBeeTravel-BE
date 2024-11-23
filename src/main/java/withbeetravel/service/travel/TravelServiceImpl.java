@@ -5,16 +5,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
-import withbeetravel.dto.request.travel.TravelRequestDto;
-import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
+import withbeetravel.dto.request.travel.TravelRequest;
+import withbeetravel.dto.response.travel.InviteCodeGetResponse;
+import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
+import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.dto.response.travel.TravelListResponse;
-import withbeetravel.dto.response.travel.TravelResponseDto;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
-import withbeetravel.repository.AccountRepository;
-import withbeetravel.repository.TravelCountryRepository;
-import withbeetravel.repository.TravelMemberRepository;
-import withbeetravel.repository.TravelRepository;
+import withbeetravel.exception.error.UserErrorCode;
+import withbeetravel.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,15 +33,16 @@ public class TravelServiceImpl implements TravelService {
     private final TravelCountryRepository travelCountryRepository;
     private final AccountRepository accountRepository;
     private final TravelMemberRepository travelMemberRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public SuccessResponse<TravelResponseDto> saveTravel(TravelRequestDto requestDto) {
+    public TravelResponse saveTravel(TravelRequest requestDto) {
 
         List<Account> accounts = accountRepository.findByUserId(userId);
         boolean hasConnectedWibeeCard = accounts.stream()
                 .anyMatch(Account::isConnectedWibeeCard);
 
-        if (!hasConnectedWibeeCard) {
+        if(!hasConnectedWibeeCard){
             throw new CustomException(TravelErrorCode.TRAVEL_CAPTAIN_NOT);
         }
 
@@ -82,13 +83,13 @@ public class TravelServiceImpl implements TravelService {
         }
 
         // ResponseDto 생성 및 반환
-        TravelResponseDto travelResponseDto = TravelResponseDto.from(savedTravel, travelCountries);
+        TravelResponse travelResponseDto = TravelResponse.from(savedTravel, travelCountries);
 
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공", travelResponseDto);
+        return travelResponseDto;
     }
 
     @Override
-    public SuccessResponse<Void> editTravel(TravelRequestDto requestDto, Long travelId) {
+    public void editTravel(TravelRequest requestDto, Long travelId){
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new IllegalArgumentException("Travel not found with ID : " + travelId));
 
@@ -99,38 +100,85 @@ public class TravelServiceImpl implements TravelService {
 
         travelCountryRepository.deleteByTravel(travel);
 
-        if (!requestDto.isDomesticTravel()) {
+        if(!requestDto.isDomesticTravel()){
 
             List<TravelCountry> updatedTravelCountries = requestDto.getTravelCountries().stream()
                     .map(countryName -> {
                         Country country = Country.findByName(countryName);
-                        return TravelCountry.builder().country(country).travel(travel).build();
+                        return  TravelCountry.builder().country(country).travel(travel).build();
                     }).toList();
 
             travelCountryRepository.saveAll(updatedTravelCountries);
         }
-
-
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 정보를 성공적으로 변경");
     }
 
     @Override
+    public InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest requestDto){
+        String inviteCode = requestDto.getInviteCode();
+
+        Travel travel = travelRepository.findByInviteCode(inviteCode).
+                orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_INVITECODE_NOT));
+
+        Long travelId = travel.getId();
+        int curMemberCount = travelMemberRepository.countByTravelId(travelId);
+
+
+        if(curMemberCount >= 10){
+            throw new CustomException(TravelErrorCode.TRAVEL_MEMBER_LIMIT);
+        }
+
+        boolean userAlreadyMember = travelMemberRepository.existsByTravelIdAndUserId(travelId, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+
+        if (userAlreadyMember) {
+            throw new CustomException(TravelErrorCode.TRAVEL_USER_ALREADY_MEMBER);
+        }
+
+        TravelMember newMember = TravelMember.builder()
+                .travel(travel)
+                .user(user)
+                .isCaptain(false)       // 초대한 사람은 Captain이 아님
+                .build();
+
+
+        travelMemberRepository.save(newMember);
+
+        return InviteCodeSignUpResponse.builder()
+                .travelId(travelId)
+                .build();
+    }
+
+
+    @Override
+    public InviteCodeGetResponse getInviteCode(Long travelId){
+        Travel travel = travelRepository.findById(travelId).orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
+
+        return new InviteCodeGetResponse(travel.getInviteCode());
+    }
+    
+//   user의 여행 목록 리스트 조회
+    @Override
     public List<TravelListResponse> getTravelList() {
 
-        // 여행 멤버 테이블에서 유저 id가 속한 여행 id 조회
+        // 여행 멤버 테이블에서 유저 id가 속한 여행 id 조회   
         List<TravelMember> travelMembers = travelMemberRepository.findAllByUserId(userId);
 
         return travelMembers.stream()
                 .map(travelMember -> {
                     Travel travel = travelMember.getTravel();
 
-                    //Captain의 프로필 이미지 조회
-                    Optional<TravelMember> captainMember = travelMemberRepository.findByTravelIdAndUserId(travel.getId(), userId);
-                    String profileImage = captainMember
+                    // 특정 여행에 속한 모든 멤버 조회
+                    List<TravelMember> members = travelMemberRepository.findByTravelId(travel.getId());
+
+                    // 캡틴 멤버 필터링 및 프로필 이미지 추출
+                    int profileImage = members.stream()
                             .filter(TravelMember::isCaptain)
                             .map(captain -> captain.getUser().getProfileImage())
+                            .findFirst()
                             .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_CAPTAIN_NOT_FOUND));
 
+                    // TravelListResponse 생성
                     return new TravelListResponse(
                             travel.getId(),
                             travel.getTravelName(),
@@ -139,7 +187,6 @@ public class TravelServiceImpl implements TravelService {
                             travel.getMainImage(),
                             profileImage
                     );
-
                 }).toList();
 
     }

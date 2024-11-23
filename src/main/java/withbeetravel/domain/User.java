@@ -1,5 +1,6 @@
 package withbeetravel.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,6 +18,16 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private Long id;
 
+    @OneToOne
+    @JoinColumn(name = "wibee_card_account")
+    @JsonManagedReference
+    private Account wibeeCardAccount;
+
+    @OneToOne
+    @JoinColumn(name = "connected_account")
+    @JsonManagedReference
+    private Account connectedAccount;
+
     @Column(name = "email", nullable = false)
     private String email;
 
@@ -30,10 +41,7 @@ public class User {
     private String name;
 
     @Column(name = "profile_image", nullable = false)
-    private String profileImage;
-
-    @Column(name = "has_wibee_card", nullable = false)
-    private boolean hasWibeeCard;
+    private int profileImage;
 
     @Column(name = "failed_pin_count", nullable = false)
     private int failedPinCount;
@@ -42,17 +50,22 @@ public class User {
     private boolean accountLocked;
 
     @Builder
-    public User(Long id, String email, String password, String pinNumber,
-                String name, String profileImage, boolean hasWibeeCard,
-                int failedPinCount, boolean accountLocked) {
+    public User(Long id, Account wibeeCardAccount, Account connectedAccount, String email,
+                String password, String pinNumber, String name,
+                int profileImage, int failedPinCount, boolean accountLocked) {
         this.id = id;
+        this.wibeeCardAccount = wibeeCardAccount;
+        this.connectedAccount = connectedAccount;
         this.email = email;
         this.password = password;
         this.pinNumber = pinNumber;
         this.name = name;
         this.profileImage = profileImage;
-        this.hasWibeeCard = hasWibeeCard;
         this.failedPinCount = failedPinCount;
         this.accountLocked = accountLocked;
+    }
+
+    public void updateWibeeCardAccount(Account account) {
+        this.wibeeCardAccount = account;
     }
 }

@@ -1,20 +1,24 @@
-package withbeetravel.dto.response.travel;
+package withbeetravel.dto.request.travel;
+
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class TravelListResponse {
-    private Long travelId;
+public class TravelRequest {
+
     private String travelName;
+    
+    private boolean isDomesticTravel;
+
+    private List<String> travelCountries;
+
     private String travelStartDate;
+
     private String travelEndDate;
-    private String travelMainImage;
-    private int profileImage;
+
 }

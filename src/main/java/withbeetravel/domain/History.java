@@ -37,12 +37,16 @@ public class History {
     @Column(name = "is_wibee_card", nullable = false)
     private boolean isWibeeCard;
 
+    @Column(name = "is_added_shared_payment", nullable = false)
+    private boolean isAddedSharedPayment;
+
     protected History(){};
 
     @Builder
     public History(Long id, Account account, LocalDateTime date,
                    Integer rcvAm, Integer payAM, long balance,
-                   String rqspeNm, boolean isWibeeCard) {
+                   String rqspeNm, boolean isWibeeCard,
+                   boolean isAddedSharedPayment) {
         this.id = id;
         this.account = account;
         this.date = date;
@@ -51,5 +55,10 @@ public class History {
         this.balance = balance;
         this.rqspeNm = rqspeNm;
         this.isWibeeCard = isWibeeCard;
+        this.isAddedSharedPayment = isAddedSharedPayment;
+    }
+
+    public void addedSharedPayment() {
+        this.isAddedSharedPayment = true;
     }
 }
