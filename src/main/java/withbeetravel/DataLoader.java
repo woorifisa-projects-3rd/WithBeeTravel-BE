@@ -5,6 +5,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import withbeetravel.domain.*;
 import withbeetravel.repository.*;
+import withbeetravel.service.payment.SharedPaymentRegisterService;
+import withbeetravel.service.payment.SharedPaymentRegisterServiceImpl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +22,8 @@ public class DataLoader implements CommandLineRunner {
     private final SharedPaymentRepository sharedPaymentRepository;
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
     private final TravelCountryRepository travelCountryRepository;
+    private final SharedPaymentRegisterServiceImpl sharedPaymentRegisterService;
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -63,6 +67,8 @@ public class DataLoader implements CommandLineRunner {
         userRepository.save(user1);
         userRepository.save(user2);
         userRepository.save(user3);
+        userRepository.save(user4);  // 추가
+        userRepository.save(user5);  // 추가
 
         // Account 더미 데이터 생성
         Account account1 = Account.builder()
@@ -116,26 +122,22 @@ public class DataLoader implements CommandLineRunner {
                 .travelName("제주도 여름 여행")
                 .travelStartDate(LocalDate.of(2024, 6, 1))
                 .travelEndDate(LocalDate.of(2024, 6, 7))
-                .inviteCode("JEJU2024")
-                .mainImage("jeju_vacation.jpg")
-                .isDomesticTravel(true)
                 .inviteCode("SUMMER2024")
                 .mainImage(null)
-                .isDomesticTravel(false)
+                .isDomesticTravel(true)
                 .settlementStatus(SettlementStatus.PENDING)
                 .build();
+
         Travel travel2 = Travel.builder()
                 .travelName("일본 겨울 여행")
                 .travelStartDate(LocalDate.of(2024, 12, 1))
                 .travelEndDate(LocalDate.of(2024, 12, 5))
-                .inviteCode("JAPAN2024")
-                .mainImage("japan_trip.jpg")
-                .isDomesticTravel(false)
                 .inviteCode("WINTER2024")
                 .mainImage(null)
-                .isDomesticTravel(true)
+                .isDomesticTravel(false)
                 .settlementStatus(SettlementStatus.DONE)
                 .build();
+
         travelRepository.save(travel1);
         travelRepository.save(travel2);
 
@@ -209,16 +211,18 @@ public class DataLoader implements CommandLineRunner {
                     .paymentImage(null)
                     .isManuallyAdded(i % 2 == 0)
                     .participantCount(5)  // 모든 멤버가 참여하므로 5로 고정
-                    .category(i % 5 == 0 ? Category.FOOD :
-                            i % 5 == 1 ? Category.TRANSPORTATION :
-                                    i % 5 == 2 ? Category.ACCOMMODATION :
-                                            i % 5 == 3 ? Category.SHOPPING :
-                                                    Category.ACTIVITY)
                     .storeName(i % 5 == 0 ? "제주 흑돼지 맛집" :
                             i % 5 == 1 ? "서귀포 카페" :
                                     i % 5 == 2 ? "제주 게스트하우스" :
                                             i % 5 == 3 ? "올레마켓" :
                                                     "제주관광호텔")
+                    .category(sharedPaymentRegisterService.getCategory(
+                            i % 5 == 0 ? "제주 흑돼지 맛집" :
+                                    i % 5 == 1 ? "서귀포 카페" :
+                                            i % 5 == 2 ? "제주 게스트하우스" :
+                                                    i % 5 == 3 ? "올레마켓" :
+                                                            "제주관광호텔"
+                    ))
                     .paymentDate(LocalDateTime.of(2024, 6,
                             2 + (i % 5),  // 6월 2일~6일
                             10 + (i % 14),  // 10시~23시
