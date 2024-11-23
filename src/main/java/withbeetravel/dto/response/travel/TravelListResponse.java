@@ -15,6 +15,6 @@ public class TravelListResponse {
     private String travelName;
     private String travelStartDate;
     private String travelEndDate;
-    private String travelMainImage;
+    private int travelMainImage;
     private int profileImage;
 }
