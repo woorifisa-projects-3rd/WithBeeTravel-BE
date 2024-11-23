@@ -224,7 +224,6 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
     // TODO: 생성형 AI로 상호명으로 카테고리 구하기
     public Category getCategory(String storeName) {
         try {
-            System.out.println("ㅇㄹ니ㅏㅇㄹㄴ아ㅣ러니ㅏㅇ러ㅣㅏㄴㅇstoreName` = " + storeName);
             List<Message> messages = new ArrayList<>();
             messages.add(new Message("system",
                     "당신은 여행 카테고리를 분류하는 AI입니다. " +
@@ -257,10 +256,7 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
                     .addHeader("Authorization", "Bearer " + config.getApiKey())
                     .build();
 
-            System.out.println("config = " + config.getApiKey());
-
             try (Response response = client.newCall(request).execute()) {
-                System.out.println("response = " + response);
                 if (!response.isSuccessful()) {
                     throw new CustomException(TravelErrorCode.TRAVEL_CATEGORY_NOT_FOUND);
                 }
@@ -273,8 +269,6 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
                         .path("content")
                         .asText()
                         .trim();
-
-                System.out.println("어이어이어어ㅣ categoryName = " + categoryName);
 
                 // 반환된 카테고리명을 Category enum으로 변환
                 return switch (categoryName) {
@@ -289,10 +283,6 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
                 };
             }
         } catch (Exception e) {
-            System.err.println("e = " + e);
-            if (e instanceof CustomException) {
-                System.err.println(((CustomException) e).getErrorCode().getMessage());
-            }
             // OpenAI API 호출 실패시 기타로 분류
             return Category.ETC;
         }
