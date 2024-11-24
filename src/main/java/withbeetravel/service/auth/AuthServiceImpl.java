@@ -13,6 +13,7 @@ import withbeetravel.dto.response.auth.SignInResponseDto;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.jwt.JwtUtil;
+import withbeetravel.jwt.RefreshToken;
 import withbeetravel.repository.UserRepository;
 
 import java.util.Optional;
@@ -60,7 +61,17 @@ public class AuthServiceImpl implements AuthService {
         }
 
         CustomUserInfoDto info = CustomUserInfoDto.from(user.get());
-        String accessToken = jwtUtil.createAccessToken(info);
-        return SignInResponseDto.from(accessToken);
+
+        // jwt 토큰 생성
+        String accessToken = jwtUtil.generateAccessToken(String.valueOf(info.getId()));
+
+        // 기존에 가지고 있는 사용자의 refresh token 제거
+        RefreshToken.removeUserRefreshToken(info.getId());
+
+        // refresh token 생성 후 저장
+        String refreshToken = jwtUtil.generateRefreshToken(String.valueOf(info.getId()));
+        RefreshToken.putRefreshToken(refreshToken, info.getId());
+
+        return SignInResponseDto.of(accessToken, refreshToken);
     }
 }

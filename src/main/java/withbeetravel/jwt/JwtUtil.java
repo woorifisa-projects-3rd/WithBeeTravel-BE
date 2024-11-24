@@ -7,11 +7,12 @@ import io.jsonwebtoken.security.SecurityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import withbeetravel.dto.request.auth.CustomUserInfoDto;
 
 import java.security.Key;
-import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 // JwtUtil : jwt 생성 및 검증
 @Slf4j
@@ -33,63 +34,80 @@ public class JwtUtil {
         this.accessTokenExpTime = accessTokenExpTime;
     }
 
-    // Access Token 생성
-    public String createAccessToken(CustomUserInfoDto user) {
-        return createToken(user, accessTokenExpTime);
+    // Token에서 UserName 조회
+    public String getUserNameFromToken(final String token) {
+        return getClaimFromToken(token, Claims::getId);
     }
 
-    // jwt 생성
-    private String createToken(CustomUserInfoDto user, long expireTime) {
-        Claims claims = Jwts.claims();
-        claims.put("id", user.getId());
-        claims.put("email", user.getEmail());
-        claims.put("name", user.getName());
-        claims.put("role", user.getRole()); // USER,ADMIN
+    // token의 사용자 속성 정보 조회
+    public <T> T getClaimFromToken(final String token, final Function<Claims, T> claimsResolver) {
 
-        // 현재 시간 기준으로 토큰 발행 시간과 만료 시간 설정
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
+        TokenStatus tokenStatus = isValidToken(token);
 
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(Date.from(now.toInstant()))
-                .setExpiration(Date.from(tokenValidity.toInstant()))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    // Token에서 User Id 추출
-    public Long getUserId(String token) {
-        return parseClaims(token).get("id", Long.class);
-    }
-
-    // jwt 검증
-    public boolean isValidToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT", e);
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT", e);
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty", e);
+        if (tokenStatus.equals(TokenStatus.VALID)) {
+            final Claims claims = getAllClaimsFromToken(token);
+            return claimsResolver.apply(claims);
+        } else { // 토큰 관련 에러가 발생했을 경우
+            return (T) String.valueOf(tokenStatus);
         }
-        return false;
     }
 
-    // jwt claims 추출
-    private Claims parseClaims(String accessToken) {
+    // token 사용자 모든 속성 정보 조회
+    private Claims getAllClaimsFromToken(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(accessToken)
+                    .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
+        }
+    }
+
+    // Access Token 생성
+    public String generateAccessToken(final String id) {
+
+        Map<String, Object> claims = new HashMap<>();
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setId(String.valueOf(id))
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpTime)) // 30분
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // Refresh Token 생성
+    public String generateRefreshToken(final String id) {
+
+        return Jwts.builder()
+                .setId(String.valueOf(id))
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + (accessTokenExpTime * 2) * 24)) // 24시간
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+    // jwt 검증
+    public TokenStatus isValidToken(final String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return TokenStatus.VALID;
+        } catch (ExpiredJwtException e) {
+            log.warn("Expired JWT: {}", e.getMessage());
+            return TokenStatus.EXPIRED;
+        } catch (SecurityException | MalformedJwtException e) {
+            log.warn("Invalid JWT: {}", e.getMessage());
+            return TokenStatus.INVALID;
+        } catch (UnsupportedJwtException e) {
+            log.warn("Unsupported JWT: {}", e.getMessage());
+            return TokenStatus.UNSUPPORTED;
+        } catch (IllegalArgumentException e) {
+            log.warn("JWT claims string is empty: {}", e.getMessage());
+            return TokenStatus.EMPTY;
         }
     }
 }

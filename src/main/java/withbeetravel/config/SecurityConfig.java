@@ -21,7 +21,12 @@ public class SecurityConfig{
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
-    private static final String[] AUTH_WHITELIST = {"/api/auth/login", "/api/auth/join", "/swagger-ui/**", "/"};
+    private static final String[] AUTH_WHITELIST = {
+            "/api/auth/login",
+            "/api/auth/join",
+            "/swagger-ui/**",
+            "/",
+            "/api/auth/token-refresh"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

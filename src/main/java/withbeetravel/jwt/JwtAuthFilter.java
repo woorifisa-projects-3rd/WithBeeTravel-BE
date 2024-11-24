@@ -16,6 +16,7 @@ import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.service.auth.CustomUserDetailsService;
 
 import java.io.IOException;
+import java.util.Map;
 
 // jwt의 검증 필터 수행
 @RequiredArgsConstructor
@@ -26,39 +27,50 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+        final String token = request.getHeader("Authorization");
+        String userId = null;
 
-        // jwt 헤더가 있을 경우
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            // jwt 유효성 검증
-            if (jwtUtil.isValidToken(token)) {
-                Long userId = jwtUtil.getUserId(token);
+        // Bearer Token 검증 후 userId 조회
+        if (token != null && !token.isEmpty()) {
+            String jwtToken = token.substring(7);
+            userId = jwtUtil.getUserNameFromToken(jwtToken);
 
-                // 유저와 토큰 일치 시 userDetails 생성
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(userId.toString());
+            // 토큰 에러 코드 처리
+            if (handleTokenError(response, userId)) return;
+        }
 
-                if (userDetails != null) {
-                    // UserDetails, Password, Role -> 접근 권한 인증 Token 생성
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities()
-                    );
+        // token 검증 완료 후 SecurityContextHolder에 내 인증 정보가 없는 경우 저장
+        if (userId != null && !userId.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // 유저와 토큰 일치 시 userDetails 생성
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(userId);
 
-                    // 현재 request의 Security Context에 접근 권한 설정
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(usernamePasswordAuthenticationToken);
-                }
-            } else {
-                if (!jwtUtil.isValidToken(token)) {
-                    jwtExceptionHandler(response, AuthErrorCode.EXPIRED_JWT);
-                    return; // 필터 체인 중단
-                } else {
-                    jwtExceptionHandler(response, AuthErrorCode.INVALID_JWT);
-                    return;
-                }
+            if (userDetails != null) {
+                // UserDetails, Password, Role -> 접근 권한 인증 Token 생성
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+
+                // 현재 request의 Security Context에 접근 권한 설정
+                SecurityContextHolder.getContext()
+                        .setAuthentication(usernamePasswordAuthenticationToken);
             }
         }
         filterChain.doFilter(request, response); // 다음 필터로 넘김
+    }
+
+    private boolean handleTokenError(HttpServletResponse response, String userId) {
+        Map<String, AuthErrorCode> errorCodeMap = Map.of(
+            "EXPIRED", AuthErrorCode.EXPIRED_JWT,
+                "INVALID", AuthErrorCode.INVALID_JWT,
+                "UNSUPPORTED", AuthErrorCode.UNSUPPORTED_JWT,
+                "EMPTY", AuthErrorCode.EMPTY_JWT
+        );
+
+        if (errorCodeMap.containsKey(userId)) {
+            jwtExceptionHandler(response, errorCodeMap.get(userId));
+            return true;
+        }
+        return false;
     }
 
     public void jwtExceptionHandler(HttpServletResponse response, AuthErrorCode authErrorCode) {
