@@ -60,7 +60,7 @@ public class JwtUtil {
 
     // Token에서 User Id 추출
     public Long getUserId(String token) {
-        return parseClaims(token).get("memberId", Long.class);
+        return parseClaims(token).get("id", Long.class);
     }
 
     // jwt 검증

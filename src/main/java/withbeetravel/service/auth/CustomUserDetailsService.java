@@ -1,7 +1,6 @@
 package withbeetravel.service.auth;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,13 +18,14 @@ import withbeetravel.security.CustomUserDetails;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final ModelMapper mapper;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmail(email).orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_CREDENTIALS));
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        Long id = Long.valueOf(userId);
+        User user = userRepository.findById(id).orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_CREDENTIALS));
 
-        CustomUserInfoDto customUserInfoDto = mapper.map(user, CustomUserInfoDto.class);
+        CustomUserInfoDto customUserInfoDto = CustomUserInfoDto.from(user);
+
         return new CustomUserDetails(customUserInfoDto);
     }
 }
