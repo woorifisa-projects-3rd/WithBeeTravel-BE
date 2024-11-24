@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
         Long id = Long.valueOf(userId);
-        User user = userRepository.findById(id).orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_CREDENTIALS));
+        User user = userRepository.findById(id).orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED));
 
         CustomUserInfoDto customUserInfoDto = CustomUserInfoDto.from(user);
 
