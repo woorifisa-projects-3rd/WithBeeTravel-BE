@@ -15,6 +15,7 @@ public class AuthErrorCode extends ErrorCode{
     public static final AuthErrorCode PASSWORD_POLICY_VIOLATION = new AuthErrorCode(HttpStatus.BAD_REQUEST, "AUTH-007", "PASSWORD_POLICY_VIOLATION", "비밀번호 정책 불충족");
     public static final AuthErrorCode INVALID_EMAIL_FORMAT = new AuthErrorCode(HttpStatus.BAD_REQUEST, "AUTH-008", "INVALID_EMAIL_FORMAT", "잘못된 이메일 형식");
     public static final AuthErrorCode PIN_POLICY_VIOLATION = new AuthErrorCode(HttpStatus.BAD_REQUEST, "PIN_POLICY_VIOLATION", "AUTH-009", "핀번호 정책 불충족");
+    public static final AuthErrorCode INVALID_PASSWORD = new AuthErrorCode(HttpStatus.BAD_REQUEST, "INVALID_PASSWORD", "AUTH-010", "잘못된 비밀번호");
 
     private AuthErrorCode(HttpStatus status, String name, String code, String message) {
         super(status, name, code, message);

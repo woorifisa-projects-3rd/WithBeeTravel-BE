@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import withbeetravel.dto.request.auth.RoleType;
 
 @Entity
 @Getter
@@ -49,10 +50,14 @@ public class User {
     @Column(name = "pinLocked", nullable = false)
     private boolean accountLocked;
 
+    @Column(name = "role", nullable = false)
+    private RoleType roleType;
+
+
     @Builder
     public User(Long id, Account wibeeCardAccount, Account connectedAccount, String email,
                 String password, String pinNumber, String name,
-                int profileImage, int failedPinCount, boolean accountLocked) {
+                int profileImage, int failedPinCount, boolean accountLocked, RoleType roleType) {
         this.id = id;
         this.wibeeCardAccount = wibeeCardAccount;
         this.connectedAccount = connectedAccount;
@@ -63,6 +68,7 @@ public class User {
         this.profileImage = profileImage;
         this.failedPinCount = failedPinCount;
         this.accountLocked = accountLocked;
+        this.roleType = roleType;
     }
 
     public void updateWibeeCardAccount(Account account) {
