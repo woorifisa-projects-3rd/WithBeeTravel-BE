@@ -26,7 +26,8 @@ public class SecurityConfig{
             "/api/auth/join",
             "/swagger-ui/**",
             "/",
-            "/api/auth/token-refresh"};
+            "/api/auth/token-refresh",
+            "/api/auth/check-refresh"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

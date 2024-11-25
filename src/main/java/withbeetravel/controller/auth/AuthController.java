@@ -3,14 +3,12 @@ package withbeetravel.controller.auth;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import withbeetravel.dto.request.auth.RefreshTokenDto;
 import withbeetravel.dto.request.auth.SignInRequestDto;
 import withbeetravel.dto.request.auth.SignUpRequestDto;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.auth.ExpirationDto;
 import withbeetravel.dto.response.auth.SignInResponseDto;
 import withbeetravel.service.auth.AuthService;
 import withbeetravel.service.auth.RefreshTokenService;
@@ -39,6 +37,12 @@ public class AuthController {
     public SuccessResponse<SignInResponseDto> refreshToken(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
         SignInResponseDto signInResponseDto = refreshTokenService.refreshToken(refreshTokenDto.getRefreshToken());
         return SuccessResponse.of(HttpStatus.OK.value(), "토큰 재발급 성공", signInResponseDto);
+    }
+
+    @GetMapping("/check-refresh")
+    public SuccessResponse<ExpirationDto> checkTokenTime(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
+        ExpirationDto expirationDto = refreshTokenService.checkExpirationTime(refreshTokenDto);
+        return SuccessResponse.of(HttpStatus.OK.value(), "리프레시 토큰 만료시간 조회 성공", expirationDto);
     }
 }
 
