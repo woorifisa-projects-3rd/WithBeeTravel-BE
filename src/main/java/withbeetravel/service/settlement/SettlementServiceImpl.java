@@ -46,12 +46,16 @@ public class SettlementServiceImpl implements SettlementService {
     @Override
     @Transactional(readOnly = true)
     public ShowSettlementDetailResponse getSettlementDetails(Long userId, Long travelId) {
-        Long settlementRequestId = findSettlementRequestByTravelId(travelId).getId();
+        SettlementRequest settlementRequest = findSettlementRequestByTravelId(travelId);
+        Long settlementRequestId = settlementRequest.getId();
 
         Long myTravelMemberId = findMyTravelMemberByTravelIdAndUserId(travelId, userId).getId();
 
         List<TravelMemberSettlementHistory> travelMemberSettlementHistories =
                 travelMemberSettlementHistoryRepository.findAllBySettlementRequestId(settlementRequestId);
+
+        // 미동의 인원수
+        int disagreeCount = settlementRequest.getDisagreeCount();
 
         ShowMyTotalPaymentResponse myTotalPayments =
                 createMyTotalPaymentResponse(userId, travelMemberSettlementHistories, myTravelMemberId);
@@ -62,11 +66,7 @@ public class SettlementServiceImpl implements SettlementService {
         List<ShowMyDetailPaymentResponse> myDetailPayments =
                 createMyDetailPaymentResponses(myTravelMemberId);
 
-        ShowSettlementDetailResponse showSettlementDetailResponse =
-                ShowSettlementDetailResponse.of(myTotalPayments, myDetailPayments, others);
-
-
-        return showSettlementDetailResponse;
+        return ShowSettlementDetailResponse.of(myTotalPayments, disagreeCount, myDetailPayments, others);
     }
 
     @Override

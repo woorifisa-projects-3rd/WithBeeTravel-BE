@@ -36,6 +36,9 @@ public class SharedPaymentResponse {
     @Schema(description = "상호명")
     private String storeName;
 
+    @Schema(description = "카테고리")
+    private String category;
+
     @Schema(description = "모든 멤버가 참여했는지 여부")
     private Boolean isAllMemberParticipated;
 
@@ -61,6 +64,7 @@ public class SharedPaymentResponse {
                         .foreignPaymentAmount(payment.getForeignPaymentAmount())
                         .exchangeRate(payment.getExchangeRate())
                         .unit(payment.getCurrencyUnit().name())
+                        .category(payment.getCategory().getDescription())
                         .storeName(payment.getStoreName())
                         .isAllMemberParticipated(payment.getPaymentParticipatedMembers().size() == totalTravelMembers)
                         .participatingMembers(participatingMembersMap.get(payment.getId()))

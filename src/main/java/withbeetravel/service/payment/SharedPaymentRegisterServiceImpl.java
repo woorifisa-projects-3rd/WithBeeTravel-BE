@@ -1,21 +1,17 @@
 package withbeetravel.service.payment;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
-import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.*;
 import withbeetravel.repository.*;
 import withbeetravel.service.global.S3Uploader;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -32,6 +28,8 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
+
+    private final SharedPaymentCategoryClassificationService sharedPaymentCategoryClassificationService;
 
     private final S3Uploader s3Uploader;
 
@@ -64,15 +62,17 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         validatePaymentAmount(foreignPaymentAmount, exchangeRate);
 
         // 이미지 값이 들어왔을 경우 S3에 업로드
-        String imageUrl;
-        try {
-            imageUrl = s3Uploader.upload(paymentImage, SHARED_PAYMENT_IMAGE_DIR + travelId);
-        } catch (IOException e) {
-            throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
+        String imageUrl = null;
+        if(paymentImage != null && paymentImage.getSize() != 0) {
+            try {
+                imageUrl = s3Uploader.upload(paymentImage, SHARED_PAYMENT_IMAGE_DIR + travelId);
+            } catch (IOException e) {
+                throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
+            }
+            // 메인 이미지로 설정했다면, 여행 메인 사진 바꿔주기
+            if(isMainImage) setTravelMainImage(travel, imageUrl);
         }
 
-        // 메인 이미지로 설정했다면, 여행 메인 사진 바꿔주기
-        if(isMainImage) setTravelMainImage(travel, imageUrl);
 
         // 여행 멤버 리스트 가져오기
         List<TravelMember> members = getTravelMembers(travelId);
@@ -201,10 +201,8 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
     }
 
-    // TODO: 생성형 AI로 상호명으로 카테고리 구하기
-    Category getCategory(String storeName) { // 상호명으로 카테고리 구하기
-
-        return Category.ETC;
+    Category getCategory(String storeName) {
+        return sharedPaymentCategoryClassificationService.getCategory(storeName);
     }
 
     User getUser(Long userId) {
