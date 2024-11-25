@@ -15,7 +15,7 @@ import withbeetravel.service.banking.HistoryService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 @RequiredArgsConstructor
 public class AccountController {
 

@@ -47,7 +47,7 @@ public class User {
     @Column(name = "failed_pin_count", nullable = false)
     private int failedPinCount;
 
-    @Column(name = "pinLocked", nullable = false)
+    @Column(name = "pin_locked", nullable = false)
     private boolean pinLocked;
 
     @Builder

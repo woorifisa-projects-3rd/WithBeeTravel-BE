@@ -8,7 +8,7 @@ import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.service.banking.HistoryService;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 @RequiredArgsConstructor
 public class HistoryController {
 
