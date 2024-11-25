@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
                 .name(signUpRequestDto.getName())
                 .email(signUpRequestDto.getEmail())
                 .password(bCryptPasswordEncoder.encode(signUpRequestDto.getPassword()))
-                .profileImage(1)
+                .profileImage((int) (Math.random() * 10) + 1)
                 .pinNumber(signUpRequestDto.getPinNumber())
                 .failedPinCount(0)
                 .accountLocked(false)
