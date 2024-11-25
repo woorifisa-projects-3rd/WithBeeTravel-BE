@@ -102,7 +102,7 @@ public class DataLoader implements CommandLineRunner {
                 .travelStartDate(LocalDate.of(2024, 6, 1))
                 .travelEndDate(LocalDate.of(2024, 6, 7))
                 .inviteCode("SUMMER2024")
-                .mainImage("summer_vacation.jpg")
+                .mainImage(null)
                 .isDomesticTravel(true)
                 .settlementStatus(SettlementStatus.PENDING)
                 .build();
@@ -111,10 +111,11 @@ public class DataLoader implements CommandLineRunner {
                 .travelStartDate(LocalDate.of(2024, 12, 1))
                 .travelEndDate(LocalDate.of(2024, 12, 5))
                 .inviteCode("WINTER2024")
-                .mainImage("winter_trip.jpg")
+                .mainImage(null)
                 .isDomesticTravel(false)
                 .settlementStatus(SettlementStatus.DONE)
                 .build();
+        
         travelRepository.save(travel1);
         travelRepository.save(travel2);
         // TravelMember 더미 데이터 생성

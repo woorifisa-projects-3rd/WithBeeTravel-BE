@@ -1,7 +1,6 @@
 package withbeetravel.service.travel;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
@@ -12,13 +11,12 @@ import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.dto.response.travel.TravelListResponse;
 import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
-import withbeetravel.exception.error.UserErrorCode;
 import withbeetravel.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -129,7 +127,7 @@ public class TravelServiceImpl implements TravelService {
 
         boolean userAlreadyMember = travelMemberRepository.existsByTravelIdAndUserId(travelId, userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
 
         if (userAlreadyMember) {
             throw new CustomException(TravelErrorCode.TRAVEL_USER_ALREADY_MEMBER);
