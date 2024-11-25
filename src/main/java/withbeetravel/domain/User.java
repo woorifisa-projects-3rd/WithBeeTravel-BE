@@ -51,6 +51,7 @@ public class User {
     private boolean accountLocked;
 
     @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
     private RoleType roleType;
 
 
