@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import withbeetravel.dto.request.auth.RoleType;
 
 @Entity
 @Getter
@@ -47,13 +48,18 @@ public class User {
     @Column(name = "failed_pin_count", nullable = false)
     private int failedPinCount;
 
-    @Column(name = "pinLocked", nullable = false)
+    @Column(name = "pin_locked", nullable = false)
     private boolean pinLocked;
+
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RoleType roleType;
+
 
     @Builder
     public User(Long id, Account wibeeCardAccount, Account connectedAccount, String email,
                 String password, String pinNumber, String name,
-                int profileImage, int failedPinCount, boolean pinLocked) {
+                int profileImage, int failedPinCount, boolean pinLocked, RoleType roleType) {
         this.id = id;
         this.wibeeCardAccount = wibeeCardAccount;
         this.connectedAccount = connectedAccount;
@@ -64,6 +70,7 @@ public class User {
         this.profileImage = profileImage;
         this.failedPinCount = failedPinCount;
         this.pinLocked = pinLocked;
+        this.roleType = roleType;
     }
 
     public void updateWibeeCardAccount(Account account) {

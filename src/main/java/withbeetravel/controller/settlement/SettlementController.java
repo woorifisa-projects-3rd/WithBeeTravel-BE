@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.settlement.ShowSettlementDetailResponse;
+import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.settlement.SettlementService;
 
 @RestController
@@ -14,11 +15,10 @@ import withbeetravel.service.settlement.SettlementService;
 public class SettlementController {
     private final SettlementService settlementService;
 
-    private final Long userId = 3L;
-
     @GetMapping
     @CheckTravelAccess
     SuccessResponse<ShowSettlementDetailResponse> getSettlementDetails(@PathVariable Long travelId) {
+        Long userId = UserAuthorizationUtil.getLoginUserId();
         ShowSettlementDetailResponse showSettlementDetailResponse = settlementService.getSettlementDetails(userId, travelId);
         return SuccessResponse.of(HttpStatus.OK.value(), "세부 지출 내역 조회 성공", showSettlementDetailResponse);
     }
@@ -26,6 +26,7 @@ public class SettlementController {
     @PostMapping
     @CheckTravelAccess
     SuccessResponse<Void> requestSettlement(@PathVariable Long travelId) {
+        Long userId = UserAuthorizationUtil.getLoginUserId();
         settlementService.requestSettlement(userId, travelId);
         return SuccessResponse.of(HttpStatus.OK.value(), "정산 요청 성공");
     }
@@ -33,7 +34,7 @@ public class SettlementController {
     @PostMapping("/agreement")
     @CheckTravelAccess
     SuccessResponse<Void> agreeSettlement(@PathVariable Long travelId) {
-
+        Long userId = UserAuthorizationUtil.getLoginUserId();
         String message = settlementService.agreeSettlement(userId, travelId);
         return SuccessResponse.of(HttpStatus.OK.value(), message);
     }
@@ -41,6 +42,7 @@ public class SettlementController {
     @DeleteMapping
     @CheckTravelAccess
     SuccessResponse<Void> cancelSettlement(@PathVariable Long travelId) {
+        Long userId = UserAuthorizationUtil.getLoginUserId();
         settlementService.cancelSettlement(userId, travelId);
         return SuccessResponse.of(HttpStatus.OK.value(), "정산 취소 성공");
     }
