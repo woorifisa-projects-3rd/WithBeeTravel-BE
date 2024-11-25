@@ -38,7 +38,7 @@ public class SharedPaymentCategoryClassificationServiceImpl implements SharedPay
             List<Message> messages = new ArrayList<>();
             messages.add(new Message("system",
                     "당신은 여행 카테고리를 분류하는 AI입니다. " +
-                            "상호명을 보고 다음 카테고리 중 하나로만 분류해주세요. 국가는 한국입니다: " +
+                            "상호명을 보고 다음 카테고리 중 하나로만 분류해주세요: " +
                             "항공, 교통, 숙박, 식비, 관광, 액티비티, 쇼핑, 기타 " +
                             "카테고리 이름만 정확히 답변해주세요. " +
                             "- 호텔, 리조트, 에어비앤비 등은 '숙박' " +
