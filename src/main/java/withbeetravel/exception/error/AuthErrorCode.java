@@ -15,6 +15,14 @@ public class AuthErrorCode extends ErrorCode{
     public static final AuthErrorCode PASSWORD_POLICY_VIOLATION = new AuthErrorCode(HttpStatus.BAD_REQUEST, "AUTH-007", "PASSWORD_POLICY_VIOLATION", "비밀번호 정책 불충족");
     public static final AuthErrorCode INVALID_EMAIL_FORMAT = new AuthErrorCode(HttpStatus.BAD_REQUEST, "AUTH-008", "INVALID_EMAIL_FORMAT", "잘못된 이메일 형식");
     public static final AuthErrorCode PIN_POLICY_VIOLATION = new AuthErrorCode(HttpStatus.BAD_REQUEST, "PIN_POLICY_VIOLATION", "AUTH-009", "핀번호 정책 불충족");
+    public static final AuthErrorCode INVALID_PASSWORD = new AuthErrorCode(HttpStatus.BAD_REQUEST, "INVALID_PASSWORD", "AUTH-010", "잘못된 비밀번호");
+    public static final AuthErrorCode INVALID_JWT = new AuthErrorCode(HttpStatus.UNAUTHORIZED, "INVALID_JWT", "AUTH-011", "잘못된 JWT 토큰");
+    public static final AuthErrorCode EXPIRED_JWT = new AuthErrorCode(HttpStatus.UNAUTHORIZED, "EXPIRED_JWT", "AUTH-012", "만료된 JWT 토큰");
+    public static final AuthErrorCode UNSUPPORTED_JWT = new AuthErrorCode(HttpStatus.UNAUTHORIZED, "UNSUPPORTED_JWT", "AUTH-013", "지원되지 않는 JWT 토큰");
+    public static final AuthErrorCode EMPTY_JWT = new AuthErrorCode(HttpStatus.BAD_REQUEST, "EMPTY_JWT", "AUTH-014", "빈 JWT 토큰");
+    public static final AuthErrorCode REFRESH_TOKEN_NOT_FOUND = new AuthErrorCode(HttpStatus.NOT_FOUND, "REFRESH_TOKEN_NOT_FOUND", "AUTH-015", "리프레시 토큰 없음");
+    public static final AuthErrorCode INVALID_REFRESH_TOKEN = new AuthErrorCode(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "AUTH-016", "잘못된 리프레시 토큰");
+
 
     private AuthErrorCode(HttpStatus status, String name, String code, String message) {
         super(status, name, code, message);

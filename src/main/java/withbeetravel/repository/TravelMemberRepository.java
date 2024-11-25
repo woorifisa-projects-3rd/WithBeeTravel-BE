@@ -13,5 +13,10 @@ public interface TravelMemberRepository extends JpaRepository<TravelMember, Long
     Optional<TravelMember> findByTravelIdAndUserId(Long travelId, Long userId);
 
     List<TravelMember> findAllByTravelId(Long travelId);
-    Boolean existsByTravelIdAndId(Long travelId, Long memberId);
+
+    int countByTravelId(Long travelId);
+
+    List<TravelMember> findAllByUserId(Long userId);
+
+    boolean existsByTravelIdAndUserId(Long travelId, Long userId);
 }

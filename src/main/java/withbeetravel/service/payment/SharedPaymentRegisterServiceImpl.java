@@ -62,15 +62,17 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         validatePaymentAmount(foreignPaymentAmount, exchangeRate);
 
         // 이미지 값이 들어왔을 경우 S3에 업로드
-        String imageUrl;
-        try {
-            imageUrl = s3Uploader.upload(paymentImage, SHARED_PAYMENT_IMAGE_DIR + travelId);
-        } catch (IOException e) {
-            throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
+        String imageUrl = null;
+        if(paymentImage != null && paymentImage.getSize() != 0) {
+            try {
+                imageUrl = s3Uploader.upload(paymentImage, SHARED_PAYMENT_IMAGE_DIR + travelId);
+            } catch (IOException e) {
+                throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
+            }
+            // 메인 이미지로 설정했다면, 여행 메인 사진 바꿔주기
+            if(isMainImage) setTravelMainImage(travel, imageUrl);
         }
 
-        // 메인 이미지로 설정했다면, 여행 메인 사진 바꿔주기
-        if(isMainImage) setTravelMainImage(travel, imageUrl);
 
         // 여행 멤버 리스트 가져오기
         List<TravelMember> members = getTravelMembers(travelId);
