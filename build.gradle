@@ -51,6 +51,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// OpenAI API 호출을 위한 HTTP 클라이언트
+	implementation 'com.squareup.okhttp3:okhttp:4.9.1'
+	// JSON 처리
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.json:json:20230227'
 }
 
 tasks.named('test') {
