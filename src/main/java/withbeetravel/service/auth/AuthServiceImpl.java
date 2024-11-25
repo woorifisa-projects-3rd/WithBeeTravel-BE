@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
                 .profileImage((int) (Math.random() * 10) + 1)
                 .pinNumber(signUpRequestDto.getPinNumber())
                 .failedPinCount(0)
-                .accountLocked(false)
+                .pinLocked(false)
                 .roleType(RoleType.USER)
                 .build();
 
