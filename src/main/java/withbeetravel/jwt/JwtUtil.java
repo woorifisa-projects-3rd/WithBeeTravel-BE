@@ -82,10 +82,12 @@ public class JwtUtil {
     // Refresh Token 생성
     public String generateRefreshToken(final String id) {
 
+        long refreshTokenExpTime = 7 * 24 * 60 * 60 * 1000;
+
         return Jwts.builder()
                 .setId(String.valueOf(id))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (accessTokenExpTime * 2) * 24)) // 24시간
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpTime)) // 일주일
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
