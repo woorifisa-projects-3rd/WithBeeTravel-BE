@@ -10,13 +10,13 @@ import withbeetravel.dto.request.travel.TravelRequest;
 import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
+import withbeetravel.dto.response.travel.TravelListResponse;
 import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.AccountRepository;
-import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelCountryRepository;
 import withbeetravel.repository.TravelRepository;
-import withbeetravel.exception.error.UserErrorCode;
 import withbeetravel.repository.*;
 
 import java.time.LocalDate;
@@ -133,7 +133,7 @@ public class TravelServiceImpl implements TravelService {
 
         boolean userAlreadyMember = travelMemberRepository.existsByTravelIdAndUserId(travelId, userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
 
         if (userAlreadyMember) {
             throw new CustomException(TravelErrorCode.TRAVEL_USER_ALREADY_MEMBER);
@@ -188,4 +188,40 @@ public class TravelServiceImpl implements TravelService {
 
         return new InviteCodeGetResponse(travel.getInviteCode());
     }
+
+//   user의 여행 목록 리스트 조회
+    @Override
+    public List<TravelListResponse> getTravelList() {
+
+        // 여행 멤버 테이블에서 유저 id가 속한 여행 id 조회
+        List<TravelMember> travelMembers = travelMemberRepository.findAllByUserId(userId);
+
+        return travelMembers.stream()
+                .map(travelMember -> {
+                    Travel travel = travelMember.getTravel();
+
+                    // 특정 여행에 속한 모든 멤버 조회
+                    List<TravelMember> members = travelMemberRepository.findByTravelId(travel.getId());
+
+                    // 캡틴 멤버 필터링 및 프로필 이미지 추출
+                    int profileImage = members.stream()
+                            .filter(TravelMember::isCaptain)
+                            .map(captain -> captain.getUser().getProfileImage())
+                            .findFirst()
+                            .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_CAPTAIN_NOT_FOUND));
+
+                    // TravelListResponse 생성
+                    return new TravelListResponse(
+                            travel.getId(),
+                            travel.getTravelName(),
+                            travel.getTravelStartDate().toString(),
+                            travel.getTravelEndDate().toString(),
+                            travel.getMainImage(),
+                            profileImage
+                    );
+                }).toList();
+
+    }
+
+
 }
