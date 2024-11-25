@@ -46,6 +46,9 @@ public class Travel {
     @OneToMany(mappedBy = "travel")
     private List<TravelMember> travelMembers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "travel")
+    private List<TravelCountry> countries = new ArrayList<>();
+
     @Builder
     public Travel(Long id,
                   String travelName,
