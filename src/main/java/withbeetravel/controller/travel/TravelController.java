@@ -7,6 +7,7 @@ import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
@@ -18,6 +19,12 @@ import withbeetravel.service.travel.TravelService;
 public class TravelController {
 
     private final TravelService travelService;
+
+    @CheckTravelAccess
+    @GetMapping("/{travelId}")
+    public SuccessResponse<TravelHomeResponse> getTravel(@PathVariable Long travelId) {
+        return SuccessResponse.of(200, "여행 홈 데이터 불러오기 성공", travelService.getTravel(travelId));
+    }
 
     @PostMapping
     public SuccessResponse<TravelResponse> saveTravel(@RequestBody TravelRequest request) {
