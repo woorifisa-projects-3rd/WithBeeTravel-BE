@@ -10,7 +10,7 @@ import withbeetravel.service.banking.VerifyService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/verify")
+@RequestMapping("/api/verify")
 public class VerifyController {
 
     private final VerifyService verifyService;
