@@ -420,7 +420,8 @@ public class SettlementServiceImpl implements SettlementService {
                             .orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED)).getName();
                     int ownPaymentCost = history.getOwnPaymentCost();
                     int actualBurdenCost = history.getActualBurdenCost();
-                    return ShowMyTotalPaymentResponse.of(name, ownPaymentCost, actualBurdenCost);
+                    boolean isAgreed = history.isAgreed();
+                    return ShowMyTotalPaymentResponse.of(name, isAgreed, ownPaymentCost, actualBurdenCost);
                 })
                 .orElseThrow(() -> new CustomException(SettlementErrorCode.MEMBER_SETTLEMENT_HISTORY_NOT_FOUND));
     }
