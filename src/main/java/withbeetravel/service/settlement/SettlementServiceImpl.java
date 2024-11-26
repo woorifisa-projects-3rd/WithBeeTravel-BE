@@ -1,7 +1,3 @@
-
-
-
-
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +16,6 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 import withbeetravel.service.banking.AccountService;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -378,9 +373,16 @@ public class SettlementServiceImpl implements SettlementService {
                 .map(paymentParticipatedMember -> {
                     SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
                     Long id = sharedPayment.getId();
+                    TravelMember addedByTravelMember = sharedPayment.getAddedByMember();
+
                     int participantCount = sharedPayment.getParticipantCount();
                     int paymentAmount = sharedPayment.getPaymentAmount();
-                    int requestedAmount = paymentAmount / participantCount;
+                    int amountPerPerson = paymentAmount / participantCount;
+
+                    // 내가 결제한 내역과 아닌 내역을 구분해서 RequestedAmount 계산
+                    int requestedAmount =
+                            (addedByTravelMember.getId() == myTravelMemberId) ?
+                                    (paymentAmount - amountPerPerson) : -amountPerPerson;
 
                     return ShowMyDetailPaymentResponse.of(
                             id,
@@ -411,6 +413,13 @@ public class SettlementServiceImpl implements SettlementService {
 
     private ShowMyTotalPaymentResponse createMyTotalPaymentResponse(
             Long userId, List<TravelMemberSettlementHistory> travelMemberSettlementHistories, Long myTravelMemberId) {
+
+        // 내가 결제한 공유 결제 내역의 1/n 금액의 합계
+        List<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByAddedByMemberId(myTravelMemberId);
+        int SumOfamountPerPerson = sharedPayments.stream()
+                .mapToInt(sharedPayment -> sharedPayment.getPaymentAmount() / sharedPayment.getParticipantCount())
+                .sum();
+
         return travelMemberSettlementHistories
                 .stream()
                 .filter(history -> history.getTravelMember().getId().equals(myTravelMemberId))
@@ -418,9 +427,11 @@ public class SettlementServiceImpl implements SettlementService {
                 .map(history -> {
                     String name = userRepository.findById(userId)
                             .orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED)).getName();
-                    int ownPaymentCost = history.getOwnPaymentCost();
+                    // 내가 받아야 할 금액의 합계 = 내 결제 금액 합계 - 1/n 금액의 합계
+                    int ownPaymentCost = history.getOwnPaymentCost() - SumOfamountPerPerson;
                     int actualBurdenCost = history.getActualBurdenCost();
-                    return ShowMyTotalPaymentResponse.of(name, ownPaymentCost, actualBurdenCost);
+                    boolean isAgreed = history.isAgreed();
+                    return ShowMyTotalPaymentResponse.of(name, isAgreed, ownPaymentCost, actualBurdenCost);
                 })
                 .orElseThrow(() -> new CustomException(SettlementErrorCode.MEMBER_SETTLEMENT_HISTORY_NOT_FOUND));
     }

@@ -7,6 +7,8 @@ import io.jsonwebtoken.security.SecurityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.AuthErrorCode;
 
 import java.security.Key;
 import java.util.Date;
@@ -74,7 +76,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setId(String.valueOf(id))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpTime)) // 30분
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpTime)) // 1시간
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -110,6 +112,33 @@ public class JwtUtil {
         } catch (IllegalArgumentException e) {
             log.warn("JWT claims string is empty: {}", e.getMessage());
             return TokenStatus.EMPTY;
+        }
+    }
+
+    public Date getExpirationDateFromToken(final String token) {
+        // 토큰 상태 확인
+        TokenStatus tokenStatus = isValidToken(token);
+
+        // 각 토큰 상태에 맞는 예외를 던지기
+        checkTokenStatus(tokenStatus);
+
+        // 정상적인 토큰인 경우 만료 날짜 추출
+        return getClaimFromToken(token, Claims::getExpiration);
+    }
+
+    private void checkTokenStatus(TokenStatus tokenStatus) {
+        switch (tokenStatus) {
+            case EXPIRED:
+                throw new CustomException(AuthErrorCode.EXPIRED_JWT);
+            case INVALID:
+                throw new CustomException(AuthErrorCode.INVALID_JWT);
+            case UNSUPPORTED:
+                throw new CustomException(AuthErrorCode.UNSUPPORTED_JWT);
+            case EMPTY:
+                throw new CustomException(AuthErrorCode.EMPTY_JWT);
+            case VALID:
+                // 정상적인 토큰인 경우 만료 날짜 추출
+                break;
         }
     }
 }

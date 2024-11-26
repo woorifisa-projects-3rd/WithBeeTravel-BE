@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.User;
 import withbeetravel.dto.request.auth.CustomUserInfoDto;
-import withbeetravel.dto.request.auth.RoleType;
+import withbeetravel.domain.RoleType;
 import withbeetravel.dto.request.auth.SignInRequestDto;
 import withbeetravel.dto.request.auth.SignUpRequestDto;
 import withbeetravel.dto.response.auth.SignInResponseDto;
