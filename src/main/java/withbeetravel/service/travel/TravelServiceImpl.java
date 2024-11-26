@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
+import withbeetravel.dto.request.account.CardCompletedRequest;
 import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
@@ -13,6 +14,7 @@ import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.dto.response.travel.TravelListResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
+import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.TravelCountryRepository;
@@ -224,4 +226,29 @@ public class TravelServiceImpl implements TravelService {
     }
 
 
+//   연결한 계좌 및 위비 카드 발급 했는지 안했는 지 여부
+    @Override
+    public void postConnectedAccount(CardCompletedRequest request,Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+        // 카드 발급 x , 연결계좌 0
+        if(request.isWibeeCard()){
+            Account account = accountRepository.findById(request.getAccountId())
+                    .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+
+           user.updateConnectedAccount(account);
+        }
+
+        // 카드 발급 0 , 연결계좌 0
+        if (!request.isWibeeCard()) {
+            Account account = accountRepository.findById(request.getAccountId())
+                    .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+
+            account.updatedAccount(request.isWibeeCard());
+
+            user.updateConnectedAccount(account);
+            user.updateWibeeCardAccount(account);
+        }
+
+    }
 }
