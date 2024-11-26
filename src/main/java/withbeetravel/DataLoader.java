@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 import static withbeetravel.dto.request.auth.RoleType.USER;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
