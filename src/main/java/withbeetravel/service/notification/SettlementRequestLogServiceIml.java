@@ -16,30 +16,26 @@ import java.util.List;
 public class SettlementRequestLogServiceIml implements SettlementRequestLogService{
 
     private final SettlementRequestLogRepository settlementRequestLogRepository;
-    private final TravelMemberRepository travelMemberRepository;
     private final SettlementRequestRepository settlementRequestRepository;
 
     @Override
     public List<SettlementRequestLogDto> getSettlementRequestLogs(Long userId) {
 
-        // 나의 여행 아이디 리스트
-        List<Long> travelIds = getTravelIds(userId);
-
-        // 모든 로그 리스트
-        List<SettlementRequestLog> settlementRequestLogs = getSettlementRequestLogs(travelIds);
+        // 나의 모든 로그 리스트
+        List<SettlementRequestLog> settlementRequestLogs = getSettlementRequestLogsByUserId(userId);
 
         // settlementRequestLogDto 리스트로 가공 (링크 추가)
         List<SettlementRequestLogDto> settlementRequestLogDtos = new ArrayList<>();
         for (SettlementRequestLog settlementRequestLog : settlementRequestLogs) {
             String link = createLink(settlementRequestLog);
-            SettlementRequestLogDto settlementRequestLogDto = createSettlementREquestLogDto(settlementRequestLog, link);
+            SettlementRequestLogDto settlementRequestLogDto = createSettlementRequestLogDto(settlementRequestLog, link);
             settlementRequestLogDtos.add(settlementRequestLogDto);
         }
 
         return settlementRequestLogDtos;
     }
 
-    private SettlementRequestLogDto createSettlementREquestLogDto(SettlementRequestLog settlementRequestLog, String link) {
+    private SettlementRequestLogDto createSettlementRequestLogDto(SettlementRequestLog settlementRequestLog, String link) {
        return SettlementRequestLogDto.builder().id(settlementRequestLog.getId())
                 .logTime(settlementRequestLog.getLogTime())
                 .logTitle(settlementRequestLog.getLogTitle().getTitle())
@@ -48,19 +44,8 @@ public class SettlementRequestLogServiceIml implements SettlementRequestLogServi
                 .build();
     }
 
-    private List<SettlementRequestLog> getSettlementRequestLogs(List<Long> travelIds) {
-        return travelIds.stream()
-                .map(settlementRequestLogRepository::findAllByTravelId)
-                .flatMap(List::stream)
-                .toList();
-    }
-
-    private List<Long> getTravelIds(Long userId) {
-        return travelMemberRepository.findAllByUserId(userId)
-                .stream()
-                .map(TravelMember::getTravel)
-                .map(Travel::getId)
-                .toList();
+    private List<SettlementRequestLog> getSettlementRequestLogsByUserId(Long userId) {
+        return settlementRequestLogRepository.findAllByUserId(userId);
     }
 
     private String createLink(SettlementRequestLog settlementRequestLog) {
@@ -73,6 +58,9 @@ public class SettlementRequestLogServiceIml implements SettlementRequestLogServi
             if (settlementRequestRepository.existsByTravelId(travelId)) {
                 link = "travel/" + travelId + "/settlement";
             }
+        } else if (logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
+            Long accountId = settlementRequestLog.getUser().getConnectedAccount().getId();
+            link = "banking/" + accountId;
         }
         return link;
     }
