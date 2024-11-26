@@ -9,6 +9,7 @@ import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.account.HistoryResponse;
+import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.banking.HistoryService;
 
@@ -23,11 +24,12 @@ public class AccountController {
 
     private final HistoryService historyService;
 
-    private final Long userId = 1L;
     //private final Long accountId = 1L;
 
     @GetMapping()
     public SuccessResponse<List<AccountResponse>> showAllAccount(){
+
+        Long userId = UserAuthorizationUtil.getLoginUserId();
 
         return SuccessResponse.of(
                 HttpStatus.OK.value(),
