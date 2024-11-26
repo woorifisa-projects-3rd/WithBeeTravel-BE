@@ -2,6 +2,8 @@ package withbeetravel.service.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import withbeetravel.dto.request.auth.RefreshTokenDto;
+import withbeetravel.dto.response.auth.ExpirationDto;
 import withbeetravel.dto.response.auth.SignInResponseDto;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
@@ -9,7 +11,7 @@ import withbeetravel.jwt.JwtUtil;
 import withbeetravel.jwt.RefreshToken;
 import withbeetravel.jwt.TokenStatus;
 
-import java.util.Map;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService{
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    @Override
+    public ExpirationDto checkExpirationTime(RefreshTokenDto refreshTokenDto) {
+        Date expirationDateFromToken = jwtUtil.getExpirationDateFromToken(refreshTokenDto.getRefreshToken());
+        return ExpirationDto.from(expirationDateFromToken);
     }
 
     private void checkRefreshToken(final String refreshToken) {
