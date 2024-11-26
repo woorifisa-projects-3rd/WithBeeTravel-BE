@@ -2,6 +2,7 @@ package withbeetravel.dto.request.auth;
 
 import lombok.Builder;
 import lombok.Getter;
+import withbeetravel.domain.RoleType;
 import withbeetravel.domain.User;
 
 // 로직 내부에서 인증 유저 정보를 저장해둘 dto

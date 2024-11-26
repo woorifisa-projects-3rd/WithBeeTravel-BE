@@ -1,4 +1,4 @@
-package withbeetravel.dto.request.auth;
+package withbeetravel.domain;
 
 public enum RoleType {
     USER, ADMIN
