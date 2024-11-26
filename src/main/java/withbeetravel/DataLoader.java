@@ -29,6 +29,7 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // User 더미 데이터 생성
+
         User user1 = User.builder()
                 .email("lee@example.com")
                 .password("password123")
