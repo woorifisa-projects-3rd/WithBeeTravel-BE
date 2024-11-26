@@ -1,7 +1,3 @@
-
-
-
-
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +16,6 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 import withbeetravel.service.banking.AccountService;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
