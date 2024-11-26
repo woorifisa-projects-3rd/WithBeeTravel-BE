@@ -25,10 +25,10 @@ public class SharedPaymentResponse {
     private int paymentAmount;
 
     @Schema(description = "외화 결제 금액")
-    private double foreignPaymentAmount;
+    private Double foreignPaymentAmount;
 
     @Schema(description = "환율")
-    private double exchangeRate;
+    private Double exchangeRate;
 
     @Schema(description = "통화 단위")
     private String unit;

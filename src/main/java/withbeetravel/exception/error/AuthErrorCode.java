@@ -24,6 +24,7 @@ public class AuthErrorCode extends ErrorCode{
     public static final AuthErrorCode INVALID_REFRESH_TOKEN = new AuthErrorCode(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "AUTH-016", "잘못된 리프레시 토큰");
     public static final AuthErrorCode VALIDATION_FAILED = new AuthErrorCode(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "AUTH-017", "유효성 검사 실패");
 
+    public static final AuthErrorCode USER_NOT_FOUND = new AuthErrorCode(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "AUTH-017", "사용자를 찾을 수 없음");
 
     private AuthErrorCode(HttpStatus status, String name, String code, String message) {
         super(status, name, code, message);

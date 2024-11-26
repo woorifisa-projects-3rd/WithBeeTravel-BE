@@ -39,10 +39,6 @@ public class SharedPaymentController {
             Page<SharedPayment> payments = sharedPaymentService.getSharedPayments(travelId, condition);
             Map<Long, List<SharedPaymentParticipatingMemberResponse>> participatingMembersMap = sharedPaymentService.getParticipatingMembersMap(payments);
 
-            if (payments.getContent().isEmpty()) {
-                throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);
-            }
-
             return SuccessResponse.of(200, "모든 공동 결제 내역 조회 성공", SharedPaymentResponse.of(
                     payments,
                     payments.getContent().get(0).getTravel().getTravelMembers().size(),

@@ -6,6 +6,9 @@ import withbeetravel.dto.request.travel.TravelRequest;
 import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
+import withbeetravel.dto.response.travel.TravelListResponse;
+
+import java.util.List;
 
 public interface
 TravelService {
@@ -18,4 +21,6 @@ TravelService {
     InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest request);
 
     InviteCodeGetResponse getInviteCode(Long travelId);
+
+    List<TravelListResponse> getTravelList();
 }
