@@ -9,6 +9,7 @@ import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.repository.UserRepository;
+import withbeetravel.security.UserAuthorizationUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +17,10 @@ public class VerifyServiceImpl implements VerifyService{
 
     private final UserRepository userRepository;
 
-    // TODO: 로그인 정보로 그에맞는 회원 id로 검증해야함
 
     public void verifyPin(String pin){
-        User user = userRepository.findById(1L)
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(()-> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED));
 
         if (user.isPinLocked()) {
@@ -42,9 +43,9 @@ public class VerifyServiceImpl implements VerifyService{
         userRepository.save(user);
     }
 
-    // TODO: 여기도 회원 id 받아서 처리해야함 일단 1번인 유저로 확인하게 했음
     public PinNumberResponse verifyUser(){
-        User user = userRepository.findById(1L)
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(()-> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED));
 
         if(user.isPinLocked()){
