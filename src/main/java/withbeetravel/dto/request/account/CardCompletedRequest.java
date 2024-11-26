@@ -13,6 +13,4 @@ public class CardCompletedRequest {
     private String connectedAccountId;
     private String wibeeCardAccountId;
     private boolean isWibeeCard;
-
-
 }
