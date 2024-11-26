@@ -32,8 +32,8 @@ public class HistoryController implements HistoryControllerDocs {
     @Override
     @GetMapping("/wibeeCardHistory")
     public SuccessResponse<WibeeCardHistoryListResponse> getWibeeCardHistory(
-            @RequestParam String startDate,
-            @RequestParam String endDate
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate
     ) {
         Long userId = UserAuthorizationUtil.getLoginUserId();
 
