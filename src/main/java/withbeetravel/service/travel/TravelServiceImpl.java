@@ -201,7 +201,7 @@ public class TravelServiceImpl implements TravelService {
                     Travel travel = travelMember.getTravel();
 
                     // 특정 여행에 속한 모든 멤버 조회
-                    List<TravelMember> members = travelMemberRepository.findByTravelId(travel.getId());
+                    List<TravelMember> members = travelMemberRepository.findAllByTravelId(travel.getId());
 
                     // 캡틴 멤버 필터링 및 프로필 이미지 추출
                     int profileImage = members.stream()
