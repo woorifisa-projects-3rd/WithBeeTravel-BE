@@ -10,7 +10,7 @@ import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static withbeetravel.dto.request.auth.RoleType.USER;
+import static withbeetravel.domain.RoleType.USER;
 
 //@Component
 @RequiredArgsConstructor
