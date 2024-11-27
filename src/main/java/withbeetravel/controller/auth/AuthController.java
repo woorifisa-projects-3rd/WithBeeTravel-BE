@@ -4,14 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import withbeetravel.dto.request.auth.RefreshTokenDto;
 import withbeetravel.dto.request.auth.SignInRequestDto;
 import withbeetravel.dto.request.auth.SignUpRequestDto;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.auth.ExpirationDto;
 import withbeetravel.dto.response.auth.SignInResponseDto;
 import withbeetravel.service.auth.AuthService;
-import withbeetravel.service.auth.RefreshTokenService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,7 +17,6 @@ import withbeetravel.service.auth.RefreshTokenService;
 public class AuthController {
 
     private final AuthService authService;
-    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/join")
     public SuccessResponse<Void> register(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
@@ -34,14 +31,14 @@ public class AuthController {
     }
 
     @PostMapping("/token-refresh")
-    public SuccessResponse<SignInResponseDto> refreshToken(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
-        SignInResponseDto signInResponseDto = refreshTokenService.refreshToken(refreshTokenDto.getRefreshToken());
+    public SuccessResponse<SignInResponseDto> refreshToken(@RequestHeader("refreshToken") String refreshToken) {
+        SignInResponseDto signInResponseDto = authService.refreshToken(refreshToken);
         return SuccessResponse.of(HttpStatus.OK.value(), "토큰 재발급 성공", signInResponseDto);
     }
 
     @GetMapping("/check-refresh")
-    public SuccessResponse<ExpirationDto> checkTokenTime(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
-        ExpirationDto expirationDto = refreshTokenService.checkExpirationTime(refreshTokenDto);
+    public SuccessResponse<ExpirationDto> checkTokenTime(@RequestHeader("refreshToken") String refreshToken) {
+        ExpirationDto expirationDto = authService.checkExpirationTime(refreshToken);
         return SuccessResponse.of(HttpStatus.OK.value(), "리프레시 토큰 만료시간 조회 성공", expirationDto);
     }
 }
