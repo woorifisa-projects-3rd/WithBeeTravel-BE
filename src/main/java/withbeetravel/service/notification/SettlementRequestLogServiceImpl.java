@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.settlementRequestLog.SettlementRequestLogDto;
-import withbeetravel.repository.SettlementRequestLogRepository;
-import withbeetravel.repository.SettlementRequestRepository;
-import withbeetravel.repository.TravelMemberRepository;
-import withbeetravel.repository.TravelRepository;
+import withbeetravel.repository.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SettlementRequestLogServiceIml implements SettlementRequestLogService{
+public class SettlementRequestLogServiceImpl implements SettlementRequestLogService{
 
     private final SettlementRequestLogRepository settlementRequestLogRepository;
     private final SettlementRequestRepository settlementRequestRepository;
@@ -44,24 +41,24 @@ public class SettlementRequestLogServiceIml implements SettlementRequestLogServi
     public void createSettlementLogsForEndedTravels() {
         List<Travel> travels = travelRepository.findAllByTravelEndDate(LocalDate.now());
         for (Travel travel : travels) {
-            createSettlementRequestLog(travel);
+            List<TravelMember> travelMembers = travelMemberRepository.findAllByTravelId(travel.getId());
+            travelMembers.forEach(travelMember -> {
+                User user = travelMember.getUser();
+                createSettlementRequestLog(travel, user, LogTitle.PAYMENT_REQUEST);
+            });
         }
     }
 
-    private void createSettlementRequestLog(Travel travel) {
-        List<TravelMember> travelMembers = travelMemberRepository.findAllByTravelId(travel.getId());
-        travelMembers.forEach(travelMember -> {
-            User user = travelMember.getUser();
-            SettlementRequestLog settlementRequestLog = SettlementRequestLog.builder()
-                    .travel(travel)
-                    .user(user)
-                    .logTitle(LogTitle.PAYMENT_REQUEST)
-                    .logMessage(LogTitle.PAYMENT_REQUEST.getMessage(travel.getTravelName()))
-                    .build();
-            settlementRequestLogRepository.save(settlementRequestLog);
-        });
-
+    private void createSettlementRequestLog(Travel travel, User user, LogTitle logTitle) {
+        SettlementRequestLog settlementRequestLog = SettlementRequestLog.builder()
+                .travel(travel)
+                .user(user)
+                .logTitle(logTitle)
+                .logMessage(logTitle.getMessage(travel.getTravelName()))
+                .build();
+        settlementRequestLogRepository.save(settlementRequestLog);
     }
+
 
     private SettlementRequestLogDto createSettlementRequestLogDto(SettlementRequestLog settlementRequestLog, String link) {
        return SettlementRequestLogDto.builder().id(settlementRequestLog.getId())
