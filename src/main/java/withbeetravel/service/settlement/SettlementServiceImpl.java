@@ -202,7 +202,7 @@ public class SettlementServiceImpl implements SettlementService {
             // totalPaymentCost가 0보다 작은 경우, 해당 멤버의 계좌에서 totalPaymentCost를 인출
             // totalPaymentCost가 0 이상일 경우, 해당 멤버의 계좌에 totalPaymentCost를 송금
             Account managerAccount = accountRepository
-                    .findById(9999L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+                    .findById(1L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
             // 총 정산 금액의 합산 계산
             int totalPaymentCostSum = getTotalPaymentCostSum(travelMemberSettlementHistories);
