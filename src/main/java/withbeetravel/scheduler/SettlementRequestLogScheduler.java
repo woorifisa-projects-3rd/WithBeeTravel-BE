@@ -1,4 +1,4 @@
-package withbeetravel.service.notification;
+package withbeetravel.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
