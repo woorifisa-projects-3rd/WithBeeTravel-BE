@@ -232,7 +232,7 @@ public class TravelServiceImpl implements TravelService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
         // 카드 발급 x , 연결계좌 0
-        if(request.isWibeeCard()){
+        if(!request.isWibeeCard()){
             Account account = accountRepository.findById(request.getAccountId())
                     .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
@@ -240,7 +240,7 @@ public class TravelServiceImpl implements TravelService {
         }
 
         // 카드 발급 0 , 연결계좌 0
-        if (!request.isWibeeCard()) {
+        if (request.isWibeeCard()) {
             Account account = accountRepository.findById(request.getAccountId())
                     .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
