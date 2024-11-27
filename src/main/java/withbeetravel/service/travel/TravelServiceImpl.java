@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.account.CardCompletedRequest;
+import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class TravelServiceImpl implements TravelService {
 
-    private final Long userId = 1L;
+
 
     private final TravelRepository travelRepository;
     private final TravelCountryRepository travelCountryRepository;
@@ -42,7 +43,7 @@ public class TravelServiceImpl implements TravelService {
     private final UserRepository userRepository;
 
     @Override
-    public TravelResponse saveTravel(TravelRequest requestDto) {
+    public TravelResponse saveTravel(TravelRequest requestDto,Long userId) {
 
         List<Account> accounts = accountRepository.findByUserId(userId);
         boolean hasConnectedWibeeCard = accounts.stream()
@@ -119,7 +120,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Override
-    public InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest requestDto){
+    public InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest requestDto,Long userId){
         String inviteCode = requestDto.getInviteCode();
 
         Travel travel = travelRepository.findByInviteCode(inviteCode).
@@ -193,7 +194,7 @@ public class TravelServiceImpl implements TravelService {
 
 //   user의 여행 목록 리스트 조회
     @Override
-    public List<TravelListResponse> getTravelList() {
+    public List<TravelListResponse> getTravelList(Long userId) {
 
         // 여행 멤버 테이블에서 유저 id가 속한 여행 id 조회
         List<TravelMember> travelMembers = travelMemberRepository.findAllByUserId(userId);
@@ -251,4 +252,16 @@ public class TravelServiceImpl implements TravelService {
         }
 
     }
+
+
+    @Override
+    public AccountConnectedWibeeResponse getConnectedWibee(Long userId){
+        boolean isConnected = accountRepository.findById(userId)
+                .map(Account::isConnectedWibeeCard) // Account 엔티티에 연결 여부 필드가 있다고 가정
+                .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+
+        return new AccountConnectedWibeeResponse(isConnected);
+    }
+
+
 }
