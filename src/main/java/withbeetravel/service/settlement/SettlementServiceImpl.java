@@ -1,6 +1,7 @@
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
@@ -12,8 +13,10 @@ import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 import withbeetravel.service.banking.AccountService;
+import withbeetravel.service.notification.SettlementRequestLogService;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,8 +36,10 @@ public class SettlementServiceImpl implements SettlementService {
     private final SettlementRequestLogRepository settlementRequestLogRepository;
     private final AccountRepository accountRepository;
 
-    private final SettlementPendingService settlementRequestLogService;
+    private final SettlementPendingService settlementPendingService;
     private final AccountService accountService;
+    private final TaskScheduler taskScheduler;
+    private final SettlementRequestLogService settlementRequestLogService;
 
     @Override
     @Transactional(readOnly = true)
@@ -107,6 +112,14 @@ public class SettlementServiceImpl implements SettlementService {
 
         // 정산 여부를 ONGOING으로 변경
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
+
+        // 24시간(= 86400초) 뒤에 createSettlementRerequestLogForNotAgreed 실행
+        if (newSettlementRequest.getRequestStartTime() != null) {
+            taskScheduler.schedule(
+                    () -> settlementRequestLogService.createSettlementReRequestLogForNotAgreed(newSettlementRequest),
+                    newSettlementRequest.getRequestStartTime()
+                            .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(24 * 60 * 60));
+        }
     }
 
     private void validateSettlementStatusIsNotOngoing(Travel travel) {
@@ -169,7 +182,7 @@ public class SettlementServiceImpl implements SettlementService {
                         .toList();
 
                 // 롤백시 실행되도록 다른 서비스 클래스로 분리
-                settlementRequestLogService.handlePendingSettlementRequest(
+                settlementPendingService.handlePendingSettlementRequest(
                         settlementRequestLogs,
                         insufficientBalanceMembers,
                         settlementRequest,

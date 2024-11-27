@@ -18,6 +18,7 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
     private final SettlementRequestRepository settlementRequestRepository;
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
+    private final TravelMemberSettlementHistoryRepository travelMemberSettlementHistoryRepository;
 
 
     @Override
@@ -49,6 +50,18 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
         }
     }
 
+    @Override
+    public void createSettlementReRequestLogForNotAgreed(SettlementRequest settlementRequest) {
+        Travel travel = settlementRequest.getTravel();
+        travelMemberSettlementHistoryRepository.findAllBySettlementRequestId(settlementRequest.getId())
+                .stream()
+                .filter(travelMemberSettlementHistory -> !travelMemberSettlementHistory.isAgreed())
+                .forEach(travelMemberSettlementHistory -> {
+                    User user = travelMemberSettlementHistory.getTravelMember().getUser();
+                    createSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_RE_REQUEST);
+                });
+    }
+
     private void createSettlementRequestLog(Travel travel, User user, LogTitle logTitle) {
         SettlementRequestLog settlementRequestLog = SettlementRequestLog.builder()
                 .travel(travel)
@@ -61,7 +74,7 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
 
 
     private SettlementRequestLogDto createSettlementRequestLogDto(SettlementRequestLog settlementRequestLog, String link) {
-       return SettlementRequestLogDto.builder().id(settlementRequestLog.getId())
+        return SettlementRequestLogDto.builder().id(settlementRequestLog.getId())
                 .logTime(settlementRequestLog.getLogTime())
                 .logTitle(settlementRequestLog.getLogTitle().getTitle())
                 .logMessage(settlementRequestLog.getLogMessage())
@@ -90,3 +103,4 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
         return link;
     }
 }
+
