@@ -6,4 +6,7 @@ import java.util.List;
 
 public interface SettlementRequestLogService {
     List<SettlementRequestLogDto> getSettlementRequestLogs (Long userId);
+
+    void createSettlementLogsForEndedTravels();
+
 }
