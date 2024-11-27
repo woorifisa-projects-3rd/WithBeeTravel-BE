@@ -10,6 +10,7 @@ import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.TravelMemberRepository;
 import withbeetravel.repository.TravelRepository;
+import withbeetravel.security.UserAuthorizationUtil;
 
 /**
  * 메소드 실행 전 Travel에 대한 권한 검증
@@ -23,10 +24,10 @@ public class TravelAccessAspect {
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
 
-    private final Long userId = 1L;
-
     @Before("@annotation(checkTravelAccess)") // @CheckTravelAccess가 붙은 메소드 실행 전에 실행
     public void checkAccess(JoinPoint joinPoint, CheckTravelAccess checkTravelAccess) {
+
+        Long userId = UserAuthorizationUtil.getLoginUserId();
 
         // @CheckTravelAccess를 붙인 메소드의 파라미터에서 travelId 추출
         Long travelId = getTravelIdFromArgs(joinPoint, checkTravelAccess.travelIdParam());

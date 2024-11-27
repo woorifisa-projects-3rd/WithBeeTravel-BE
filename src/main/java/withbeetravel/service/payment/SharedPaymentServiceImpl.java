@@ -38,15 +38,21 @@ public class SharedPaymentServiceImpl implements SharedPaymentService {
             throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);
         }
 
-        return sharedPaymentRepository.findAllByTravelIdAndMemberIdAndDateRange(
+        Page<SharedPayment> payments = sharedPaymentRepository.findAllByTravelIdAndMemberIdAndDateRange(
                 travelId,
                 condition.getMemberId(),
                 condition.getStartDate(),
                 condition.getEndDate(),
                 category,
                 PageRequest.of(condition.getPage(), 10,
-                        Sort.by(Sort.Direction.DESC,  condition.getSortBy().equals("amount") ? "paymentAmount" : "paymentDate"))
+                        Sort.by(Sort.Direction.DESC, condition.getSortBy().equals("amount") ? "paymentAmount" : "paymentDate"))
         );
+
+        if (payments.isEmpty()) {
+            throw new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND);
+        }
+
+        return payments;
     }
 
     @Override

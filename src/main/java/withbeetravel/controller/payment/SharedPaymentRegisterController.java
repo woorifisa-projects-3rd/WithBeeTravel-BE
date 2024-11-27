@@ -9,6 +9,7 @@ import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.payment.docs.SharedPaymentRegisterControllerDocs;
 import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.payment.SharedPaymentRegisterService;
 
 @RestController
@@ -17,9 +18,6 @@ import withbeetravel.service.payment.SharedPaymentRegisterService;
 public class SharedPaymentRegisterController implements SharedPaymentRegisterControllerDocs {
 
     private final SharedPaymentRegisterService sharedPaymentRegisterService;
-
-    // TODO: userId 수정
-    private static final Long userId = 1L;
 
     @Override
     @CheckTravelAccess
@@ -36,7 +34,9 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
             @RequestParam(value = "paymentComment", required = false) String paymentComment,
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
-        
+
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+
         sharedPaymentRegisterService.addManualSharedPayment(
                 userId, travelId, paymentDate, storeName, paymentAmount,
                 foreignPaymentAmount, currencyUnit, exchangeRate, paymentImage, paymentComment,
@@ -62,6 +62,8 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
             @RequestParam(value = "paymentComment", required = false) String paymentComment,
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+
         sharedPaymentRegisterService.updateManualSharedPayment(
                 userId, travelId, sharedPaymentId, paymentDate, storeName,
                 paymentAmount, foreignPaymentAmount, currencyUnit, exchangeRate, paymentImage,
@@ -78,6 +80,9 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
             @PathVariable Long travelId,
             @RequestBody SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
     ) {
+
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+
         sharedPaymentRegisterService.addWibeeCardSharedPayment(
                 userId, travelId, sharedPaymentWibeeCardRegisterRequest
         );

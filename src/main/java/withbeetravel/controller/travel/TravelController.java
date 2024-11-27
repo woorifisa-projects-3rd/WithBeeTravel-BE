@@ -11,7 +11,10 @@ import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
+import withbeetravel.dto.response.travel.TravelListResponse;
 import withbeetravel.service.travel.TravelService;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -54,4 +57,9 @@ public class TravelController {
     }
 
 
+    @GetMapping
+    public SuccessResponse<List<TravelListResponse>> getTravelList() {
+        List<TravelListResponse> travelListResponse = travelService.getTravelList();
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 리스트 조회 성공", travelListResponse);
+    }
 }

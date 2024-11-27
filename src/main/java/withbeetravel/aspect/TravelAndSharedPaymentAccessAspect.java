@@ -12,6 +12,7 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelMemberRepository;
 import withbeetravel.repository.TravelRepository;
+import withbeetravel.security.UserAuthorizationUtil;
 
 /**
  * 메소드 실행 전 Travel과 Shared payment에 대한 권한 검증
@@ -26,11 +27,11 @@ public class TravelAndSharedPaymentAccessAspect {
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
 
-    private final Long userId = 1L;
-
     // @CheckTravelAndSharedPaymentAccess 붙은 메소드 실행 전에 실행
     @Before("@annotation(access)")
     public void checkAccess(JoinPoint joinPoint, CheckTravelAndSharedPaymentAccess access) {
+
+        Long userId = UserAuthorizationUtil.getLoginUserId();
 
         // @CheckTravelAndSharedPaymentAccess 붙인 메소드의 파라미터에서 travelId 추출
         Long travelId = getIdFromArgs(joinPoint, access.travelIdParam());
