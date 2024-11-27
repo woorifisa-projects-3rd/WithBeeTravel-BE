@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
+import withbeetravel.dto.request.account.CardCompletedRequest;
+import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
@@ -13,6 +15,7 @@ import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.dto.response.travel.TravelListResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
+import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.TravelCountryRepository;
@@ -30,7 +33,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class TravelServiceImpl implements TravelService {
 
-    private final Long userId = 1L;
+
 
     private final TravelRepository travelRepository;
     private final TravelCountryRepository travelCountryRepository;
@@ -40,7 +43,7 @@ public class TravelServiceImpl implements TravelService {
     private final UserRepository userRepository;
 
     @Override
-    public TravelResponse saveTravel(TravelRequest requestDto) {
+    public TravelResponse saveTravel(TravelRequest requestDto,Long userId) {
 
         List<Account> accounts = accountRepository.findByUserId(userId);
         boolean hasConnectedWibeeCard = accounts.stream()
@@ -117,7 +120,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Override
-    public InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest requestDto){
+    public InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest requestDto,Long userId){
         String inviteCode = requestDto.getInviteCode();
 
         Travel travel = travelRepository.findByInviteCode(inviteCode).
@@ -191,7 +194,7 @@ public class TravelServiceImpl implements TravelService {
 
 //   user의 여행 목록 리스트 조회
     @Override
-    public List<TravelListResponse> getTravelList() {
+    public List<TravelListResponse> getTravelList(Long userId) {
 
         // 여행 멤버 테이블에서 유저 id가 속한 여행 id 조회
         List<TravelMember> travelMembers = travelMemberRepository.findAllByUserId(userId);
@@ -221,6 +224,43 @@ public class TravelServiceImpl implements TravelService {
                     );
                 }).toList();
 
+    }
+
+
+//   연결한 계좌 및 위비 카드 발급 했는지 안했는 지 여부
+    @Override
+    public void postConnectedAccount(CardCompletedRequest request,Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+        // 카드 발급 x , 연결계좌 0
+        if(!request.isWibeeCard()){
+            Account account = accountRepository.findById(request.getAccountId())
+                    .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+
+           user.updateConnectedAccount(account);
+        }
+
+        // 카드 발급 0 , 연결계좌 0
+        if (request.isWibeeCard()) {
+            Account account = accountRepository.findById(request.getAccountId())
+                    .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+            System.out.println(request.isWibeeCard());
+            account.updatedAccount(request.isWibeeCard());
+
+            user.updateConnectedAccount(account);
+            user.updateWibeeCardAccount(account);
+        }
+
+    }
+
+
+    @Override
+    public AccountConnectedWibeeResponse getConnectedWibee(Long userId){
+        boolean isConnected = accountRepository.findById(userId)
+                .map(Account::isConnectedWibeeCard) // Account 엔티티에 연결 여부 필드가 있다고 가정
+                .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+
+        return new AccountConnectedWibeeResponse(isConnected);
     }
 
 

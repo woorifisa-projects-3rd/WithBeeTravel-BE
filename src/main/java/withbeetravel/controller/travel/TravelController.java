@@ -4,14 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
+import withbeetravel.dto.request.account.CardCompletedRequest;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.dto.response.travel.TravelListResponse;
+import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.travel.TravelService;
 
 import java.util.List;
@@ -31,7 +34,8 @@ public class TravelController {
 
     @PostMapping
     public SuccessResponse<TravelResponse> saveTravel(@RequestBody TravelRequest request) {
-        TravelResponse travelResponse = travelService.saveTravel(request);
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        TravelResponse travelResponse = travelService.saveTravel(request,userId);
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공",travelResponse);
     }
 
@@ -45,7 +49,8 @@ public class TravelController {
 
     @PostMapping("/invite-code")
     public SuccessResponse<InviteCodeSignUpResponse> signUpTravel(@RequestBody InviteCodeSignUpRequest request){
-        InviteCodeSignUpResponse inviteCodeResponse = travelService.signUpTravel(request);
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        InviteCodeSignUpResponse inviteCodeResponse = travelService.signUpTravel(request,userId);
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 가입 성공", inviteCodeResponse);
     }
 
@@ -59,7 +64,22 @@ public class TravelController {
 
     @GetMapping
     public SuccessResponse<List<TravelListResponse>> getTravelList() {
-        List<TravelListResponse> travelListResponse = travelService.getTravelList();
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        List<TravelListResponse> travelListResponse = travelService.getTravelList(userId);
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 리스트 조회 성공", travelListResponse);
+    }
+
+    @PostMapping("/accounts")
+    public SuccessResponse<Void> postConnectedAccount(@RequestBody CardCompletedRequest request){
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        travelService.postConnectedAccount(request,userId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "계좌 연결 완료");
+    }
+
+    @GetMapping("/accounts")
+    public SuccessResponse<AccountConnectedWibeeResponse> getConnectedAccount(){
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        AccountConnectedWibeeResponse accountConnectedWibeeResponse = travelService.getConnectedWibee(userId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "위비 카드 발급 여부 확인",accountConnectedWibeeResponse);
     }
 }

@@ -49,4 +49,8 @@ public class Account {
         this.product = product;
         this.isConnectedWibeeCard = isConnectedWibeeCard;
     }
+
+    public void updatedAccount(Boolean isConnectedWibeeCard){
+        this.isConnectedWibeeCard = isConnectedWibeeCard;
+    }
 }
