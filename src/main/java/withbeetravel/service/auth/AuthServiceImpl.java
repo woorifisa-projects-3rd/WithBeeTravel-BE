@@ -22,6 +22,8 @@ import withbeetravel.repository.UserRepository;
 import java.util.Date;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -129,6 +131,13 @@ public class AuthServiceImpl implements AuthService {
     public ExpirationDto checkExpirationTime(final String refreshToken) {
         Date expirationDateFromToken = jwtUtil.getExpirationDateFromToken(refreshToken);
         return ExpirationDto.from(expirationDateFromToken);
+    }
+
+    @Override
+    public void logout(String refreshToken) {
+        if (!isNull(refreshToken)) {
+            refreshTokenRepository.deleteByToken(validateRefreshTokenExists(refreshToken).getToken());
+        }
     }
 
     private void checkRefreshToken(final String refreshToken) {

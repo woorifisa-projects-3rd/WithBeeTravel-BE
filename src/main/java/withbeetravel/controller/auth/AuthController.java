@@ -41,5 +41,12 @@ public class AuthController {
         ExpirationDto expirationDto = authService.checkExpirationTime(refreshToken);
         return SuccessResponse.of(HttpStatus.OK.value(), "리프레시 토큰 만료시간 조회 성공", expirationDto);
     }
+
+    @PostMapping("/logout")
+    public SuccessResponse<Void> logout(@RequestHeader("refreshToken") String refreshToken) {
+        authService.logout(refreshToken);
+        return SuccessResponse.of(HttpStatus.OK.value(),  "로그아웃 성공");
+    }
+
 }
 

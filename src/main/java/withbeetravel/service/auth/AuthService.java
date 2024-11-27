@@ -12,4 +12,6 @@ public interface AuthService {
     SignInResponseDto refreshToken(final String refreshToken);
 
     ExpirationDto checkExpirationTime(final String refreshToken);
+
+    void logout(final String refreshToken);
 }
