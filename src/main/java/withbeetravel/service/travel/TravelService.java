@@ -1,5 +1,6 @@
 package withbeetravel.service.travel;
 
+import withbeetravel.dto.request.account.CardCompletedRequest;
 import withbeetravel.dto.response.travel.TravelHomeResponse;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
@@ -23,4 +24,6 @@ TravelService {
     InviteCodeGetResponse getInviteCode(Long travelId);
 
     List<TravelListResponse> getTravelList();
+
+    void postConnectedAccount(CardCompletedRequest request, Long userId);
 }

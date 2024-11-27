@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAccess;
+import withbeetravel.dto.request.account.CardCompletedRequest;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
 import withbeetravel.dto.response.SuccessResponse;
@@ -12,6 +13,7 @@ import withbeetravel.dto.response.travel.InviteCodeGetResponse;
 import withbeetravel.dto.response.travel.InviteCodeSignUpResponse;
 import withbeetravel.dto.response.travel.TravelResponse;
 import withbeetravel.dto.response.travel.TravelListResponse;
+import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.travel.TravelService;
 
 import java.util.List;
@@ -61,5 +63,12 @@ public class TravelController {
     public SuccessResponse<List<TravelListResponse>> getTravelList() {
         List<TravelListResponse> travelListResponse = travelService.getTravelList();
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 리스트 조회 성공", travelListResponse);
+    }
+
+    @PostMapping("/accounts")
+    public SuccessResponse<Void> postConnectedAccount(@RequestBody CardCompletedRequest request){
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+        travelService.postConnectedAccount(request,userId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "계좌 연결 완료");
     }
 }

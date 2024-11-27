@@ -76,6 +76,10 @@ public class User {
         this.wibeeCardAccount = account;
     }
 
+    public void updateConnectedAccount(Account account){
+        this.connectedAccount = account;
+    }
+
     public void incrementFailedPinCount() {
         this.failedPinCount++;
         if (this.failedPinCount >= 5) {
