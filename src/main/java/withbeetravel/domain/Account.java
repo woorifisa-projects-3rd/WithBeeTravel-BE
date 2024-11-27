@@ -51,6 +51,6 @@ public class Account {
     }
 
     public void updatedAccount(Boolean isConnectedWibeeCard){
-        this.isConnectedWibeeCard = isConnectedWibeeCard();
+        this.isConnectedWibeeCard = isConnectedWibeeCard;
     }
 }
