@@ -10,7 +10,8 @@ import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static withbeetravel.dto.request.auth.RoleType.USER;
+import static withbeetravel.domain.RoleType.USER;
+
 
 //@Component
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class DataLoader implements CommandLineRunner {
 
         User user1 = User.builder()
                 .email("lee@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("123456")
                 .name("이도이")
                 .roleType(USER)
@@ -42,7 +43,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user2 = User.builder()
                 .email("gong@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("234567")
                 .name("공소연")
                 .roleType(USER)
@@ -52,7 +53,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user3 = User.builder()
                 .email("yoo@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("345678")
                 .name("유승아")
                 .roleType(USER)
@@ -62,7 +63,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user4 = User.builder()
                 .email("kim@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("456789")
                 .name("김호철")
                 .roleType(USER)
@@ -72,7 +73,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user5 = User.builder()
                 .email("kong@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("567890")
                 .name("공예진")
                 .roleType(USER)

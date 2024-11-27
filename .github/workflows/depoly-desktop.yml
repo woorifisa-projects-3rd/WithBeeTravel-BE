@@ -3,7 +3,7 @@ name: Build and Deploy to Local Ubuntu using Docker
 on:
   push:
     branches:
-      - feat/TK-200-CICD-적용하기  # 원하는 브랜치로 설정
+      - feat/TK-210-HTTPS-연결 # 원하는 브랜치로 설정
 
 env:
   DOCKER_IMAGE_NAME: with-bee-dev  # Docker 이미지 이름
@@ -11,8 +11,6 @@ env:
   LOCAL_UBUNTU_SSH_USER: ubuntu  # 로컬 우분투 사용자 이름
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
   DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/withbee-dev  # Docker Hub 이미지 이름
-  SPRING_DATASOURCE_USERNAME: root
-  SPRING_DATASOURCE_PASSWORD: 1234
   SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
 
 jobs:
@@ -75,7 +73,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
             # 로컬 우분투에서 기존 컨테이너가 있을 경우 제거
-            CONTAINER_ID=$(sudo docker ps -q --filter "publish=80-8080")
+            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
 
             if [ ! -z "$CONTAINER_ID" ]; then
               sudo docker stop $CONTAINER_ID
@@ -86,4 +84,4 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
 
             # 새로운 컨테이너로 실행
-            sudo docker run --name with-bee-dev -d -p 80:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
