@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import withbeetravel.domain.RefreshToken;
 import withbeetravel.domain.User;
 import withbeetravel.dto.request.auth.CustomUserInfoDto;
 import withbeetravel.domain.RoleType;
@@ -13,7 +14,7 @@ import withbeetravel.dto.response.auth.SignInResponseDto;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.jwt.JwtUtil;
-import withbeetravel.jwt.RefreshToken;
+import withbeetravel.repository.RefreshTokenRepository;
 import withbeetravel.repository.UserRepository;
 
 import java.util.Optional;
@@ -26,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public void signUp(SignUpRequestDto signUpRequestDto) {
@@ -66,11 +68,18 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtUtil.generateAccessToken(String.valueOf(info.getId()));
 
         // 기존에 가지고 있는 사용자의 refresh token 제거
-        RefreshToken.removeUserRefreshToken(info.getId());
+        if (refreshTokenRepository.existsByUserId(info.getId())) {
+            refreshTokenRepository.deleteByUserId(info.getId());
+        }
 
         // refresh token 생성 후 저장
         String refreshToken = jwtUtil.generateRefreshToken(String.valueOf(info.getId()));
-        RefreshToken.putRefreshToken(refreshToken, info.getId());
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .user(user.get())
+                        .token(refreshToken)
+                        .expirationTime(jwtUtil.getExpirationDateFromToken(refreshToken))
+                        .build());
 
         return SignInResponseDto.of(accessToken, refreshToken);
     }
