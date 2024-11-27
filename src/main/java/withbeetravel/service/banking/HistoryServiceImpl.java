@@ -90,9 +90,10 @@ public class HistoryServiceImpl implements HistoryService {
         // 결제 내역 가져오기
         List<History> histories = historyRepository.findByAccountIdAndDateBetween(account.getId(), sDate.atStartOfDay(), eDate.atStartOfDay().plusDays(1));
 
-        // 위비 카드 결제 내역만 가져오기
+        // 위비 카드 결제 내역만 가져오기(날짜 오름차순 정렬)
         List<History> filteredHistories = histories.stream()
                 .filter(History::isWibeeCard)
+                .sorted((h1, h2) -> h1.getDate().compareTo(h2.getDate()))
                 .toList();
 
         return WibeeCardHistoryListResponse.builder()
