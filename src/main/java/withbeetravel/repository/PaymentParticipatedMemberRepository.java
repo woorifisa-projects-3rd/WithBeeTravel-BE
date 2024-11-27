@@ -12,4 +12,6 @@ public interface PaymentParticipatedMemberRepository extends JpaRepository<Payme
     List<PaymentParticipatedMember> findAllBySharedPaymentId(Long sharedPaymentId);
 
     List<PaymentParticipatedMember> findAllByTravelMemberId(Long travelMemberId);
+
+    boolean existsByTravelMemberIdAndSharedPaymentId(Long travelMemberId, Long sharedPaymentId);
 }

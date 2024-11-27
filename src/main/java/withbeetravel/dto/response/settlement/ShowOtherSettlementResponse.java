@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class ShowOtherSettlementResponse {
-    private Long id;
-    private String name;
-    private int totalPaymentCost;
-    private boolean isAgreed;
+    private final Long id;
+    private final String name;
+    private final int totalPaymentCost;
+    private final boolean isAgreed;
 
     private ShowOtherSettlementResponse(Long id, String name, int totalPaymentCost, boolean isAgreed) {
         this.id = id;

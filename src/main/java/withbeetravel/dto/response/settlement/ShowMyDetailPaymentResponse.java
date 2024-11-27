@@ -6,11 +6,11 @@ import java.time.LocalDateTime;
 
 @Getter
 public class ShowMyDetailPaymentResponse {
-    private Long id;
-    private int paymentAmount;
-    private int requestedAmount;
-    private String storeName;
-    private LocalDateTime paymentDate;
+    private final Long id;
+    private final int paymentAmount;
+    private final int requestedAmount;
+    private final String storeName;
+    private final LocalDateTime paymentDate;
 
     private ShowMyDetailPaymentResponse(Long id,
                                         int paymentAmount,
