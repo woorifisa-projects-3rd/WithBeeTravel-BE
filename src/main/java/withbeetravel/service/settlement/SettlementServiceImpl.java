@@ -114,11 +114,15 @@ public class SettlementServiceImpl implements SettlementService {
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
 
         // 24시간(= 86400초) 뒤에 createSettlementRerequestLogForNotAgreed 실행
-        if (newSettlementRequest.getRequestStartTime() != null) {
-            taskScheduler.schedule(
-                    () -> settlementRequestLogService.createSettlementReRequestLogForNotAgreed(newSettlementRequest),
-                    newSettlementRequest.getRequestStartTime()
-                            .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(24 * 60 * 60));
+        try {
+            if (newSettlementRequest.getRequestStartTime() != null) {
+                taskScheduler.schedule(
+                        () -> settlementRequestLogService.createSettlementReRequestLogForNotAgreed(newSettlementRequest),
+                        newSettlementRequest.getRequestStartTime()
+                                .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(24 * 60 * 60));
+            }
+        } catch (Exception e) {
+            throw new CustomException(SettlementErrorCode.SCHEDULER_PROCESSING_FAILED);
         }
     }
 
