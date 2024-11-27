@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
-import withbeetravel.dto.response.settlement.ShowMyDetailPaymentResponse;
-import withbeetravel.dto.response.settlement.ShowMyTotalPaymentResponse;
-import withbeetravel.dto.response.settlement.ShowOtherSettlementResponse;
-import withbeetravel.dto.response.settlement.ShowSettlementDetailResponse;
+import withbeetravel.dto.response.settlement.*;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.BankingErrorCode;
@@ -19,6 +16,7 @@ import withbeetravel.service.banking.AccountService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -58,10 +56,13 @@ public class SettlementServiceImpl implements SettlementService {
         List<ShowOtherSettlementResponse> others =
                 createOtherSettlementResponses(travelMemberSettlementHistories, myTravelMemberId);
 
-        List<ShowMyDetailPaymentResponse> myDetailPayments =
-                createMyDetailPaymentResponses(myTravelMemberId);
+        MyDetailPaymentResponse myDetailPaymentResponse = createMyDetailPaymentResponses(myTravelMemberId);
+        List<ShowMyDetailPaymentResponse> myDetailPayments = myDetailPaymentResponse.getMyDetailPaymentResponses();
+        int totalPaymentAmounts = myDetailPaymentResponse.getTotalPaymentAmounts();
+        int totalRequestedAmounts = myDetailPaymentResponse.getTotalRequestedAmounts();
 
-        return ShowSettlementDetailResponse.of(myTotalPayments, disagreeCount, myDetailPayments, others);
+        return ShowSettlementDetailResponse.of(
+                myTotalPayments, disagreeCount, totalPaymentAmounts, totalRequestedAmounts, myDetailPayments, others);
     }
 
     @Override
@@ -367,31 +368,68 @@ public class SettlementServiceImpl implements SettlementService {
         }
     }
 
-    private List<ShowMyDetailPaymentResponse> createMyDetailPaymentResponses(Long myTravelMemberId) {
-        return paymentParticipatedMemberRepository.findAllByTravelMemberId(myTravelMemberId)
-                .stream()
-                .map(paymentParticipatedMember -> {
-                    SharedPayment sharedPayment = paymentParticipatedMember.getSharedPayment();
-                    Long id = sharedPayment.getId();
-                    TravelMember addedByTravelMember = sharedPayment.getAddedByMember();
+    private MyDetailPaymentResponse createMyDetailPaymentResponses(Long myTravelMemberId) {
+        // 내가 정산에 포함된 결제 내역들
+        List<PaymentParticipatedMember> paymentParticipatedMembers = paymentParticipatedMemberRepository.findAllByTravelMemberId(myTravelMemberId);
+        List<SharedPayment> settledPayments = paymentParticipatedMembers.stream()
+                .map(PaymentParticipatedMember::getSharedPayment).toList();
 
-                    int participantCount = sharedPayment.getParticipantCount();
-                    int paymentAmount = sharedPayment.getPaymentAmount();
-                    int amountPerPerson = paymentAmount / participantCount;
+        // 내가 결제한 리스트
+        List<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByAddedByMemberId(myTravelMemberId);
+        // 내가 결제했지만 정산에 포함되지 않는 공동결제내역들
+        List<SharedPayment> unsettledPayments = sharedPayments.stream()
+                .filter(sharedPayment -> {
+                    Long sharedPaymentId = sharedPayment.getId();
+                    return !paymentParticipatedMemberRepository.existsByTravelMemberIdAndSharedPaymentId(myTravelMemberId, sharedPaymentId);
+                }).toList();
 
-                    // 내가 결제한 내역과 아닌 내역을 구분해서 RequestedAmount 계산
-                    int requestedAmount =
-                            (addedByTravelMember.getId() == myTravelMemberId) ?
-                                    (paymentAmount - amountPerPerson) : -amountPerPerson;
+        // settledPayments + unsettledPayments
+        List<SharedPayment> allPayments = Stream.concat(settledPayments.stream(), unsettledPayments.stream()).toList();
 
-                    return ShowMyDetailPaymentResponse.of(
-                            id,
-                            paymentAmount,
-                            requestedAmount,
-                            sharedPayment.getStoreName(),
-                            sharedPayment.getPaymentDate());
-                })
-                .toList();
+        // 총 받을 금액
+        int sumOfPaymentAmounts = 0;
+
+        // 총 보낼 금액
+        int sumOfRequestedAmounts = 0;
+
+        // 세부 지출 내역들
+        List<ShowMyDetailPaymentResponse> myDetailPaymentResponses = new ArrayList<>();
+
+        for (SharedPayment sharedPayment : allPayments) {
+            Long sharedPaymentId = sharedPayment.getId();
+            TravelMember addedByTravelMember = sharedPayment.getAddedByMember();
+
+            int participantCount = sharedPayment.getParticipantCount();
+            int paymentAmount = sharedPayment.getPaymentAmount();
+            int amountPerPerson = paymentAmount / participantCount;
+
+            // 내가 결제했고, 정산에 포함되었는지 확인
+            boolean included = paymentParticipatedMemberRepository
+                    .existsByTravelMemberIdAndSharedPaymentId(
+                            addedByTravelMember.getId(), sharedPayment.getId());
+
+            // 내가 결제한 내역, 내가 결제했지만 정산에 포함되지 않은 내역,
+            // 내가 결제하지 않았지만 정산에 포함된 내역을 구분해서 RequestedAmount 계산
+            int requestedAmount =
+                    addedByTravelMember.getId() == myTravelMemberId ?
+                            (included ? paymentAmount - amountPerPerson : paymentAmount) : -amountPerPerson;
+
+            if (requestedAmount < 0) {
+                sumOfRequestedAmounts += requestedAmount;
+            } else {
+                sumOfPaymentAmounts += requestedAmount;
+
+            }
+
+            myDetailPaymentResponses.add(ShowMyDetailPaymentResponse.of(
+                    sharedPaymentId,
+                    paymentAmount,
+                    requestedAmount,
+                    sharedPayment.getStoreName(),
+                    sharedPayment.getPaymentDate()));
+        }
+
+        return MyDetailPaymentResponse.of(sumOfPaymentAmounts, -sumOfRequestedAmounts, myDetailPaymentResponses);
     }
 
     private List<ShowOtherSettlementResponse> createOtherSettlementResponses
@@ -416,7 +454,7 @@ public class SettlementServiceImpl implements SettlementService {
 
         // 내가 결제한 공유 결제 내역의 1/n 금액의 합계
         List<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByAddedByMemberId(myTravelMemberId);
-        int SumOfamountPerPerson = sharedPayments.stream()
+        int sumOfAmountPerPerson = sharedPayments.stream()
                 .mapToInt(sharedPayment -> sharedPayment.getPaymentAmount() / sharedPayment.getParticipantCount())
                 .sum();
 
@@ -428,8 +466,8 @@ public class SettlementServiceImpl implements SettlementService {
                     String name = userRepository.findById(userId)
                             .orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED)).getName();
                     // 내가 받아야 할 금액의 합계 = 내 결제 금액 합계 - 1/n 금액의 합계
-                    int ownPaymentCost = history.getOwnPaymentCost() - SumOfamountPerPerson;
-                    int actualBurdenCost = history.getActualBurdenCost();
+                    int ownPaymentCost = history.getOwnPaymentCost() - sumOfAmountPerPerson;
+                    int actualBurdenCost = history.getActualBurdenCost() - sumOfAmountPerPerson;
                     boolean isAgreed = history.isAgreed();
                     return ShowMyTotalPaymentResponse.of(name, isAgreed, ownPaymentCost, actualBurdenCost);
                 })
