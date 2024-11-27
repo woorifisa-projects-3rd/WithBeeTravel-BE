@@ -18,7 +18,7 @@ public class VerifyController {
     @PostMapping("/pin-number")
     public SuccessResponse verifyPin(
             @RequestBody PinNumberRequest pinNumberRequest){
-        verifyService.verifyPin( pinNumberRequest.getPinNumber());
+        verifyService.verifyPin(pinNumberRequest.getPinNumber());
 
         return SuccessResponse.of(HttpStatus.OK.value(), "핀번호 검증 완료");
     }
