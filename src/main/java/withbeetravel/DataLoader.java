@@ -10,6 +10,7 @@ import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static withbeetravel.domain.RoleType.ADMIN;
 import static withbeetravel.domain.RoleType.USER;
 
 
@@ -30,6 +31,17 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // User 더미 데이터 생성
+
+        User user0 = User.builder()
+                .email("admin@admin")
+                .password("password123!")
+                .pinNumber("123456")
+                .name("관라지")
+                .roleType(ADMIN)
+                .pinLocked(false)
+                .failedPinCount(0)
+                .profileImage(1)
+                .build();
 
         User user1 = User.builder()
                 .email("lee@example.com")
@@ -82,13 +94,24 @@ public class DataLoader implements CommandLineRunner {
                 .failedPinCount(0)
                 .build();
 
+        userRepository.save(user0);  // 추가
         userRepository.save(user1);
         userRepository.save(user2);
         userRepository.save(user3);
         userRepository.save(user4);  // 추가
         userRepository.save(user5);  // 추가
 
+
+
         // Account 더미 데이터 생성
+        Account account0 = Account.builder()
+                .user(user0)
+                .accountNumber("0000000000000")
+                .balance(100000000)
+                .product(Product.WON통장)
+                .isConnectedWibeeCard(true)
+                .build();
+
         Account account1 = Account.builder()
                 .user(user1)
                 .accountNumber("123456789012")
@@ -129,6 +152,7 @@ public class DataLoader implements CommandLineRunner {
                 .isConnectedWibeeCard(false)
                 .build();
 
+        accountRepository.save(account0);
         accountRepository.save(account1);
         accountRepository.save(account2);
         accountRepository.save(account3);
