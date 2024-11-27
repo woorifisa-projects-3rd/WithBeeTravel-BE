@@ -3,12 +3,12 @@ name: Build and Deploy to Local Ubuntu using Docker
 on:
   push:
     branches:
-      - feat/TK-210-HTTPS-연결 # 원하는 브랜치로 설정
+      - dev
 
 env:
   DOCKER_IMAGE_NAME: with-bee-dev  # Docker 이미지 이름
-  LOCAL_UBUNTU_HOST: ${{ secrets.LOCAL_UBUNTU_HOST }}   # 로컬 우분투 IP 주소
-  LOCAL_UBUNTU_SSH_USER: ubuntu  # 로컬 우분투 사용자 이름
+  LOCAL_UBUNTU_HOST: ${{ secrets.LOCAL_UBUNTU_HOST }}
+  LOCAL_UBUNTU_SSH_USER: ubuntu  # 사용자 이름
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
   DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/withbee-dev  # Docker Hub 이미지 이름
   SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
@@ -68,11 +68,11 @@ jobs:
       - name: Deploy to Local Ubuntu
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.LOCAL_UBUNTU_HOST }}  # 로컬 우분투 IP 주소
+          host: ${{ secrets.LOCAL_UBUNTU_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            # 로컬 우분투에서 기존 컨테이너가 있을 경우 제거
+            #  기존 컨테이너가 있을 경우 제거
             CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
 
             if [ ! -z "$CONTAINER_ID" ]; then
