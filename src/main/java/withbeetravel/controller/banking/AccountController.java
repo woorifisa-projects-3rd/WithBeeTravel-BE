@@ -3,12 +3,14 @@ package withbeetravel.controller.banking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import withbeetravel.aspect.CheckBankingAccess;
 import withbeetravel.dto.request.account.*;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.account.AccountOwnerNameResponse;
 import withbeetravel.dto.response.account.AccountResponse;
 import withbeetravel.dto.response.account.HistoryResponse;
+import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.banking.HistoryService;
 
@@ -23,12 +25,11 @@ public class AccountController {
 
     private final HistoryService historyService;
 
-    private final Long userId = 1L;
-    //private final Long accountId = 1L;
+
 
     @GetMapping()
     public SuccessResponse<List<AccountResponse>> showAllAccount(){
-
+        Long userId = UserAuthorizationUtil.getLoginUserId();
         return SuccessResponse.of(
                 HttpStatus.OK.value(),
                 "전체 계좌 조회 완료",
@@ -37,6 +38,7 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}/info")
+    //@CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
     public SuccessResponse<AccountResponse> accountInfo(@PathVariable Long accountId){
         return  SuccessResponse.of(
                 HttpStatus.OK.value(),
@@ -46,6 +48,7 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}")
+   // @CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
     public SuccessResponse<List<HistoryResponse>> showAllHistories(@PathVariable Long accountId){
         return SuccessResponse.of(
                 HttpStatus.OK.value(),
@@ -57,11 +60,12 @@ public class AccountController {
     @PostMapping()
     public SuccessResponse<AccountResponse> createAccount(@RequestBody CreateAccountRequest createAccountRequest){
 
+        Long userId = UserAuthorizationUtil.getLoginUserId();
         // 계좌 생성
         return SuccessResponse.of(
                 HttpStatus.CREATED.value(),
                 "계좌 생성 완료",
-                accountService.createAccount(1L,createAccountRequest)
+                accountService.createAccount(userId,createAccountRequest)
         );//1L 부분은 나중에 로그인 상태가 되면 유저 별로 바뀔 예정
     }
 
