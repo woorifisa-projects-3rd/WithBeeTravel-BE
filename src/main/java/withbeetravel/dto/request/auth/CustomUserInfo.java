@@ -7,7 +7,7 @@ import withbeetravel.domain.User;
 
 // 로직 내부에서 인증 유저 정보를 저장해둘 dto
 @Getter
-public class CustomUserInfoDto {
+public class CustomUserInfo {
     private Long id;
     private String email;
     private String password;
@@ -15,11 +15,11 @@ public class CustomUserInfoDto {
     private RoleType role;
 
     @Builder
-    public CustomUserInfoDto(Long id,
-                             String email,
-                             String password,
-                             String name,
-                             RoleType role) {
+    public CustomUserInfo(Long id,
+                          String email,
+                          String password,
+                          String name,
+                          RoleType role) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -27,8 +27,8 @@ public class CustomUserInfoDto {
         this.role = role;
     }
 
-    public static CustomUserInfoDto from(User user) {
-        return CustomUserInfoDto.builder()
+    public static CustomUserInfo from(User user) {
+        return CustomUserInfo.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .password(user.getPassword())
