@@ -63,7 +63,7 @@ public class User {
         this.wibeeCardAccount = wibeeCardAccount;
         this.connectedAccount = connectedAccount;
         this.email = email;
-        this.password = BCrypt.hashpw(password, BCrypt.gensalt());
+        this.password = password;
         this.pinNumber = BCrypt.hashpw(pinNumber, BCrypt.gensalt());
         this.name = name;
         this.profileImage = profileImage;
