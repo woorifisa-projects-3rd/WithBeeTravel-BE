@@ -44,23 +44,27 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
 
         // 이미지 추가, 수정, 삭제
-        String newImage = uploadImage(travelId, sharedPayment, image);
+        if(image != null && image.getSize() != 0) {
+            String newImageUrl;
+            try {
+                newImageUrl = s3Uploader.upload(image, SHARED_PAYMENT_IMAGE_DIR + travelId);
+            } catch (IOException e) {
+                throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
+            }
+            sharedPayment.updatePaymentImage(newImageUrl);
+            // 메인 이미지로 설정했다면, 여행 메인 사진 바꿔주기
+            if(isMainImage) {
+                // 여행 정보 찾아오기
+                Travel travel = travelRepository.findById(travelId)
+                        .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
-        // 새로운 image 정보 엔티티에서 변경
-        sharedPayment.updatePaymentImage(newImage);
+                // 여행 이미지 수정
+                travel.updateMainImage(newImageUrl);
+            }
+        }
 
         // comment 정보 엔티티에서 변경
         sharedPayment.updatePaymentCommnet(comment);
-
-        // 메인 이미지로 설정해준 경우 여행 정보 수정
-        if(isMainImage && image != null && newImage != null) {
-            // 여행 정보 찾아오기
-            Travel travel = travelRepository.findById(travelId)
-                    .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
-
-            // 여행 이미지 수정
-            travel.updateMainImage(newImage);
-        }
 
         return SuccessResponse.of(200, "이미지 및 문구를 성공적으로 변경하였습니다.");
     }
