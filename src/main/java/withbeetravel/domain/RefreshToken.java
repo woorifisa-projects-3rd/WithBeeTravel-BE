@@ -17,11 +17,11 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "token", unique = true)
+    @Column(name = "token")
     private String token;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "expiration_time", nullable = false)
@@ -31,6 +31,11 @@ public class RefreshToken {
     public RefreshToken(Long id, User user, String token, Date expirationTime) {
         this.id = id;
         this.user = user;
+        this.token = token;
+        this.expirationTime = expirationTime;
+    }
+
+    public void update(String token, Date expirationTime) {
         this.token = token;
         this.expirationTime = expirationTime;
     }

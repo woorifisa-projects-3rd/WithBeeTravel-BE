@@ -58,30 +58,27 @@ public class AuthServiceImpl implements AuthService {
     public SignInResponseDto login(SignInRequestDto signInRequestDto) {
         String email = signInRequestDto.getEmail();
         String password = signInRequestDto.getPassword();
-        Optional<User> user = userRepository.findUserByEmail(email);
-        if (!userRepository.existsByEmail(email)) {
-            throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
-        }
 
-        if (!bCryptPasswordEncoder.matches(password, user.get().getPassword())) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.EMAIL_NOT_FOUND));
+
+        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
             throw new CustomException(AuthErrorCode.INVALID_PASSWORD);
         }
 
-        CustomUserInfoDto info = CustomUserInfoDto.from(user.get());
+        CustomUserInfoDto info = CustomUserInfoDto.from(user);
 
         // jwt 토큰 생성
         String accessToken = jwtUtil.generateAccessToken(String.valueOf(info.getId()));
 
         // 기존에 가지고 있는 사용자의 refresh token 제거
-        if (refreshTokenRepository.existsByUserId(info.getId())) {
-            refreshTokenRepository.deleteByUserId(info.getId());
-        }
+        refreshTokenRepository.deleteByUserId(info.getId());
 
         // refresh token 생성 후 저장
         String refreshToken = jwtUtil.generateRefreshToken(String.valueOf(info.getId()));
         refreshTokenRepository.save(
                 RefreshToken.builder()
-                        .user(user.get())
+                        .user(user)
                         .token(refreshToken)
                         .expirationTime(jwtUtil.getExpirationDateFromToken(refreshToken))
                         .build());
