@@ -1,11 +1,13 @@
 package withbeetravel.service.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
+import withbeetravel.dto.response.payment.CurrencyUnitResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.*;
 import withbeetravel.repository.*;
@@ -15,7 +17,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +27,9 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
-    private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
+    private final TravelCountryRepository travelCountryRepository;
 
     private final SharedPaymentCategoryClassificationService sharedPaymentCategoryClassificationService;
 
@@ -182,6 +184,49 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         );
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public CurrencyUnitResponse getCurrencyUnitOptions(Long travelId) {
+
+        Travel travel = getTravel(travelId);
+
+        // 방문 예정 나라의 통화 코드
+        Set<String> visitedCountryCurrencyUnit = new HashSet<>();
+
+        // 해외 여행이면 방문 나라의 통화 코드들 넣기
+        if(!travel.isDomesticTravel()) {
+            List<TravelCountry> travelCountries = getTravelCountries(travelId);
+            for(TravelCountry country: travelCountries) {
+                if(!country.getCountry().getCurrencyCode().equals("KRW"))
+                    visitedCountryCurrencyUnit.add(country.getCountry().getCurrencyCode());
+            }
+        }
+
+        // visitedCountryCurrencyUnit에 없는 통화 코드 리스트
+        List<String> doesntVisitedCountryCurrencyUnit = new ArrayList<>();
+        for(CurrencyUnit currencyUnit : CurrencyUnit.values()) {
+            if(!visitedCountryCurrencyUnit.contains(currencyUnit.name()) && !currencyUnit.name().equals("KRW"))
+                doesntVisitedCountryCurrencyUnit.add(currencyUnit.name());
+        }
+
+        // doesntVisitedCountryCurrencyUnit 사전순 정렬
+        Collections.sort(doesntVisitedCountryCurrencyUnit);
+
+        // visitedCountryCurrencyUnit를 currencyUnitOptions에 담아 사전 순 정렬
+        List<String> currencyUnitOptions = new ArrayList<>(visitedCountryCurrencyUnit);
+        Collections.sort(currencyUnitOptions);
+
+        // ret 뒤에 doesntVisitedCountryCurrencyUnit 추가
+        currencyUnitOptions.addAll(doesntVisitedCountryCurrencyUnit);
+
+        // 원화는 항상 맨 앞
+        currencyUnitOptions.add(0, "KRW");
+
+        return CurrencyUnitResponse.builder()
+                .currencyUnitOptions(currencyUnitOptions)
+                .build();
+    }
+
     Travel getTravel(Long travelId) {
         return travelRepository.findById(travelId)
                 .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
@@ -222,6 +267,10 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
     History getHistory(Long historyId) {
         return historyRepository.findById(historyId)
                 .orElseThrow(() -> new CustomException(BankingErrorCode.HISTORY_NOT_FOUND));
+    }
+
+    List<TravelCountry> getTravelCountries(Long travelId) {
+        return travelCountryRepository.findByTravelId(travelId);
     }
 
     void validatePaymentAmount(Double foreignPaymentAmount, Double exchangeRate) {

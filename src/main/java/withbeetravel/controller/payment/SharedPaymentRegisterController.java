@@ -9,6 +9,7 @@ import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.payment.docs.SharedPaymentRegisterControllerDocs;
 import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.payment.CurrencyUnitResponse;
 import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.payment.SharedPaymentRegisterService;
 
@@ -88,5 +89,17 @@ public class SharedPaymentRegisterController implements SharedPaymentRegisterCon
         );
 
         return SuccessResponse.of(HttpStatus.OK.value(), "결제 내역이 추가되었습니다.");
+    }
+
+    @Override
+    @CheckTravelAccess
+    @GetMapping("/currency-unit")
+    public SuccessResponse<CurrencyUnitResponse> getCurrencyUnitOptions(
+            @PathVariable Long travelId
+    ) {
+
+        CurrencyUnitResponse response = sharedPaymentRegisterService.getCurrencyUnitOptions(travelId);
+
+        return SuccessResponse.of(HttpStatus.OK.value(), "통화 코드 목록입니다.", response);
     }
 }
