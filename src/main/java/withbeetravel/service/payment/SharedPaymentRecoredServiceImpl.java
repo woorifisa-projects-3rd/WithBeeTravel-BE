@@ -32,7 +32,7 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
 
     @Override
     @Transactional
-    public SuccessResponse<Void> addAndUpdatePaymentRecord(
+    public void addAndUpdatePaymentRecord(
             Long travelId,
             Long sharedPaymentId,
             MultipartFile image,
@@ -65,13 +65,11 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
 
         // comment 정보 엔티티에서 변경
         sharedPayment.updatePaymentCommnet(comment);
-
-        return SuccessResponse.of(200, "이미지 및 문구를 성공적으로 변경하였습니다.");
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SuccessResponse<SharedPaymentRecordResponse> getSharedPaymentRecord(Long sharedPaymentId) {
+    public SharedPaymentRecordResponse getSharedPaymentRecord(Long sharedPaymentId) {
 
         // SharedPayment 엔티티 가져오기
         SharedPayment sharedPayment = sharedPaymentRepository.findById(sharedPaymentId)
@@ -80,7 +78,7 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
         // Response Dto에 담기
         SharedPaymentRecordResponse responseDto = SharedPaymentRecordResponse.from(sharedPayment);
 
-        return SuccessResponse.of(200, "여행 기록 불러오기 성공", responseDto);
+        return responseDto;
     }
 
     // 이미지 추가, 수정, 삭제
