@@ -1,4 +1,4 @@
-package withbeetravel.controller.auth;
+package withbeetravel.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;

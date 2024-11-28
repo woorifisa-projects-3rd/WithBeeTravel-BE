@@ -12,6 +12,7 @@ import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.auth.AccessTokenResponse;
 import withbeetravel.dto.response.auth.ExpirationResponse;
 import withbeetravel.dto.response.auth.SignInResponse;
+import withbeetravel.security.CookieUtil;
 import withbeetravel.service.auth.AuthService;
 
 @RestController
