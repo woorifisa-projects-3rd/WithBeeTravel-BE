@@ -2,19 +2,21 @@ package withbeetravel.dto.response.auth;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class SignInResponseDto {
-    private String accessToken;
+    private AccessTokenDto accessTokenDto;
     private String refreshToken;
 
     @Builder
-    public SignInResponseDto(String accessToken, String refreshToken) {
-        this.accessToken = accessToken;
+    public SignInResponseDto(AccessTokenDto accessTokenDto, String refreshToken) {
+        this.accessTokenDto = accessTokenDto;
         this.refreshToken = refreshToken;
     }
 
-    public static SignInResponseDto of (String accessToken, String refreshToken) {
-        return SignInResponseDto.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+    public static SignInResponseDto of (AccessTokenDto accessTokenDto, String refreshToken) {
+        return SignInResponseDto.builder().accessTokenDto(accessTokenDto).refreshToken(refreshToken).build();
     }
 }

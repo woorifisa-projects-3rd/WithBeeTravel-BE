@@ -9,7 +9,7 @@ public interface AuthService {
     void signUp(SignUpRequestDto signUpRequestDto);
     SignInResponseDto login(SignInRequestDto signInRequestDto);
 
-    SignInResponseDto refreshToken(final String refreshToken);
+    SignInResponseDto reissue(final String refreshToken);
 
     ExpirationDto checkExpirationTime(final String refreshToken);
 
