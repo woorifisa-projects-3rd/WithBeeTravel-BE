@@ -32,7 +32,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<SuccessResponse<AccessTokenResponse>> login(@RequestBody @Valid SignInRequest signInRequest) {
         SignInResponse signInResponse = authService.login(signInRequest);
-        System.out.println("AccessTokenDto: " + signInResponse.getAccessTokenResponse());
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, String.valueOf(cookieUtil.createHttpOnlyCookie(signInResponse.getRefreshToken())))
                         .body(SuccessResponse.of(HttpStatus.OK.value(), "로그인 성공", signInResponse.getAccessTokenResponse()));
     }
