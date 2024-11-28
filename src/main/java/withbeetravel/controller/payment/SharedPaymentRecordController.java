@@ -28,7 +28,7 @@ public class SharedPaymentRecordController implements SharedPaymentRecordControl
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
 
-        sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage)
+        sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage);
         return SuccessResponse.of(HttpStatus.OK.value(), "이미지 및 문구를 성공적으로 변경하였습니다.");
     }
 
