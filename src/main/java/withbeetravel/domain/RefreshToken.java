@@ -34,9 +34,4 @@ public class RefreshToken {
         this.token = token;
         this.expirationTime = expirationTime;
     }
-
-    public void update(String token, Date expirationTime) {
-        this.token = token;
-        this.expirationTime = expirationTime;
-    }
 }
