@@ -7,16 +7,17 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class SignInResponse {
-    private AccessTokenResponse accessTokenResponse;
+    private UserAuthResponse userAuthResponse;
     private String refreshToken;
 
     @Builder
-    public SignInResponse(AccessTokenResponse accessTokenResponse, String refreshToken) {
-        this.accessTokenResponse = accessTokenResponse;
+    public SignInResponse(UserAuthResponse userAuthResponse, String refreshToken) {
+        this.userAuthResponse = userAuthResponse;
         this.refreshToken = refreshToken;
     }
 
-    public static SignInResponse of (AccessTokenResponse accessTokenResponse, String refreshToken) {
-        return SignInResponse.builder().accessTokenResponse(accessTokenResponse).refreshToken(refreshToken).build();
+    public static SignInResponse of (UserAuthResponse userAuthResponse, String refreshToken) {
+        return SignInResponse.builder().userAuthResponse(userAuthResponse).refreshToken(refreshToken).build();
     }
 }
+

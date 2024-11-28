@@ -10,9 +10,7 @@ import withbeetravel.dto.request.auth.CustomUserInfo;
 import withbeetravel.domain.RoleType;
 import withbeetravel.dto.request.auth.SignInRequest;
 import withbeetravel.dto.request.auth.SignUpRequest;
-import withbeetravel.dto.response.auth.AccessTokenResponse;
-import withbeetravel.dto.response.auth.ExpirationResponse;
-import withbeetravel.dto.response.auth.SignInResponse;
+import withbeetravel.dto.response.auth.*;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.jwt.JwtUtil;
@@ -84,13 +82,13 @@ public class AuthServiceImpl implements AuthService {
                         .build());
 
         // AccessTokenDto 생성
-        AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder().accessToken(accessToken).build();
+        UserAuthResponse userAuthResponse = UserAuthResponse.of(accessToken, user.getRoleType());
 
-        return SignInResponse.of(accessTokenResponse, refreshToken);
+        return SignInResponse.of(userAuthResponse, refreshToken);
     }
 
     @Override
-    public SignInResponse reissue(final String refreshToken) {
+    public ReissueResponse reissue(final String refreshToken) {
         // refresh token 유효성 검사
         checkRefreshToken(refreshToken);
 
@@ -118,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
         // AccessTokenDto 생성
         AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder().accessToken(newAccessToken).build();
 
-        return SignInResponse.of(accessTokenResponse, newRefreshToken);
+        return ReissueResponse.of(accessTokenResponse, newRefreshToken);
     }
 
     private RefreshToken validateRefreshTokenExists(String refreshToken) {
