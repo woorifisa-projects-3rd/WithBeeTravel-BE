@@ -37,4 +37,8 @@ public class TravelMember {
         this.user = user;
         this.isCaptain = isCaptain;
     }
+
+    public void initializeSettlementHistory() {
+        settlementHistory = null;
+    }
 }
