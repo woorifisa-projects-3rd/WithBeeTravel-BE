@@ -21,14 +21,14 @@ public class SettlementPendingServiceImpl implements SettlementPendingService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handlePendingSettlementRequest(SettlementRequestLog settlementRequestLog,
+    public void handlePendingSettlementRequest(List<SettlementRequestLog> settlementRequestLogs,
                                                List<TravelMember> insufficientBalanceMembers,
                                                SettlementRequest settlementRequest,
                                                int updatedCount,
                                                TravelMemberSettlementHistory travelMemberSettlementHistory) {
 
         // 정산 보류 로그 저장
-        settlementRequestLogRepository.save(settlementRequestLog);
+        settlementRequestLogRepository.saveAll(settlementRequestLogs);
 
         // 잔액 부족 멤버의 정산 동의를 true -> false로 변경
         changeIsAgreedToFalse(insufficientBalanceMembers, settlementRequest);

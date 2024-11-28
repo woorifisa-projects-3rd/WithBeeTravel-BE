@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface SettlementRequestLogRepository extends JpaRepository<SettlementRequestLog, Long> {
     List<SettlementRequestLog> findAllByTravelId(Long travelId);
+
+    List<SettlementRequestLog> findAllByUserId(Long userId);
 }

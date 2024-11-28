@@ -129,7 +129,7 @@ public class AccountServiceImpl implements AccountService {
         // 타겟 계좌 내역 객체 생성, 저장
         // 관리자 계좌에서 사용자에게 송금할 경우, 송금 메시지를 "위비트래블 정산금 입금"으로 지정
         History targetHistory;
-        if (account.getId() == 9999L) {
+        if (account.getId() == 1L) {
             targetHistory = createTargetHistory(amount, targetAccount, account, "위비트래블 정산금 입금");
         } else {
             targetHistory = createTargetHistory(amount, targetAccount, account, account.getUser().getName());
