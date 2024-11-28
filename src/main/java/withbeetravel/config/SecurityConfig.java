@@ -26,8 +26,8 @@ public class SecurityConfig{
             "/api/auth/join",
             "/swagger-ui/**",
             "/",
-            "/api/auth/token-refresh",
-            "/api/auth/check-refresh"};
+            "/api/auth/reissue",
+            "/api/auth/check-time"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,9 +40,10 @@ public class SecurityConfig{
         http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS));
 
-        // FormLogin, BasicHttp 비활성화
+        // FormLogin, BasicHttp, logout 비활성화
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
+        http.logout(AbstractHttpConfigurer::disable);
 
         // JwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
         http.addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil),
