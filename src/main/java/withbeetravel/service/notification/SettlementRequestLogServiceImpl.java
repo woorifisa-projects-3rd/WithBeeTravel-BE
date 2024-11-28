@@ -74,12 +74,7 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
 
 
     private SettlementRequestLogDto createSettlementRequestLogDto(SettlementRequestLog settlementRequestLog, String link) {
-        return SettlementRequestLogDto.builder().id(settlementRequestLog.getId())
-                .logTime(settlementRequestLog.getLogTime())
-                .logTitle(settlementRequestLog.getLogTitle().getTitle())
-                .logMessage(settlementRequestLog.getLogMessage())
-                .link(link)
-                .build();
+        return SettlementRequestLogDto.of(settlementRequestLog, link);
     }
 
     private List<SettlementRequestLog> getSettlementRequestLogsByUserId(Long userId) {
