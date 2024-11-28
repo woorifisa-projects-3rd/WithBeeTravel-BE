@@ -1,6 +1,7 @@
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
@@ -12,8 +13,10 @@ import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
 import withbeetravel.service.banking.AccountService;
+import withbeetravel.service.notification.SettlementRequestLogService;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,8 +36,10 @@ public class SettlementServiceImpl implements SettlementService {
     private final SettlementRequestLogRepository settlementRequestLogRepository;
     private final AccountRepository accountRepository;
 
-    private final SettlementPendingService settlementRequestLogService;
+    private final SettlementPendingService settlementPendingService;
     private final AccountService accountService;
+    private final TaskScheduler taskScheduler;
+    private final SettlementRequestLogService settlementRequestLogService;
 
     @Override
     @Transactional(readOnly = true)
@@ -84,6 +89,7 @@ public class SettlementServiceImpl implements SettlementService {
         // 여행멤버정산내역 생성
         for (TravelMember member : travelMemberRepository.findAllByTravelId(travelId)) {
             Long travelMemberId = member.getId();
+            User user = member.getUser();
 
             int ownPaymentCost = getTotalOwnPaymentCost(travelMemberId);
             int actualBurdenCost = getTotalActualBurdenCost(travelMemberId);
@@ -98,13 +104,26 @@ public class SettlementServiceImpl implements SettlementService {
                             .build();
 
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
+
+            // 정산 요청 저장
+            saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST);
+
         }
 
         // 정산 여부를 ONGOING으로 변경
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
 
-        // 정산 요청 저장
-        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_REQUEST);
+        // 24시간(= 86400초) 뒤에 createSettlementRerequestLogForNotAgreed 실행
+        try {
+            if (newSettlementRequest.getRequestStartTime() != null) {
+                taskScheduler.schedule(
+                        () -> settlementRequestLogService.createSettlementReRequestLogForNotAgreed(newSettlementRequest),
+                        newSettlementRequest.getRequestStartTime()
+                                .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(24 * 60 * 60));
+            }
+        } catch (Exception e) {
+            throw new CustomException(SettlementErrorCode.SCHEDULER_PROCESSING_FAILED);
+        }
     }
 
     private void validateSettlementStatusIsNotOngoing(Travel travel) {
@@ -159,13 +178,16 @@ public class SettlementServiceImpl implements SettlementService {
             // insufficientBalancedMembers에 한 명이라도 있을 경우, 정산 보류
             if (!insufficientBalanceMembers.isEmpty()) {
 
-                // 정산 보류 로그 추가
-                SettlementRequestLog settlementRequestLog =
-                        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_PENDING);
+                List<SettlementRequestLog> settlementRequestLogs = insufficientBalanceMembers.stream()
+                        .map(travelMember -> {
+                            User insufficientUser = travelMember.getUser();
+                            return saveSettlementRequestLog(travel, insufficientUser, LogTitle.SETTLEMENT_PENDING);
+                        })
+                        .toList();
 
                 // 롤백시 실행되도록 다른 서비스 클래스로 분리
-                settlementRequestLogService.handlePendingSettlementRequest(
-                        settlementRequestLog,
+                settlementPendingService.handlePendingSettlementRequest(
+                        settlementRequestLogs,
                         insufficientBalanceMembers,
                         settlementRequest,
                         insufficientBalanceMembers.size(),
@@ -180,7 +202,7 @@ public class SettlementServiceImpl implements SettlementService {
             // totalPaymentCost가 0보다 작은 경우, 해당 멤버의 계좌에서 totalPaymentCost를 인출
             // totalPaymentCost가 0 이상일 경우, 해당 멤버의 계좌에 totalPaymentCost를 송금
             Account managerAccount = accountRepository
-                    .findById(9999L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+                    .findById(1L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
             // 총 정산 금액의 합산 계산
             int totalPaymentCostSum = getTotalPaymentCostSum(travelMemberSettlementHistories);
@@ -198,9 +220,11 @@ public class SettlementServiceImpl implements SettlementService {
             settlementRequest.updateRequestEndDate(LocalDateTime.now());
 
             // 정산 완료 로그 생성
-            SettlementRequestLog settlementRequestLog =
-                    saveCompleteSettlementRequestLog(travel, totalPaymentCostSum);
-            settlementRequestLogRepository.save(settlementRequestLog);
+            for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
+                SettlementRequestLog settlementRequestLog =
+                        saveCompleteSettlementRequestLog(travel, travelMember.getUser(), totalPaymentCostSum);
+                settlementRequestLogRepository.save(settlementRequestLog);
+            }
 
             return "모든 여행 멤버의 정산 동의 완료 후 정산 완료";
         }
@@ -258,6 +282,12 @@ public class SettlementServiceImpl implements SettlementService {
         // 멤버들의 정산 내역을 먼저 삭제
         travelMemberSettlementHistoryRepository.deleteAllBySettlementRequestId(settlementRequest.getId());
 
+        // 멤버들의 settlementHistory 초기화
+        List<TravelMember> travelMembers = travelMemberRepository.findAllByTravelId(travelId);
+        for (int i = 0; i < travelMembers.size(); i++) {
+            travelMembers.get(i).initializeSettlementHistory();
+        }
+
         // 정산 요청 삭제
         settlementRequestRepository.deleteById(settlementRequest.getId());
 
@@ -265,7 +295,9 @@ public class SettlementServiceImpl implements SettlementService {
         travel.updateSettlementStatus(SettlementStatus.PENDING);
 
         // 정산 취소 로그 저장
-        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_CANCEL);
+        for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
+            saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_CANCEL);
+        }
     }
 
     private void updateIsAgreedAndDisagreeCount(TravelMemberSettlementHistory travelMemberSettlementHistory, SettlementRequest settlementRequest) {
@@ -309,20 +341,24 @@ public class SettlementServiceImpl implements SettlementService {
         }
     }
 
-    private SettlementRequestLog saveSettlementRequestLog(Travel travel,
+    private SettlementRequestLog saveSettlementRequestLog(Travel travel, User user,
                                                           LogTitle logTitle) {
         return settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .travel(travel)
+                        .user(user)
                         .logTitle(logTitle)
-                        .logMessage(logTitle.getMessage(travel.getTravelName()))
+                        .logMessage(logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                                logTitle.getMessage(travel.getTravelName(), user.getName()) :
+                                logTitle.getMessage(travel.getTravelName()))
                         .build());
     }
 
-    private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, int additionalValue) {
+    private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, User user, int additionalValue) {
         return settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .travel(travel)
+                        .user(user)
                         .logTitle(LogTitle.SETTLEMENT_COMPLETE)
                         .logMessage( LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName(), additionalValue))
                         .build());
@@ -348,12 +384,11 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     private SettlementRequest createSettlementRequest(Travel travel, int totalMemberCount) {
-        SettlementRequest newSettlementRequest = settlementRequestRepository.save(
-                SettlementRequest.builder()
-                        .travel(travel)
-                        .disagreeCount(totalMemberCount)
-                        .build());
-        return newSettlementRequest;
+                return settlementRequestRepository.save(
+                        SettlementRequest.builder()
+                                .travel(travel)
+                                .disagreeCount(totalMemberCount)
+                                .build());
     }
 
     private Travel findTravelById(Long travelId) {

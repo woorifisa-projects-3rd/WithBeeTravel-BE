@@ -18,7 +18,7 @@ TravelService {
 
     void editTravel(TravelRequest request, Long travelId);
 
-    TravelHomeResponse getTravel(Long travelId);
+    TravelHomeResponse getTravel(Long travelId, Long userId);
 
     InviteCodeSignUpResponse signUpTravel(InviteCodeSignUpRequest request,Long userId);
 

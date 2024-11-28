@@ -38,7 +38,7 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}/info")
-    //@CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
+    @CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
     public SuccessResponse<AccountResponse> accountInfo(@PathVariable Long accountId){
         return  SuccessResponse.of(
                 HttpStatus.OK.value(),
@@ -48,7 +48,7 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}")
-   // @CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
+    @CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
     public SuccessResponse<List<HistoryResponse>> showAllHistories(@PathVariable Long accountId){
         return SuccessResponse.of(
                 HttpStatus.OK.value(),
