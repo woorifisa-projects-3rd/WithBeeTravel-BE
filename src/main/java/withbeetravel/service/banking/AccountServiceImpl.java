@@ -58,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
                 .accountNumber(accountNumber)
                 .balance(0)
                 .product(product)
-                .isConnectedWibeeCard(true)
+                .isConnectedWibeeCard(false)
                 .build();
 
         accountRepository.save(account);

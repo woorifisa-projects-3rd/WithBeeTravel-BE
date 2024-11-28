@@ -1,6 +1,7 @@
 package withbeetravel.controller.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
@@ -27,7 +28,8 @@ public class SharedPaymentRecordController implements SharedPaymentRecordControl
             @RequestParam(value = "isMainImage", defaultValue = "false") boolean isMainImage
     ) {
 
-        return sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage);
+        sharedPaymentService.addAndUpdatePaymentRecord(travelId, sharedPaymentId, paymentImage, paymentComment, isMainImage);
+        return SuccessResponse.of(HttpStatus.OK.value(), "이미지 및 문구를 성공적으로 변경하였습니다.");
     }
 
     @Override
@@ -37,6 +39,7 @@ public class SharedPaymentRecordController implements SharedPaymentRecordControl
             @PathVariable Long travelId,
             @PathVariable Long sharedPaymentId
     ) {
-        return sharedPaymentService.getSharedPaymentRecord(sharedPaymentId);
+        SharedPaymentRecordResponse response = sharedPaymentService.getSharedPaymentRecord(sharedPaymentId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 기록 불러오기 성공", response);
     }
 }

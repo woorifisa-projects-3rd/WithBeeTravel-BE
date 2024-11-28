@@ -10,7 +10,9 @@ import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static withbeetravel.domain.RoleType.ADMIN;
 import static withbeetravel.domain.RoleType.USER;
+
 
 //@Component
 @RequiredArgsConstructor
@@ -30,9 +32,20 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // User 더미 데이터 생성
 
+        User user0 = User.builder()
+                .email("admin@admin")
+                .password("password123!")
+                .pinNumber("123456")
+                .name("관라지")
+                .roleType(ADMIN)
+                .pinLocked(false)
+                .failedPinCount(0)
+                .profileImage(1)
+                .build();
+
         User user1 = User.builder()
                 .email("lee@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("123456")
                 .name("이도이")
                 .roleType(USER)
@@ -42,7 +55,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user2 = User.builder()
                 .email("gong@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("234567")
                 .name("공소연")
                 .roleType(USER)
@@ -52,7 +65,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user3 = User.builder()
                 .email("yoo@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("345678")
                 .name("유승아")
                 .roleType(USER)
@@ -62,7 +75,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user4 = User.builder()
                 .email("kim@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("456789")
                 .name("김호철")
                 .roleType(USER)
@@ -72,7 +85,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         User user5 = User.builder()
                 .email("kong@example.com")
-                .password("password123")
+                .password("password123!")
                 .pinNumber("567890")
                 .name("공예진")
                 .roleType(USER)
@@ -81,13 +94,24 @@ public class DataLoader implements CommandLineRunner {
                 .failedPinCount(0)
                 .build();
 
+        userRepository.save(user0);  // 추가
         userRepository.save(user1);
         userRepository.save(user2);
         userRepository.save(user3);
         userRepository.save(user4);  // 추가
         userRepository.save(user5);  // 추가
 
+
+
         // Account 더미 데이터 생성
+        Account account0 = Account.builder()
+                .user(user0)
+                .accountNumber("0000000000000")
+                .balance(100000000)
+                .product(Product.WON통장)
+                .isConnectedWibeeCard(true)
+                .build();
+
         Account account1 = Account.builder()
                 .user(user1)
                 .accountNumber("123456789012")
@@ -128,6 +152,7 @@ public class DataLoader implements CommandLineRunner {
                 .isConnectedWibeeCard(false)
                 .build();
 
+        accountRepository.save(account0);
         accountRepository.save(account1);
         accountRepository.save(account2);
         accountRepository.save(account3);

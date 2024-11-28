@@ -3,6 +3,7 @@ package withbeetravel.service.payment;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.payment.CurrencyUnitResponse;
 
 public interface SharedPaymentRegisterService {
 
@@ -39,5 +40,9 @@ public interface SharedPaymentRegisterService {
             Long userId,
             Long travelId,
             SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
+    );
+
+    CurrencyUnitResponse getCurrencyUnitOptions(
+            Long travelId
     );
 }
