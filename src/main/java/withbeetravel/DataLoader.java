@@ -2,7 +2,6 @@ package withbeetravel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 import withbeetravel.domain.*;
 import withbeetravel.repository.*;
 import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;
@@ -10,7 +9,8 @@ import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static withbeetravel.dto.request.auth.RoleType.USER;
+import static withbeetravel.domain.RoleType.USER;
+
 
 //@Component
 @RequiredArgsConstructor
