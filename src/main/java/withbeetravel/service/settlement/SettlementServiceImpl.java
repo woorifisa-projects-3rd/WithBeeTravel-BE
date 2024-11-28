@@ -258,6 +258,12 @@ public class SettlementServiceImpl implements SettlementService {
         // 멤버들의 정산 내역을 먼저 삭제
         travelMemberSettlementHistoryRepository.deleteAllBySettlementRequestId(settlementRequest.getId());
 
+        // 멤버들의 settlementHistory 초기화
+        List<TravelMember> travelMembers = travelMemberRepository.findAllByTravelId(travelId);
+        for (int i = 0; i < travelMembers.size(); i++) {
+            travelMembers.get(i).initializeSettlementHistory();
+        }
+
         // 정산 요청 삭제
         settlementRequestRepository.deleteById(settlementRequest.getId());
 

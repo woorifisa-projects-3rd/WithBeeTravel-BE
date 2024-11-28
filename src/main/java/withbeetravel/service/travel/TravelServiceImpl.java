@@ -172,11 +172,13 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Override
-    public TravelHomeResponse getTravel(Long travelId) {
+    public TravelHomeResponse getTravel(Long travelId, Long userId) {
         // Aspect에서 이미 검증했으므로 Travel은 반드시 존재
         Travel travel = travelRepository.findById(travelId).get();
+        TravelMember travelMember = travelMemberRepository.findByTravelIdAndUserId(travelId, userId)
+                .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_ACCESS_FORBIDDEN));
         Map<String, Double> statistics = calculateStatistics(travelId);
-        return TravelHomeResponse.of(travel, statistics);
+        return TravelHomeResponse.of(travel, travelMember, statistics);
     }
 
     private Map<String, Double> calculateStatistics(Long travelId) {

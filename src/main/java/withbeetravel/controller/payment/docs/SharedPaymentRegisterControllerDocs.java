@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.dto.request.payment.SharedPaymentWibeeCardRegisterRequest;
 import withbeetravel.dto.response.ErrorResponse;
 import withbeetravel.dto.response.SuccessResponse;
+import withbeetravel.dto.response.payment.CurrencyUnitResponse;
 
 @Tag(name = "공동 결제 내역 API", description = "에 대한 설명입니다.")
 public interface SharedPaymentRegisterControllerDocs {
@@ -239,5 +240,29 @@ public interface SharedPaymentRegisterControllerDocs {
             Long travelId,
             SharedPaymentWibeeCardRegisterRequest sharedPaymentWibeeCardRegisterRequest
 
+    );
+
+    @Operation(
+            summary = "통화 코드 불러오기",
+            description = "방문 나라 통화를 우선으로 통화 코드 불러오기",
+            tags = {"User Management", "공동 결제 내역"},
+            parameters = {
+                    @Parameter(
+                            name = "travelId",
+                            description = "여행 ID",
+                            required = true,
+                            in = ParameterIn.PATH,
+                            example = "1234"
+                    )
+            }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "통화 코드 목록입니다.", content = @Content(schema = @Schema(implementation = CurrencyUnitResponse.class))),
+            @ApiResponse(responseCode = "401", description = "AUTH-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "TRAVEL-002", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "TRAVEL-001", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    SuccessResponse<CurrencyUnitResponse> getCurrencyUnitOptions(
+            Long travelId
     );
 }

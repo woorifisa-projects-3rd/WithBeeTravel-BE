@@ -29,7 +29,9 @@ public class TravelController {
     @CheckTravelAccess
     @GetMapping("/{travelId}")
     public SuccessResponse<TravelHomeResponse> getTravel(@PathVariable Long travelId) {
-        return SuccessResponse.of(200, "여행 홈 데이터 불러오기 성공", travelService.getTravel(travelId));
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+
+        return SuccessResponse.of(200, "여행 홈 데이터 불러오기 성공", travelService.getTravel(travelId, userId));
     }
 
     @PostMapping

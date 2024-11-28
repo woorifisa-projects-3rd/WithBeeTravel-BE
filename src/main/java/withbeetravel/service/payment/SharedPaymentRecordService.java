@@ -6,7 +6,7 @@ import withbeetravel.dto.response.SuccessResponse;
 
 public interface SharedPaymentRecordService {
 
-    SuccessResponse<Void> addAndUpdatePaymentRecord(
+    void addAndUpdatePaymentRecord(
             Long travelId,
             Long sharedPaymentId,
             MultipartFile image,
@@ -14,7 +14,7 @@ public interface SharedPaymentRecordService {
             boolean isMainImage
     );
 
-    SuccessResponse<SharedPaymentRecordResponse> getSharedPaymentRecord(
+    SharedPaymentRecordResponse getSharedPaymentRecord(
             Long sharedPaymentId
     );
 }
