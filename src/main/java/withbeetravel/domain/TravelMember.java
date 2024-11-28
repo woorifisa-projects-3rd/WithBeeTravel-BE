@@ -25,6 +25,9 @@ public class TravelMember {
     @Column(name = "is_captain", nullable = false)
     private boolean isCaptain;
 
+    @OneToOne(mappedBy = "travelMember")
+    private TravelMemberSettlementHistory settlementHistory;
+
     protected TravelMember() {}
 
     @Builder
