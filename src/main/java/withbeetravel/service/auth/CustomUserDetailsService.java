@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import withbeetravel.domain.User;
-import withbeetravel.dto.request.auth.CustomUserInfoDto;
+import withbeetravel.dto.request.auth.CustomUserInfo;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.repository.UserRepository;
@@ -24,8 +24,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         Long id = Long.valueOf(userId);
         User user = userRepository.findById(id).orElseThrow(() -> new CustomException(AuthErrorCode.AUTHENTICATION_FAILED));
 
-        CustomUserInfoDto customUserInfoDto = CustomUserInfoDto.from(user);
+        CustomUserInfo customUserInfo = CustomUserInfo.from(user);
 
-        return new CustomUserDetails(customUserInfoDto);
+        return new CustomUserDetails(customUserInfo);
     }
 }

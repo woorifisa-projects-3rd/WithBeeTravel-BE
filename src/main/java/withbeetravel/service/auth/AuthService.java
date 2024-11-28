@@ -1,17 +1,17 @@
 package withbeetravel.service.auth;
 
-import withbeetravel.dto.request.auth.SignInRequestDto;
-import withbeetravel.dto.request.auth.SignUpRequestDto;
-import withbeetravel.dto.response.auth.ExpirationDto;
-import withbeetravel.dto.response.auth.SignInResponseDto;
+import withbeetravel.dto.request.auth.SignInRequest;
+import withbeetravel.dto.request.auth.SignUpRequest;
+import withbeetravel.dto.response.auth.ExpirationResponse;
+import withbeetravel.dto.response.auth.SignInResponse;
 
 public interface AuthService {
-    void signUp(SignUpRequestDto signUpRequestDto);
-    SignInResponseDto login(SignInRequestDto signInRequestDto);
+    void signUp(SignUpRequest signUpRequest);
+    SignInResponse login(SignInRequest signInRequest);
 
-    SignInResponseDto reissue(final String refreshToken);
+    SignInResponse reissue(final String refreshToken);
 
-    ExpirationDto checkExpirationTime(final String refreshToken);
+    ExpirationResponse checkExpirationTime(final String refreshToken);
 
     void logout(final String refreshToken);
 }

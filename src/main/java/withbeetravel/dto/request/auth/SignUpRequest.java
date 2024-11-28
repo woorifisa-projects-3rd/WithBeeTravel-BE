@@ -5,7 +5,7 @@ import lombok.Getter;
 
 // 회원가입 DTO
 @Getter
-public class SignUpRequestDto {
+public class SignUpRequest {
 
     @NotBlank(message = "이메일은 필수 입력 값입니다.")
     @Email(message = "잘못된 이메일 형식입니다.")
@@ -23,7 +23,7 @@ public class SignUpRequestDto {
     @NotBlank(message = "이름은 필수 입력 값입니다.")
     private String name;
 
-    public SignUpRequestDto(String email, String password, String pinNumber, String name) {
+    public SignUpRequest(String email, String password, String pinNumber, String name) {
         this.email = email;
         this.password = password;
         this.pinNumber = pinNumber;

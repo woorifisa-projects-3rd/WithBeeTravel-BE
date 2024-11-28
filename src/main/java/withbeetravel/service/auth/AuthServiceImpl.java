@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.RefreshToken;
 import withbeetravel.domain.User;
-import withbeetravel.dto.request.auth.CustomUserInfoDto;
+import withbeetravel.dto.request.auth.CustomUserInfo;
 import withbeetravel.domain.RoleType;
-import withbeetravel.dto.request.auth.SignInRequestDto;
-import withbeetravel.dto.request.auth.SignUpRequestDto;
-import withbeetravel.dto.response.auth.AccessTokenDto;
-import withbeetravel.dto.response.auth.ExpirationDto;
-import withbeetravel.dto.response.auth.SignInResponseDto;
+import withbeetravel.dto.request.auth.SignInRequest;
+import withbeetravel.dto.request.auth.SignUpRequest;
+import withbeetravel.dto.response.auth.AccessTokenResponse;
+import withbeetravel.dto.response.auth.ExpirationResponse;
+import withbeetravel.dto.response.auth.SignInResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.jwt.JwtUtil;
@@ -35,17 +35,17 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
-    public void signUp(SignUpRequestDto signUpRequestDto) {
-        if (userRepository.existsByEmail(signUpRequestDto.getEmail())) {
+    public void signUp(SignUpRequest signUpRequest) {
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         User user = User.builder()
-                .name(signUpRequestDto.getName())
-                .email(signUpRequestDto.getEmail())
-                .password(bCryptPasswordEncoder.encode(signUpRequestDto.getPassword()))
+                .name(signUpRequest.getName())
+                .email(signUpRequest.getEmail())
+                .password(bCryptPasswordEncoder.encode(signUpRequest.getPassword()))
                 .profileImage((int) (Math.random() * 10) + 1)
-                .pinNumber(signUpRequestDto.getPinNumber())
+                .pinNumber(signUpRequest.getPinNumber())
                 .failedPinCount(0)
                 .pinLocked(false)
                 .roleType(RoleType.USER)
@@ -55,9 +55,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public SignInResponseDto login(SignInRequestDto signInRequestDto) {
-        String email = signInRequestDto.getEmail();
-        String password = signInRequestDto.getPassword();
+    public SignInResponse login(SignInRequest signInRequest) {
+        String email = signInRequest.getEmail();
+        String password = signInRequest.getPassword();
 
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.EMAIL_NOT_FOUND));
@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(AuthErrorCode.INVALID_PASSWORD);
         }
 
-        CustomUserInfoDto info = CustomUserInfoDto.from(user);
+        CustomUserInfo info = CustomUserInfo.from(user);
 
         // jwt 토큰 생성
         String accessToken = jwtUtil.generateAccessToken(String.valueOf(info.getId()));
@@ -84,13 +84,13 @@ public class AuthServiceImpl implements AuthService {
                         .build());
 
         // AccessTokenDto 생성
-        AccessTokenDto accessTokenDto = AccessTokenDto.builder().accessToken(accessToken).build();
+        AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder().accessToken(accessToken).build();
 
-        return SignInResponseDto.of(accessTokenDto, refreshToken);
+        return SignInResponse.of(accessTokenResponse, refreshToken);
     }
 
     @Override
-    public SignInResponseDto reissue(final String refreshToken) {
+    public SignInResponse reissue(final String refreshToken) {
         // refresh token 유효성 검사
         checkRefreshToken(refreshToken);
 
@@ -116,9 +116,9 @@ public class AuthServiceImpl implements AuthService {
                         .build());
 
         // AccessTokenDto 생성
-        AccessTokenDto accessTokenDto = AccessTokenDto.builder().accessToken(newAccessToken).build();
+        AccessTokenResponse accessTokenResponse = AccessTokenResponse.builder().accessToken(newAccessToken).build();
 
-        return SignInResponseDto.of(accessTokenDto, newRefreshToken);
+        return SignInResponse.of(accessTokenResponse, newRefreshToken);
     }
 
     private RefreshToken validateRefreshTokenExists(String refreshToken) {
@@ -128,9 +128,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ExpirationDto checkExpirationTime(final String refreshToken) {
-        Date expirationDateFromToken = jwtUtil.getExpirationDateFromToken(refreshToken);
-        return ExpirationDto.from(expirationDateFromToken);
+    public ExpirationResponse checkExpirationTime(final String token) {
+        Date expirationDateFromToken = jwtUtil.getExpirationDateFromToken(token);
+        return ExpirationResponse.from(expirationDateFromToken);
     }
 
     @Override

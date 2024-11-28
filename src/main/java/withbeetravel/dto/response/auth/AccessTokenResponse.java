@@ -6,11 +6,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AccessTokenDto {
+public class AccessTokenResponse {
     private String accessToken;
 
     @Builder
-    public AccessTokenDto(String accessToken) {
+    public AccessTokenResponse(String accessToken) {
         this.accessToken = accessToken;
     }
 }

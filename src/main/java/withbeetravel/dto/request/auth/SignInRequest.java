@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class SignInRequestDto {
+public class SignInRequest {
 
     @NotNull(message = "이메일 입력은 필수입니다.")
     @Email(message = "잘못된 이메일 형식입니다.")
@@ -14,7 +14,7 @@ public class SignInRequestDto {
     @NotNull(message = "비밀번호 입력은 필수입니다.")
     private String password;
 
-    public SignInRequestDto(String email, String password) {
+    public SignInRequest(String email, String password) {
         this.email = email;
         this.password = password;
     }
