@@ -353,7 +353,8 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
         travel.updateMainImage(imageUrl);
     }
 
-    void saveWibeeCardSharedPayment(
+    @Override
+    public void saveWibeeCardSharedPayment(
             TravelMember travelMember,
             Travel travel,
             History history
@@ -365,6 +366,7 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
                         .currencyUnit(CurrencyUnit.KRW)
                         .paymentAmount(history.getPayAM())
                         .isManuallyAdded(false)
+                        .participantCount(travel.getTravelMembers().size())
                         .category(getCategory(history.getRqspeNm()))
                         .storeName(history.getRqspeNm())
                         .paymentDate(history.getDate())
