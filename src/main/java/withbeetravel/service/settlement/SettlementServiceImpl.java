@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import withbeetravel.controller.notification.NotificationController;
 import withbeetravel.domain.*;
 import withbeetravel.dto.response.settlement.*;
 import withbeetravel.exception.CustomException;
@@ -15,10 +17,13 @@ import withbeetravel.repository.*;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.notification.SettlementRequestLogService;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
@@ -40,6 +45,7 @@ public class SettlementServiceImpl implements SettlementService {
     private final AccountService accountService;
     private final TaskScheduler taskScheduler;
     private final SettlementRequestLogService settlementRequestLogService;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -343,7 +349,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     private SettlementRequestLog saveSettlementRequestLog(Travel travel, User user,
                                                           LogTitle logTitle) {
-        return settlementRequestLogRepository.save(
+        SettlementRequestLog settlementRequestLog = settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .travel(travel)
                         .user(user)
@@ -351,7 +357,34 @@ public class SettlementServiceImpl implements SettlementService {
                         .logMessage(logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
                                 logTitle.getMessage(travel.getTravelName(), user.getName()) :
                                 logTitle.getMessage(travel.getTravelName()))
+                        .link(logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                                logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
+                                logTitle.getLinkPattern(travel.getId()))
                         .build());
+
+        if (logTitle.equals(LogTitle.SETTLEMENT_REQUEST)) {
+            sendNotification(settlementRequestLog, "request");
+        }
+
+        return settlementRequestLog;
+    }
+
+    private void sendNotification(SettlementRequestLog settlementRequestLog, String eventName) {
+        if (NotificationController.sseEmitters.containsKey(settlementRequestLog.getUser().getId())) {
+            SseEmitter sseEmitter = NotificationController.sseEmitters.get(settlementRequestLog.getUser().getId());
+            try {
+                if (sseEmitter != null) {
+                    Map<String, String> eventData = new HashMap<>();
+                    eventData.put("title", settlementRequestLog.getLogTitle().getTitle()); // 로그 타이틀 (ex. 정산 요청)
+                    eventData.put("message", settlementRequestLog.getLogMessage()); // 로그 메시지
+                    eventData.put("link", settlementRequestLog.getLink()); // 이동 링크
+
+                    sseEmitter.send(SseEmitter.event().name(eventName).data(eventData));
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, User user, int additionalValue) {

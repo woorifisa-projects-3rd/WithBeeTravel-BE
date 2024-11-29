@@ -37,18 +37,23 @@ public class SettlementRequestLog {
     @Column(name = "log_time")
     private LocalDateTime logTime;
 
+    @Column(name = "link")
+    private String link;
+
     @Builder
     public SettlementRequestLog(Long id,
                                 Travel travel,
                                 User user,
                                 LogTitle logTitle,
                                 String logMessage,
-                                LocalDateTime logTime) {
+                                LocalDateTime logTime,
+                                String link) {
         this.id = id;
         this.travel = travel;
         this.user = user;
         this.logTitle = logTitle;
         this.logMessage = logMessage;
         this.logTime = logTime;
+        this.link = link;
     }
 }

@@ -16,6 +16,7 @@ public class SettlementErrorCode extends ErrorCode{
     public static final SettlementErrorCode SETTLEMENT_INSUFFICIENT_BALANCE = new SettlementErrorCode(HttpStatus.CONFLICT, "SETTLEMENT_INSUFFICIENT_BALANCE", "SETTLEMENT-010", "여행멤버의 잔액 부족으로 인한 정산 처리 불가");
     public static final SettlementErrorCode SETTLEMENT_ONGOING_ALREADY_EXISTS = new SettlementErrorCode(HttpStatus.CONFLICT, "SETTLEMENT_ONGOING_ALREADY_EXISTS", "SETTLEMENT-011", "진행중인 정산 요청이 이미 존재");
     public static final SettlementErrorCode SCHEDULER_PROCESSING_FAILED = new SettlementErrorCode(HttpStatus.UNPROCESSABLE_ENTITY, "SCHEDULER_PROCESSING_FAILED", "SETTLEMENT-012", "정산 정리 요청 스케줄링 중 오류가 발생했습니다.");
+    public static final SettlementErrorCode SSE_CONNECTION_FAILED = new SettlementErrorCode(HttpStatus.SERVICE_UNAVAILABLE, "SSE_CONNECTION_FAILED", "SETTLEMENT-013", "SSE 연결 실패");
 
     private SettlementErrorCode(HttpStatus status, String name, String code, String message) {
         super(status, name, code, message);
