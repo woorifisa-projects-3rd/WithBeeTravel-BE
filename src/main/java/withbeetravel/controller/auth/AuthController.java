@@ -6,17 +6,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import withbeetravel.controller.auth.docs.AuthControllerDocs;
 import withbeetravel.dto.request.auth.SignInRequest;
 import withbeetravel.dto.request.auth.SignUpRequest;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.auth.*;
 import withbeetravel.security.CookieUtil;
+import withbeetravel.security.UserAuthorizationUtil;
 import withbeetravel.service.auth.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
 
     private final AuthService authService;
     private final CookieUtil cookieUtil;
@@ -55,5 +57,14 @@ public class AuthController {
         return SuccessResponse.of(HttpStatus.OK.value(),  "로그아웃 성공");
     }
 
+    @Override
+    @GetMapping("/mypage")
+    public SuccessResponse<MyPageResponse> getMyPageInfo() {
+
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+
+        MyPageResponse myPageInfo = authService.getMyPageInfo(userId);
+        return SuccessResponse.of(HttpStatus.OK.value(), "마이페이지 정보입니다.", myPageInfo);
+    }
 }
 

@@ -138,9 +138,22 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public MyPageResponse getMyPageInfo(Long userId) {
+
+        User user = getUser(userId);
+
+        return MyPageResponse.from(user);
+    }
+
     private void checkRefreshToken(final String refreshToken) {
         if (!jwtUtil.isValidToken(refreshToken).equals(TokenStatus.VALID)) {
             throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
     }
 }
