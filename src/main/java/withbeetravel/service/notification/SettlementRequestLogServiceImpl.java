@@ -93,23 +93,6 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
         return settlementRequestLogRepository.findAllByUserId(userId);
     }
 
-    private String createLink(SettlementRequestLog settlementRequestLog) {
-        String link = null;
-        Long travelId = settlementRequestLog.getTravel().getId();
-        LogTitle logTitle = settlementRequestLog.getLogTitle();
-        if (logTitle.equals(LogTitle.PAYMENT_REQUEST)) {
-            link = "travel/" + travelId + "/payments";
-        } else if (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) || logTitle.equals(LogTitle.SETTLEMENT_RE_REQUEST)) {
-            if (settlementRequestRepository.existsByTravelId(travelId)) {
-                link = "travel/" + travelId + "/settlement";
-            }
-        } else if (logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
-            Long accountId = settlementRequestLog.getUser().getConnectedAccount().getId();
-            link = "banking/" + accountId;
-        }
-        return link;
-    }
-
     private void sendNotification(SettlementRequestLog settlementRequestLog, String eventName) {
         if (NotificationController.sseEmitters.containsKey(settlementRequestLog.getUser().getId())) {
             SseEmitter sseEmitter = NotificationController.sseEmitters.get(settlementRequestLog.getUser().getId());
