@@ -1,7 +1,9 @@
 package withbeetravel.controller.notification;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/notifications")
 public class NotificationController {
@@ -24,9 +27,10 @@ public class NotificationController {
      * streamNotifications : 사용자의 요청을 받아 SSE 구독하도록 연결
      * - SseEmitter를 반환
      */
-    @GetMapping("/stream")
-    public SseEmitter streamNotifications() {
+    @GetMapping(value = "/stream", produces = "text/event-stream")
+    public SseEmitter streamNotifications(@RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
+                                              String lastEventId) {
         Long userId = UserAuthorizationUtil.getLoginUserId();
-        return notificationService.subscribe(userId);
+        return notificationService.subscribe(userId, lastEventId);
     }
 }

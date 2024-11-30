@@ -3,10 +3,12 @@ package withbeetravel.service.notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import withbeetravel.controller.notification.NotificationController;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.settlementRequestLog.SettlementRequestLogDto;
+import withbeetravel.exception.CustomException;
+import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.repository.*;
+import withbeetravel.repository.notification.EmitterRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -24,6 +26,7 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
     private final TravelMemberSettlementHistoryRepository travelMemberSettlementHistoryRepository;
+    private final EmitterRepository emitterRepository;
 
 
     @Override
@@ -37,7 +40,7 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
         for (SettlementRequestLog settlementRequestLog : settlementRequestLogs) {
             String link = settlementRequestLog.getLink();
             String title = settlementRequestLog.getLogTitle().getTitle();
-            if (title.equals(LogTitle.SETTLEMENT_REQUEST) || title.equals(LogTitle.SETTLEMENT_RE_REQUEST)) {
+            if (title.equals(LogTitle.SETTLEMENT_REQUEST.getTitle()) || title.equals(LogTitle.SETTLEMENT_RE_REQUEST.getTitle())) {
                 if (!settlementRequestRepository.existsByTravelId(settlementRequestLog.getTravel().getId())) {
                     link = null;
                 }
@@ -85,30 +88,39 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
         settlementRequestLogRepository.save(settlementRequestLog);
 
         // 실시간 알림 전송
-        String eventName = logTitle.equals(LogTitle.PAYMENT_REQUEST) ? "organizePayment" : "re-request";
-        sendNotification(settlementRequestLog, eventName);
+        sendNotification(settlementRequestLog);
     }
 
     private List<SettlementRequestLog> getSettlementRequestLogsByUserId(Long userId) {
         return settlementRequestLogRepository.findAllByUserId(userId);
     }
 
-    private void sendNotification(SettlementRequestLog settlementRequestLog, String eventName) {
-        if (NotificationController.sseEmitters.containsKey(settlementRequestLog.getUser().getId())) {
-            SseEmitter sseEmitter = NotificationController.sseEmitters.get(settlementRequestLog.getUser().getId());
-            try {
-                if (sseEmitter != null) {
+    private void sendNotification(SettlementRequestLog settlementRequestLog) {
+        String userId = String.valueOf(settlementRequestLog.getUser().getId());
+
+        // 수신자에 연결된 모든 SseEmitter 객체를 가져옴
+        Map<String, SseEmitter> emitters =
+                emitterRepository.findAllEmitterStartWithByUserId(userId);
+
+        // eventId 생성
+        String eventId = userId + "_" + System.currentTimeMillis();
+
+        // emitter를 순환하며 각 SseEmitter 객체에 알림 전송
+        emitters.forEach(
+                (key, sseEmitter) -> {
                     Map<String, String> eventData = new HashMap<>();
                     eventData.put("title", settlementRequestLog.getLogTitle().getTitle()); // 로그 타이틀 (ex. 정산 요청)
                     eventData.put("message", settlementRequestLog.getLogMessage()); // 로그 메시지
                     eventData.put("link", settlementRequestLog.getLink()); // 이동 링크
-
-                    sseEmitter.send(SseEmitter.event().name(eventName).data(eventData));
+                    emitterRepository.saveEventCache(key, eventData);
+                    try {
+                        sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
+                    } catch (IOException e) {
+                        emitterRepository.deleteById(key);
+                        throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
+                    }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        );
     }
 }
 

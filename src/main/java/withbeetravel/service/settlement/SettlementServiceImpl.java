@@ -16,6 +16,7 @@ import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
+import withbeetravel.repository.notification.EmitterRepository;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.notification.SettlementRequestLogService;
 
@@ -47,6 +48,7 @@ public class SettlementServiceImpl implements SettlementService {
     private final AccountService accountService;
     private final TaskScheduler taskScheduler;
     private final SettlementRequestLogService settlementRequestLogService;
+    private final EmitterRepository emitterRepository;
 
 
     @Override
@@ -364,12 +366,9 @@ public class SettlementServiceImpl implements SettlementService {
                         .link(link)
                         .build());
 
-        String eventName = logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ? "request" :
-                (logTitle.equals(LogTitle.SETTLEMENT_CANCEL) ? "cancel" : "complete");
-
         // 실시간 알림 전송
         if (!logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
-            sendNotification(settlementRequestLog, eventName);
+            sendNotification(settlementRequestLog);
         }
 
         return settlementRequestLog;
@@ -392,22 +391,32 @@ public class SettlementServiceImpl implements SettlementService {
                         logTitle.getMessage(travel.getTravelName()));
     }
 
-    private void sendNotification(SettlementRequestLog settlementRequestLog, String eventName) {
-        if (NotificationController.sseEmitters.containsKey(settlementRequestLog.getUser().getId())) {
-            SseEmitter sseEmitter = NotificationController.sseEmitters.get(settlementRequestLog.getUser().getId());
-            try {
-                if (sseEmitter != null) {
+    private void sendNotification(SettlementRequestLog settlementRequestLog) {
+        String userId = String.valueOf(settlementRequestLog.getUser().getId());
+
+        // 수신자에 연결된 모든 SseEmitter 객체를 가져옴
+        Map<String, SseEmitter> emitters =
+                emitterRepository.findAllEmitterStartWithByUserId(userId);
+
+        // eventId 생성
+        String eventId = userId + "_" + System.currentTimeMillis();
+
+        // emitter를 순환하며 각 SseEmitter 객체에 알림 전송
+        emitters.forEach(
+                (key, sseEmitter) -> {
                     Map<String, String> eventData = new HashMap<>();
                     eventData.put("title", settlementRequestLog.getLogTitle().getTitle()); // 로그 타이틀 (ex. 정산 요청)
                     eventData.put("message", settlementRequestLog.getLogMessage()); // 로그 메시지
                     eventData.put("link", settlementRequestLog.getLink()); // 이동 링크
-
-                    sseEmitter.send(SseEmitter.event().name(eventName).data(eventData));
+                    emitterRepository.saveEventCache(key, eventData);
+                    try {
+                        sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
+                    } catch (IOException e) {
+                        emitterRepository.deleteById(key);
+                        throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
+                    }
                 }
-            } catch (IOException e) {
-                throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
-            }
-        }
+        );
     }
 
     private int getTotalActualBurdenCost(Long travelMemberId) {
