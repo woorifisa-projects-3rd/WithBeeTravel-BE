@@ -359,13 +359,15 @@ public class SettlementServiceImpl implements SettlementService {
                                 logTitle.getMessage(travel.getTravelName()))
                         .link(logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
                                 logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
+                                (logTitle.equals(LogTitle.SETTLEMENT_CANCEL)) ? null :
                                 logTitle.getLinkPattern(travel.getId()))
                         .build());
 
-        if (logTitle.equals(LogTitle.SETTLEMENT_REQUEST)) {
-            sendNotification(settlementRequestLog, "request");
-        }
+        String eventName = logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ? "request" : "cancel";
 
+        if (!logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
+            sendNotification(settlementRequestLog, eventName);
+        }
         return settlementRequestLog;
     }
 
@@ -382,19 +384,23 @@ public class SettlementServiceImpl implements SettlementService {
                     sseEmitter.send(SseEmitter.event().name(eventName).data(eventData));
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
             }
         }
     }
 
     private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, User user, int additionalValue) {
-        return settlementRequestLogRepository.save(
+        SettlementRequestLog settlementRequestLog = settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .travel(travel)
                         .user(user)
                         .logTitle(LogTitle.SETTLEMENT_COMPLETE)
-                        .logMessage( LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName(), additionalValue))
+                        .logMessage(LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName(), additionalValue))
                         .build());
+
+        // 실시간 알림 전송
+        sendNotification(settlementRequestLog, "complete");
+        return settlementRequestLog;
     }
 
     private int getTotalActualBurdenCost(Long travelMemberId) {
