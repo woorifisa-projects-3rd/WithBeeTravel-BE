@@ -33,14 +33,13 @@ import java.util.stream.Collectors;
 @Transactional
 public class TravelServiceImpl implements TravelService {
 
-
-
     private final TravelRepository travelRepository;
     private final TravelCountryRepository travelCountryRepository;
     private final AccountRepository accountRepository;
     private final SharedPaymentRepository sharedPaymentRepository;
     private final TravelMemberRepository travelMemberRepository;
     private final UserRepository userRepository;
+    private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
 
     @Override
     public TravelResponse saveTravel(TravelRequest requestDto,Long userId) {
@@ -150,6 +149,24 @@ public class TravelServiceImpl implements TravelService {
 
 
         travelMemberRepository.save(newMember);
+
+        // 현재 공동지출내역 참여 멤버로 추가
+        List<SharedPayment> sharedPayments = sharedPaymentRepository.findAllByTravelId(travelId);
+        // PaymentParticipatedMember가 연관관계의 주인
+        List<PaymentParticipatedMember> participatedMembers = sharedPayments.stream()
+                .map(sharedPayment -> {
+                    // 참여자 수 증가
+                    sharedPayment.updateParticipantCount(sharedPayment.getParticipantCount() + 1);
+
+                    return PaymentParticipatedMember.builder()
+                            .travelMember(newMember)
+                            .sharedPayment(sharedPayment)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // PaymentParticipatedMember 저장
+        paymentParticipatedMemberRepository.saveAll(participatedMembers);
 
         return InviteCodeSignUpResponse.builder()
                 .travelId(travelId)
