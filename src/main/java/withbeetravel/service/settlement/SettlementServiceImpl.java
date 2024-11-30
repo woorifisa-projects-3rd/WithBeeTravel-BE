@@ -7,7 +7,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import withbeetravel.controller.notification.NotificationController;
 import withbeetravel.domain.*;
 import withbeetravel.dto.response.settlement.*;
 import withbeetravel.exception.CustomException;
