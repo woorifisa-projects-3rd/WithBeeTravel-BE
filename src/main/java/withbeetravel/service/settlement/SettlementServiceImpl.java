@@ -1,6 +1,8 @@
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,7 +114,7 @@ public class SettlementServiceImpl implements SettlementService {
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
 
             // 정산 요청 저장
-            saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST);
+            saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST, 0);
 
         }
 
@@ -187,7 +189,7 @@ public class SettlementServiceImpl implements SettlementService {
                 List<SettlementRequestLog> settlementRequestLogs = insufficientBalanceMembers.stream()
                         .map(travelMember -> {
                             User insufficientUser = travelMember.getUser();
-                            return saveSettlementRequestLog(travel, insufficientUser, LogTitle.SETTLEMENT_PENDING);
+                            return saveSettlementRequestLog(travel, insufficientUser, LogTitle.SETTLEMENT_PENDING, 0);
                         })
                         .toList();
 
@@ -228,7 +230,7 @@ public class SettlementServiceImpl implements SettlementService {
             // 정산 완료 로그 생성
             for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
                 SettlementRequestLog settlementRequestLog =
-                        saveCompleteSettlementRequestLog(travel, travelMember.getUser(), totalPaymentCostSum);
+                        saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_COMPLETE, totalPaymentCostSum);
                 settlementRequestLogRepository.save(settlementRequestLog);
             }
 
@@ -302,7 +304,7 @@ public class SettlementServiceImpl implements SettlementService {
 
         // 정산 취소 로그 저장
         for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
-            saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_CANCEL);
+            saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_CANCEL, 0);
         }
     }
 
@@ -348,27 +350,46 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     private SettlementRequestLog saveSettlementRequestLog(Travel travel, User user,
-                                                          LogTitle logTitle) {
+                                                          LogTitle logTitle, int additionalValue) {
+
+        String logMessage = getLogMessage(travel, user, logTitle, additionalValue);
+        String link = getLink(travel, user, logTitle);
+
         SettlementRequestLog settlementRequestLog = settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .travel(travel)
                         .user(user)
                         .logTitle(logTitle)
-                        .logMessage(logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
-                                logTitle.getMessage(travel.getTravelName(), user.getName()) :
-                                logTitle.getMessage(travel.getTravelName()))
-                        .link(logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
-                                logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
-                                (logTitle.equals(LogTitle.SETTLEMENT_CANCEL)) ? null :
-                                logTitle.getLinkPattern(travel.getId()))
+                        .logMessage(logMessage)
+                        .link(link)
                         .build());
 
-        String eventName = logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ? "request" : "cancel";
+        String eventName = logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ? "request" :
+                (logTitle.equals(LogTitle.SETTLEMENT_CANCEL) ? "cancel" : "complete");
 
+        // 실시간 알림 전송
         if (!logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
             sendNotification(settlementRequestLog, eventName);
         }
+
         return settlementRequestLog;
+    }
+
+    @Nullable
+    private String getLink(Travel travel, User user, LogTitle logTitle) {
+        return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
+                (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ?
+                        logTitle.getLinkPattern(travel.getId()) : null);
+    }
+
+    @NotNull
+    private String getLogMessage(Travel travel, User user, LogTitle logTitle, int additionalValue) {
+        return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                logTitle.getMessage(travel.getTravelName(), user.getName()) :
+                (logTitle.equals(LogTitle.SETTLEMENT_COMPLETE) ?
+                        logTitle.getMessage(travel.getTravelName(), additionalValue) :
+                        logTitle.getMessage(travel.getTravelName()));
     }
 
     private void sendNotification(SettlementRequestLog settlementRequestLog, String eventName) {
@@ -387,20 +408,6 @@ public class SettlementServiceImpl implements SettlementService {
                 throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
             }
         }
-    }
-
-    private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, User user, int additionalValue) {
-        SettlementRequestLog settlementRequestLog = settlementRequestLogRepository.save(
-                SettlementRequestLog.builder()
-                        .travel(travel)
-                        .user(user)
-                        .logTitle(LogTitle.SETTLEMENT_COMPLETE)
-                        .logMessage(LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName(), additionalValue))
-                        .build());
-
-        // 실시간 알림 전송
-        sendNotification(settlementRequestLog, "complete");
-        return settlementRequestLog;
     }
 
     private int getTotalActualBurdenCost(Long travelMemberId) {
