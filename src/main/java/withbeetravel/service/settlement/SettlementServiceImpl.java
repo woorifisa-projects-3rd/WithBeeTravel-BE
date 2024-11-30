@@ -412,7 +412,6 @@ public class SettlementServiceImpl implements SettlementService {
                         sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
                     } catch (IOException e) {
                         emitterRepository.deleteById(key);
-                        throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
                     }
                 }
         );

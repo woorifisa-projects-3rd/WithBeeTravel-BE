@@ -25,7 +25,6 @@ public class EmitterRepositoryImpl implements EmitterRepository{
     @Override
     public void saveEventCache(String eventCacheId, Object event) {
         eventCache.put(eventCacheId, event);
-        log.info(eventCache.toString());
     }
 
     // 해당 회원과 관련된 모든 Emitters를 찾음

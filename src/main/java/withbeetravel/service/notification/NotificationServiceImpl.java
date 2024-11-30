@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import withbeetravel.exception.CustomException;
-import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.repository.notification.EmitterRepository;
 
 import java.io.IOException;
@@ -67,7 +65,6 @@ public class NotificationServiceImpl implements NotificationService{
                     .data(data));
         } catch (IOException e) {
             emitterRepository.deleteById(emitterId);
-            throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
         }
     }
 

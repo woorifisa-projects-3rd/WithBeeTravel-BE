@@ -5,8 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.settlementRequestLog.SettlementRequestLogDto;
-import withbeetravel.exception.CustomException;
-import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.repository.*;
 import withbeetravel.repository.notification.EmitterRepository;
 
@@ -117,7 +115,6 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
                         sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
                     } catch (IOException e) {
                         emitterRepository.deleteById(key);
-                        throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
                     }
                 }
         );

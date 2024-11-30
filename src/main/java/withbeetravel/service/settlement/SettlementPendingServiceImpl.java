@@ -6,8 +6,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.*;
-import withbeetravel.exception.CustomException;
-import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.repository.SettlementRequestLogRepository;
 import withbeetravel.repository.SettlementRequestRepository;
 import withbeetravel.repository.TravelMemberSettlementHistoryRepository;
@@ -85,7 +83,6 @@ public class SettlementPendingServiceImpl implements SettlementPendingService {
                             sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
                         } catch (IOException e) {
                             emitterRepository.deleteById(key);
-                            throw new CustomException(SettlementErrorCode.SSE_CONNECTION_FAILED);
                         }
                     }
             );

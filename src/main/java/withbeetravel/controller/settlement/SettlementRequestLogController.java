@@ -14,8 +14,6 @@ import withbeetravel.service.notification.NotificationService;
 import withbeetravel.service.notification.SettlementRequestLogService;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,9 +22,6 @@ public class SettlementRequestLogController {
 
     private final NotificationService notificationService;
     private final SettlementRequestLogService settlementRequestLogService;
-
-    // 모든 Emitters를 저장하는 ConcurrentHashMap
-    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
 
     @GetMapping
     SuccessResponse<List<SettlementRequestLogDto>> getNotifications() {
