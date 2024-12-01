@@ -72,7 +72,7 @@ public class TravelServiceImpl implements TravelService {
                 .mainImage(null)
                 .build();
 
-
+        System.out.println("여행 데이터" + travel);
         Travel savedTravel = travelRepository.save(travel);  // Travel 엔티티 저장
 
         // TravelMember 엔티티 생성 (생성자를 Travel의 Captain으로 추가)
@@ -209,7 +209,7 @@ public class TravelServiceImpl implements TravelService {
         return new InviteCodeGetResponse(travel.getInviteCode());
     }
 
-//   user의 여행 목록 리스트 조회
+    //   user의 여행 목록 리스트 조회
     @Override
     public List<TravelListResponse> getTravelList(Long userId) {
 
@@ -244,7 +244,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
 
-//   연결한 계좌 및 위비 카드 발급 했는지 안했는 지 여부
+    //   연결한 계좌 및 위비 카드 발급 했는지 안했는 지 여부
     @Override
     public void postConnectedAccount(CardCompletedRequest request,Long userId){
         User user = userRepository.findById(userId)
@@ -254,16 +254,15 @@ public class TravelServiceImpl implements TravelService {
             Account account = accountRepository.findById(request.getAccountId())
                     .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
-           user.updateConnectedAccount(account);
+            user.updateConnectedAccount(account);
         }
 
         // 카드 발급 0 , 연결계좌 0
         if (request.isWibeeCard()) {
             Account account = accountRepository.findById(request.getAccountId())
                     .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
-            System.out.println(request.isWibeeCard());
-            account.updatedAccount(request.isWibeeCard());
 
+            account.updatedAccount(request.isWibeeCard());
             user.updateConnectedAccount(account);
             user.updateWibeeCardAccount(account);
         }
@@ -273,14 +272,9 @@ public class TravelServiceImpl implements TravelService {
 
     @Override
     public AccountConnectedWibeeResponse getConnectedWibee(Long userId){
-        boolean isConnected = accountRepository.findByUserId(userId)
-                .stream()
-                .filter(Account::isConnectedWibeeCard)  // isConnectedWibeeCard가 true인 계좌만 필터링
-                .findFirst()  // 첫 번째 계좌를 찾음 (여러 계좌 중 첫 번째)
-                .map(account -> true)  // 해당 계좌가 있다면 true 반환
-                .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
-        System.out.println(isConnected);
-
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+        boolean isConnected = user.getWibeeCardAccount() != null;
         return new AccountConnectedWibeeResponse(isConnected);
     }
 

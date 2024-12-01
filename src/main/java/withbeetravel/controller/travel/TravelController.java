@@ -46,7 +46,7 @@ public class TravelController {
     public SuccessResponse<Void> editTravel(@PathVariable Long travelId, @RequestBody TravelRequest request) {
         // 여행 정보 수정
         travelService.editTravel(request, travelId);
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공");
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 편집 성공");
     }
 
     @PostMapping("/invite-code")
