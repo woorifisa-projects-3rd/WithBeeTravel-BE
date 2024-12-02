@@ -359,19 +359,24 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
             Travel travel,
             History history
     ) {
-        sharedPaymentRepository.save(
-                SharedPayment.builder()
-                        .addedByMember(travelMember)
-                        .travel(travel)
-                        .currencyUnit(CurrencyUnit.KRW)
-                        .paymentAmount(history.getPayAM())
-                        .isManuallyAdded(false)
-                        .participantCount(travel.getTravelMembers().size())
-                        .category(getCategory(history.getRqspeNm()))
-                        .storeName(history.getRqspeNm())
-                        .paymentDate(history.getDate())
-                        .build()
-        );
+
+        SharedPayment sharedPayment = SharedPayment.builder()
+                .addedByMember(travelMember)
+                .travel(travel)
+                .currencyUnit(CurrencyUnit.KRW)
+                .paymentAmount(history.getPayAM())
+                .isManuallyAdded(false)
+                .participantCount(travel.getTravelMembers().size())
+                .category(getCategory(history.getRqspeNm()))
+                .storeName(history.getRqspeNm())
+                .paymentDate(history.getDate())
+                .build();
+
+
+        sharedPaymentRepository.save(sharedPayment);
+
+        // 공동 결제 내역 참여 인원 설정
+        setParticipatedMembers(sharedPayment, travel.getTravelMembers());
     }
 
     void registerWibeeCardSharedPayment(
