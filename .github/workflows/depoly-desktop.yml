@@ -70,7 +70,7 @@ jobs:
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             # 기존 컨테이너가 있을 경우 제거
-            CONTAINER_ID=$(sudo docker ps -q --filter "name=with-bee-dev")
+            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
             if [ ! -z "$CONTAINER_ID" ]; then
               sudo docker stop $CONTAINER_ID
               sudo docker rm $CONTAINER_ID
