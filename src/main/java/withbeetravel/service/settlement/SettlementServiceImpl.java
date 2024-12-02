@@ -1,9 +1,12 @@
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.*;
 import withbeetravel.dto.response.settlement.*;
 import withbeetravel.exception.CustomException;
@@ -12,13 +15,17 @@ import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
+import withbeetravel.repository.notification.EmitterRepository;
 import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.notification.SettlementRequestLogService;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
@@ -40,6 +47,8 @@ public class SettlementServiceImpl implements SettlementService {
     private final AccountService accountService;
     private final TaskScheduler taskScheduler;
     private final SettlementRequestLogService settlementRequestLogService;
+    private final EmitterRepository emitterRepository;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -106,7 +115,7 @@ public class SettlementServiceImpl implements SettlementService {
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
 
             // 정산 요청 저장
-            saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST);
+            saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST, 0);
 
         }
 
@@ -181,7 +190,7 @@ public class SettlementServiceImpl implements SettlementService {
                 List<SettlementRequestLog> settlementRequestLogs = insufficientBalanceMembers.stream()
                         .map(travelMember -> {
                             User insufficientUser = travelMember.getUser();
-                            return saveSettlementRequestLog(travel, insufficientUser, LogTitle.SETTLEMENT_PENDING);
+                            return saveSettlementRequestLog(travel, insufficientUser, LogTitle.SETTLEMENT_PENDING, 0);
                         })
                         .toList();
 
@@ -222,7 +231,7 @@ public class SettlementServiceImpl implements SettlementService {
             // 정산 완료 로그 생성
             for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
                 SettlementRequestLog settlementRequestLog =
-                        saveCompleteSettlementRequestLog(travel, travelMember.getUser(), totalPaymentCostSum);
+                        saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_COMPLETE, totalPaymentCostSum);
                 settlementRequestLogRepository.save(settlementRequestLog);
             }
 
@@ -296,7 +305,7 @@ public class SettlementServiceImpl implements SettlementService {
 
         // 정산 취소 로그 저장
         for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
-            saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_CANCEL);
+            saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_CANCEL, 0);
         }
     }
 
@@ -342,26 +351,70 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     private SettlementRequestLog saveSettlementRequestLog(Travel travel, User user,
-                                                          LogTitle logTitle) {
-        return settlementRequestLogRepository.save(
+                                                          LogTitle logTitle, int additionalValue) {
+
+        String logMessage = getLogMessage(travel, user, logTitle, additionalValue);
+        String link = getLink(travel, user, logTitle);
+
+        SettlementRequestLog settlementRequestLog = settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .travel(travel)
                         .user(user)
                         .logTitle(logTitle)
-                        .logMessage(logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
-                                logTitle.getMessage(travel.getTravelName(), user.getName()) :
-                                logTitle.getMessage(travel.getTravelName()))
+                        .logMessage(logMessage)
+                        .link(link)
                         .build());
+
+        // 실시간 알림 전송
+        if (!logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
+            sendNotification(settlementRequestLog);
+        }
+
+        return settlementRequestLog;
     }
 
-    private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, User user, int additionalValue) {
-        return settlementRequestLogRepository.save(
-                SettlementRequestLog.builder()
-                        .travel(travel)
-                        .user(user)
-                        .logTitle(LogTitle.SETTLEMENT_COMPLETE)
-                        .logMessage( LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName(), additionalValue))
-                        .build());
+    @Nullable
+    private String getLink(Travel travel, User user, LogTitle logTitle) {
+        return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
+                (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ?
+                        logTitle.getLinkPattern(travel.getId()) : null);
+    }
+
+    @NotNull
+    private String getLogMessage(Travel travel, User user, LogTitle logTitle, int additionalValue) {
+        return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                logTitle.getMessage(travel.getTravelName(), user.getName()) :
+                (logTitle.equals(LogTitle.SETTLEMENT_COMPLETE) ?
+                        logTitle.getMessage(travel.getTravelName(), additionalValue) :
+                        logTitle.getMessage(travel.getTravelName()));
+    }
+
+    private void sendNotification(SettlementRequestLog settlementRequestLog) {
+        String userId = String.valueOf(settlementRequestLog.getUser().getId());
+
+        // 수신자에 연결된 모든 SseEmitter 객체를 가져옴
+        Map<String, SseEmitter> emitters =
+                emitterRepository.findAllEmitterStartWithByUserId(userId);
+
+        // eventId 생성
+        String eventId = userId + "_" + System.currentTimeMillis();
+
+        // emitter를 순환하며 각 SseEmitter 객체에 알림 전송
+        emitters.forEach(
+                (key, sseEmitter) -> {
+                    Map<String, String> eventData = new HashMap<>();
+                    eventData.put("title", settlementRequestLog.getLogTitle().getTitle()); // 로그 타이틀 (ex. 정산 요청)
+                    eventData.put("message", settlementRequestLog.getLogMessage()); // 로그 메시지
+                    eventData.put("link", settlementRequestLog.getLink()); // 이동 링크
+                    emitterRepository.saveEventCache(key, eventData);
+                    try {
+                        sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
+                    } catch (IOException e) {
+                        emitterRepository.deleteById(key);
+                    }
+                }
+        );
     }
 
     private int getTotalActualBurdenCost(Long travelMemberId) {

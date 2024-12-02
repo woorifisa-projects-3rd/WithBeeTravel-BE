@@ -2,13 +2,18 @@ package withbeetravel.service.notification;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.settlementRequestLog.SettlementRequestLogDto;
 import withbeetravel.repository.*;
+import withbeetravel.repository.notification.EmitterRepository;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +24,7 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
     private final TravelRepository travelRepository;
     private final TravelMemberRepository travelMemberRepository;
     private final TravelMemberSettlementHistoryRepository travelMemberSettlementHistoryRepository;
+    private final EmitterRepository emitterRepository;
 
 
     @Override
@@ -30,8 +36,15 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
         // settlementRequestLogDto 리스트로 가공 (링크 추가)
         List<SettlementRequestLogDto> settlementRequestLogDtos = new ArrayList<>();
         for (SettlementRequestLog settlementRequestLog : settlementRequestLogs) {
-            String link = createLink(settlementRequestLog);
-            SettlementRequestLogDto settlementRequestLogDto = createSettlementRequestLogDto(settlementRequestLog, link);
+            String link = settlementRequestLog.getLink();
+            String title = settlementRequestLog.getLogTitle().getTitle();
+            if (title.equals(LogTitle.SETTLEMENT_REQUEST.getTitle()) || title.equals(LogTitle.SETTLEMENT_RE_REQUEST.getTitle())) {
+                if (!settlementRequestRepository.existsByTravelId(settlementRequestLog.getTravel().getId())) {
+                    link = null;
+                }
+            }
+
+            SettlementRequestLogDto settlementRequestLogDto = SettlementRequestLogDto.of(settlementRequestLog, link);
             settlementRequestLogDtos.add(settlementRequestLogDto);
         }
 
@@ -68,34 +81,43 @@ public class SettlementRequestLogServiceImpl implements SettlementRequestLogServ
                 .user(user)
                 .logTitle(logTitle)
                 .logMessage(logTitle.getMessage(travel.getTravelName()))
+                .link(logTitle.getLinkPattern(travel.getId()))
                 .build();
         settlementRequestLogRepository.save(settlementRequestLog);
-    }
 
-
-    private SettlementRequestLogDto createSettlementRequestLogDto(SettlementRequestLog settlementRequestLog, String link) {
-        return SettlementRequestLogDto.of(settlementRequestLog, link);
+        // 실시간 알림 전송
+        sendNotification(settlementRequestLog);
     }
 
     private List<SettlementRequestLog> getSettlementRequestLogsByUserId(Long userId) {
         return settlementRequestLogRepository.findAllByUserId(userId);
     }
 
-    private String createLink(SettlementRequestLog settlementRequestLog) {
-        String link = null;
-        Long travelId = settlementRequestLog.getTravel().getId();
-        LogTitle logTitle = settlementRequestLog.getLogTitle();
-        if (logTitle.equals(LogTitle.PAYMENT_REQUEST)) {
-            link = "travel/" + travelId + "/payments";
-        } else if (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) || logTitle.equals(LogTitle.SETTLEMENT_RE_REQUEST)) {
-            if (settlementRequestRepository.existsByTravelId(travelId)) {
-                link = "travel/" + travelId + "/settlement";
-            }
-        } else if (logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
-            Long accountId = settlementRequestLog.getUser().getConnectedAccount().getId();
-            link = "banking/" + accountId;
-        }
-        return link;
+    private void sendNotification(SettlementRequestLog settlementRequestLog) {
+        String userId = String.valueOf(settlementRequestLog.getUser().getId());
+
+        // 수신자에 연결된 모든 SseEmitter 객체를 가져옴
+        Map<String, SseEmitter> emitters =
+                emitterRepository.findAllEmitterStartWithByUserId(userId);
+
+        // eventId 생성
+        String eventId = userId + "_" + System.currentTimeMillis();
+
+        // emitter를 순환하며 각 SseEmitter 객체에 알림 전송
+        emitters.forEach(
+                (key, sseEmitter) -> {
+                    Map<String, String> eventData = new HashMap<>();
+                    eventData.put("title", settlementRequestLog.getLogTitle().getTitle()); // 로그 타이틀 (ex. 정산 요청)
+                    eventData.put("message", settlementRequestLog.getLogMessage()); // 로그 메시지
+                    eventData.put("link", settlementRequestLog.getLink()); // 이동 링크
+                    emitterRepository.saveEventCache(key, eventData);
+                    try {
+                        sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
+                    } catch (IOException e) {
+                        emitterRepository.deleteById(key);
+                    }
+                }
+        );
     }
 }
 
