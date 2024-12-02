@@ -28,7 +28,6 @@ public class AccountController {
 
 
     @GetMapping()
-    @CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
     public SuccessResponse<List<AccountResponse>> showAllAccount(){
         Long userId = UserAuthorizationUtil.getLoginUserId();
         return SuccessResponse.of(
@@ -59,7 +58,6 @@ public class AccountController {
     }
 
     @PostMapping()
-    @CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
     public SuccessResponse<AccountResponse> createAccount(@RequestBody CreateAccountRequest createAccountRequest){
 
         Long userId = UserAuthorizationUtil.getLoginUserId();
