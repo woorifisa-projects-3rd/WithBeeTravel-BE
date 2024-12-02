@@ -45,6 +45,36 @@ jobs:
         run: docker push ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
 
   # 2단계: 로컬 Ubuntu에 Docker 배포
+#  deploy-to-ubuntu:
+#    runs-on: ubuntu-latest
+#    needs: build-and-push-docker
+#    steps:
+#      - name: Deploy to Local Ubuntu
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.LOCAL_UBUNTU_HOST }}
+#          username: ubuntu
+#          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+#          script: |
+#            # 기존 컨테이너가 있을 경우 제거
+#            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
+#
+#            if [ ! -z "$CONTAINER_ID" ]; then
+#              sudo docker stop $CONTAINER_ID
+#              sudo docker rm $CONTAINER_ID
+#            fi
+#
+#            # Docker Hub에서 새 이미지 pull
+#            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+#
+#            # application.properties 파일 생성 (배포 단계에서 생성)
+#            echo "${{ secrets.APPLICATION_DEV }}" > /path/to/application.properties
+#
+#            # aws.properties 파일 생성 (배포 단계에서 생성)
+#            echo "${{ secrets.AWS_PROPERTIES }}" | tr ';' '\n' > /path/to/aws.properties
+#
+#            # 새로운 컨테이너로 실행
+#            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
   deploy-to-ubuntu:
     runs-on: ubuntu-latest
     needs: build-and-push-docker
@@ -67,11 +97,15 @@ jobs:
             # Docker Hub에서 새 이미지 pull
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
 
+            # 컨테이너 실행
+            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+
             # application.properties 파일 생성 (배포 단계에서 생성)
-            echo "${{ secrets.APPLICATION_DEV }}" > /path/to/application.properties
+            echo "${{ secrets.APPLICATION_DEV }}" > /home/ubuntu/application.properties
 
             # aws.properties 파일 생성 (배포 단계에서 생성)
-            echo "${{ secrets.AWS_PROPERTIES }}" | tr ';' '\n' > /path/to/aws.properties
+            echo "${{ secrets.AWS_PROPERTIES }}" | tr ';' '\n' > /home/ubuntu/aws.properties
 
-            # 새로운 컨테이너로 실행
-            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+            # 컨테이너 내부의 /src/main/resources 폴더에 파일 복사
+            sudo docker cp /home/ubuntu/application.properties with-bee-dev:/app/src/main/resources/application.properties
+            sudo docker cp /home/ubuntu/aws.properties with-bee-dev:/app/src/main/resources/aws.properties
