@@ -10,7 +10,7 @@ import java.util.List;
 public interface HistoryService {
     List<HistoryResponse> showAll(Long AccountId);
 
-    void addHistory(Long accountId, HistoryRequest historyRequest);
+    void addHistory(Long userId, Long accountId, HistoryRequest historyRequest);
 
     WibeeCardHistoryListResponse getWibeeCardHistory(Long userId, String startDate, String endDate);
 }
