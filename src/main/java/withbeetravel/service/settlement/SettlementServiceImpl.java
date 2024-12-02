@@ -409,7 +409,7 @@ public class SettlementServiceImpl implements SettlementService {
                     eventData.put("link", settlementRequestLog.getLink()); // 이동 링크
                     emitterRepository.saveEventCache(key, eventData);
                     try {
-                        sseEmitter.send(SseEmitter.event().id(eventId).name("sse").data(eventData));
+                        sseEmitter.send(SseEmitter.event().id(eventId).name("message").data(eventData));
                     } catch (IOException e) {
                         emitterRepository.deleteById(key);
                     }
