@@ -3,7 +3,7 @@ name: Build and Deploy to Local Ubuntu using Docker
 on:
   push:
     branches:
-      - dev
+      - feat/TK-224-관리자-페이지-API-구현
 
 env:
   DOCKER_IMAGE_NAME: with-bee-dev  # Docker 이미지 이름
@@ -59,29 +59,52 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
 
-
-  # 2단계: 로컬 Ubuntu에 Docker 배포
+  #2단계
   deploy-to-ubuntu:
     runs-on: ubuntu-latest
     needs: build-and-push-docker
     steps:
-      - name: Deploy to Local Ubuntu
-        uses: appleboy/ssh-action@master
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          host: ${{ secrets.LOCAL_UBUNTU_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          script: |
-            #  기존 컨테이너가 있을 경우 제거
-            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
 
-            if [ ! -z "$CONTAINER_ID" ]; then
-              sudo docker stop $CONTAINER_ID
-              sudo docker rm $CONTAINER_ID
-            fi
+      - name: Execute commands on EC2 using SSM
+        run: |          
+          INSTANCE_ID="${{ secrets.INSTANCE_ID }}"
 
-            # Docker Hub에서 새 이미지 pull
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+          # EC2에 연결하고 명령 실행
+          aws ssm send-command \
+            --instance-ids $INSTANCE_ID \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy Docker container" \
+            --parameters 'commands=["sudo docker ps -q --filter \"publish=8080:8080\" | xargs -r sudo docker stop && sudo docker rm $(sudo docker ps -q --filter \"publish=8080:8080\")","sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest","sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest"]'
 
-            # 새로운 컨테이너로 실행
-            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+
+#  # 2단계: 로컬 Ubuntu에 Docker 배포
+#  deploy-to-ubuntu:
+#    runs-on: ubuntu-latest
+#    needs: build-and-push-docker
+#    steps:
+#      - name: Deploy to Local Ubuntu
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.LOCAL_UBUNTU_HOST }}
+#          username: ubuntu
+#          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+#          script: |
+#            #  기존 컨테이너가 있을 경우 제거
+#            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
+#
+#            if [ ! -z "$CONTAINER_ID" ]; then
+#              sudo docker stop $CONTAINER_ID
+#              sudo docker rm $CONTAINER_ID
+#            fi
+#
+#            # Docker Hub에서 새 이미지 pull
+#            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+#
+#            # 새로운 컨테이너로 실행
+#            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
