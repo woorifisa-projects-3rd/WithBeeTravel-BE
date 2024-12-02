@@ -67,18 +67,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
             # Docker Hub에 로그인
-            echo "$DOCKER_HUB_TOKEN" | sudo docker login -u "$DOCKER_USERNAME" --password-stdin
-            
-            # 기존 컨테이너가 있을 경우 제거
-            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
+            echo "${{ secrets.DOCKER_HUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+            # 기존 컨테이너가 있을 경우 제거
+            CONTAINER_ID=$(sudo docker ps -q --filter "name=with-bee-dev")
             if [ ! -z "$CONTAINER_ID" ]; then
               sudo docker stop $CONTAINER_ID
               sudo docker rm $CONTAINER_ID
             fi
 
             # Docker Hub에서 새 이미지 pull
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+            sudo docker pull "${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest"
 
             # 새로운 컨테이너로 실행
-            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
+            sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul "${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest"
