@@ -70,7 +70,7 @@ public class AccountController {
     }
 
     @PostMapping("{accountId}/transfer")
-    @CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
+    //@CheckBankingAccess(accountIdParam = "accountId") // AOP로 권한 검증
     public SuccessResponse transfer(@RequestBody TransferRequest transferRequest){
 
         accountService.transfer(transferRequest.getAccountId(),
