@@ -67,7 +67,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
             # 기존 컨테이너가 있을 경우 제거
-            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080:8080")
+            CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
 
             if [ ! -z "$CONTAINER_ID" ]; then
               sudo docker stop $CONTAINER_ID
