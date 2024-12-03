@@ -1,4 +1,4 @@
-package withbeetravel.service.log;
+package withbeetravel.service.loginLog;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;

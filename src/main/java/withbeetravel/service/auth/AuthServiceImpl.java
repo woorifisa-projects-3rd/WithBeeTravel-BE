@@ -17,7 +17,7 @@ import withbeetravel.jwt.JwtUtil;
 import withbeetravel.jwt.TokenStatus;
 import withbeetravel.repository.RefreshTokenRepository;
 import withbeetravel.repository.UserRepository;
-import withbeetravel.service.log.LoginLogService;
+import withbeetravel.service.loginLog.LoginLogService;
 
 import java.util.Date;
 

@@ -3,6 +3,7 @@ package withbeetravel.domain;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
@@ -33,6 +34,8 @@ public class LoginLog {
 
     @Column(name = "ip_address")
     private String ipAddress;
+
+    protected  LoginLog(){};
 
     @Builder
     public LoginLog(Long id, LoginLogType loginLogType, User user,
