@@ -61,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService{
         try {
             sseEmitter.send(SseEmitter.event()
                     .id(eventId)
-                    .name("sse")
+                    .name("connect")
                     .data(data));
         } catch (IOException e) {
             emitterRepository.deleteById(emitterId);
