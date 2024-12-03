@@ -2,7 +2,7 @@ package withbeetravel.service.log;
 
 import withbeetravel.domain.User;
 
-public interface LogService {
+public interface LoginLogService {
 
     void logRegister(User user, String email);
 
