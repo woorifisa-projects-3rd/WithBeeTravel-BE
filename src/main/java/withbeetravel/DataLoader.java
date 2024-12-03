@@ -2,7 +2,6 @@ package withbeetravel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 import withbeetravel.domain.*;
 import withbeetravel.repository.*;
 import withbeetravel.service.payment.SharedPaymentCategoryClassificationService;

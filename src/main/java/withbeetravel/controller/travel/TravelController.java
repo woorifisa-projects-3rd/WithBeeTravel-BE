@@ -46,7 +46,7 @@ public class TravelController {
     public SuccessResponse<Void> editTravel(@PathVariable Long travelId, @RequestBody TravelRequest request) {
         // 여행 정보 수정
         travelService.editTravel(request, travelId);
-        return SuccessResponse.of(HttpStatus.OK.value(), "여행 생성 성공");
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 편집 성공");
     }
 
     @PostMapping("/invite-code")
@@ -71,6 +71,7 @@ public class TravelController {
         return SuccessResponse.of(HttpStatus.OK.value(), "여행 리스트 조회 성공", travelListResponse);
     }
 
+//  계좌 연결
     @PostMapping("/accounts")
     public SuccessResponse<Void> postConnectedAccount(@RequestBody CardCompletedRequest request){
         Long userId = UserAuthorizationUtil.getLoginUserId();
@@ -78,6 +79,7 @@ public class TravelController {
         return SuccessResponse.of(HttpStatus.OK.value(), "계좌 연결 완료");
     }
 
+//    카드 발급 여부
     @GetMapping("/accounts")
     public SuccessResponse<AccountConnectedWibeeResponse> getConnectedAccount(){
         Long userId = UserAuthorizationUtil.getLoginUserId();

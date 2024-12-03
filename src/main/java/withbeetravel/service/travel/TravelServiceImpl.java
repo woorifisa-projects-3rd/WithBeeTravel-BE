@@ -1,6 +1,8 @@
 package withbeetravel.service.travel;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import withbeetravel.domain.*;
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
 public class TravelServiceImpl implements TravelService {
 
 
-
+    private static final Logger log = LoggerFactory.getLogger(TravelServiceImpl.class);
     private final TravelRepository travelRepository;
     private final TravelCountryRepository travelCountryRepository;
     private final AccountRepository accountRepository;
@@ -46,15 +48,18 @@ public class TravelServiceImpl implements TravelService {
     public TravelResponse saveTravel(TravelRequest requestDto,Long userId) {
 
         List<Account> accounts = accountRepository.findByUserId(userId);
+        System.out.println(accounts);
         boolean hasConnectedWibeeCard = accounts.stream()
                 .anyMatch(Account::isConnectedWibeeCard);
-
+        System.out.println(hasConnectedWibeeCard);
         if(!hasConnectedWibeeCard){
             throw new CustomException(TravelErrorCode.TRAVEL_CAPTAIN_NOT);
         }
 
         // 초대 코드 생성
         String inviteCode = UUID.randomUUID().toString();
+
+
 
         // Travel 엔티티 생성
         Travel travel = Travel.builder()
@@ -67,8 +72,18 @@ public class TravelServiceImpl implements TravelService {
                 .mainImage(null)
                 .build();
 
-
+        System.out.println("여행 데이터" + travel);
         Travel savedTravel = travelRepository.save(travel);  // Travel 엔티티 저장
+
+        // TravelMember 엔티티 생성 (생성자를 Travel의 Captain으로 추가)
+        TravelMember travelMember = TravelMember.builder()
+                .travel(savedTravel)
+                .user(userRepository.findById(userId)
+                        .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND))) // 유저 검증
+                .isCaptain(true) // Captain 역할로 지정
+                .build();
+
+        travelMemberRepository.save(travelMember); // TravelMember 엔티티 저장
 
         // 해외 여행일 경우, 선택된 나라들에 대해 유효성 검증 후 TravelCountry 엔티티 생성
         // TravelCountry 리스트를 빈 리스트로 초기화
@@ -194,7 +209,7 @@ public class TravelServiceImpl implements TravelService {
         return new InviteCodeGetResponse(travel.getInviteCode());
     }
 
-//   user의 여행 목록 리스트 조회
+    //   user의 여행 목록 리스트 조회
     @Override
     public List<TravelListResponse> getTravelList(Long userId) {
 
@@ -229,7 +244,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
 
-//   연결한 계좌 및 위비 카드 발급 했는지 안했는 지 여부
+    //   연결한 계좌 및 위비 카드 발급 했는지 안했는 지 여부
     @Override
     public void postConnectedAccount(CardCompletedRequest request,Long userId){
         User user = userRepository.findById(userId)
@@ -239,16 +254,15 @@ public class TravelServiceImpl implements TravelService {
             Account account = accountRepository.findById(request.getAccountId())
                     .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
-           user.updateConnectedAccount(account);
+            user.updateConnectedAccount(account);
         }
 
         // 카드 발급 0 , 연결계좌 0
         if (request.isWibeeCard()) {
             Account account = accountRepository.findById(request.getAccountId())
                     .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
-            System.out.println(request.isWibeeCard());
-            account.updatedAccount(request.isWibeeCard());
 
+            account.updatedAccount(request.isWibeeCard());
             user.updateConnectedAccount(account);
             user.updateWibeeCardAccount(account);
         }
@@ -258,10 +272,9 @@ public class TravelServiceImpl implements TravelService {
 
     @Override
     public AccountConnectedWibeeResponse getConnectedWibee(Long userId){
-        boolean isConnected = accountRepository.findById(userId)
-                .map(Account::isConnectedWibeeCard) // Account 엔티티에 연결 여부 필드가 있다고 가정
-                .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
-
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+        boolean isConnected = user.getWibeeCardAccount() != null;
         return new AccountConnectedWibeeResponse(isConnected);
     }
 
