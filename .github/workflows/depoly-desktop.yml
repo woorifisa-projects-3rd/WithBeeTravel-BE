@@ -3,7 +3,7 @@ name: Build and Deploy to Local Ubuntu using Docker
 on:
   push:
     branches:
-      - feat/TK-224-관리자-페이지-API-구현
+      - dev
 
 env:
   DOCKER_IMAGE_NAME: with-bee-dev  # Docker 이미지 이름
