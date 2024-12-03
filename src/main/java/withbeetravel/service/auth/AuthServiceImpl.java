@@ -50,8 +50,8 @@ public class AuthServiceImpl implements AuthService {
                 .pinLocked(false)
                 .roleType(RoleType.USER)
                 .build();
-
         userRepository.save(user);
+        logService.logRegister(user,user.getEmail());
     }
 
     @Override

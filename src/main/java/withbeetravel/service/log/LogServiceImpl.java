@@ -17,6 +17,17 @@ public class LogServiceImpl implements LogService {
     private final LogRepository logRepository;
 
     @Async
+    public void logRegister(User user, String email){
+        Log registerLog = Log.builder()
+                .logType(LogType.REGISTER)
+                .user(user)
+                .description("회원 가입 완료")
+                .ipAddress(email)
+                .build();
+        logRepository.save(registerLog);
+    }
+
+    @Async
     public void logLoginSuccess(User user, String email) {
         Log loginLog = Log.builder()
                 .logType(LogType.LOGIN)
@@ -30,7 +41,6 @@ public class LogServiceImpl implements LogService {
     @Async
     @Transactional
     public void logLoginFailed(User user, String email) {
-        System.out.println("로그 저장 시도");
         Log loginFailedLog = Log.builder()
                 .logType(LogType.LOGIN_FAILED)
                 .user(user)
