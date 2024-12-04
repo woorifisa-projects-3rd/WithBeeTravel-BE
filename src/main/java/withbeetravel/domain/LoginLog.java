@@ -18,7 +18,7 @@ public class LoginLog {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "log_type", nullable = false)
+    @Column(name = "login_log_type", nullable = false)
     private LoginLogType loginLogType;
 
     @ManyToOne(fetch = FetchType.LAZY)
