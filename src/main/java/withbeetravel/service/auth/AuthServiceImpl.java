@@ -149,7 +149,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void deleteExpiredToken() {
-        refreshTokenRepository.deleteAllByExpirationTimeBefore(LocalDateTime.now());
+        refreshTokenRepository.deleteAllByExpirationTimeBefore(new Date());
     }
 
     private void checkRefreshToken(final String refreshToken) {

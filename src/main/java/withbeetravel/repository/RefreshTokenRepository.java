@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import withbeetravel.domain.RefreshToken;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
@@ -20,5 +20,5 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     void deleteByToken(String token);
 
-    void deleteAllByExpirationTimeBefore(LocalDateTime localDateTime);
+    void deleteAllByExpirationTimeBefore(Date date);
 }
