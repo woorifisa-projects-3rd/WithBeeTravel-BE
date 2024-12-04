@@ -18,6 +18,7 @@ import withbeetravel.jwt.TokenStatus;
 import withbeetravel.repository.RefreshTokenRepository;
 import withbeetravel.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static java.util.Objects.isNull;
@@ -144,6 +145,11 @@ public class AuthServiceImpl implements AuthService {
         User user = getUser(userId);
 
         return MyPageResponse.from(user);
+    }
+
+    @Override
+    public void deleteExpiredToken() {
+        refreshTokenRepository.deleteAllByExpirationTimeBefore(new Date());
     }
 
     private void checkRefreshToken(final String refreshToken) {

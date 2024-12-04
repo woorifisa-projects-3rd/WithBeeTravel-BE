@@ -18,4 +18,6 @@ public interface AuthService {
     void logout(final String refreshToken);
 
     MyPageResponse getMyPageInfo(Long userId);
+
+    void deleteExpiredToken();
 }
