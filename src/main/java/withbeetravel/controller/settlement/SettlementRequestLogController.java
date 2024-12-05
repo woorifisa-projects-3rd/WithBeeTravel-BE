@@ -1,7 +1,9 @@
 package withbeetravel.controller.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,9 +37,15 @@ public class SettlementRequestLogController {
      * - SseEmitter를 반환
      */
     @GetMapping(value = "/stream", produces = "text/event-stream")
-    public SseEmitter streamNotifications(@RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
+    public ResponseEntity<SseEmitter> streamNotifications(@RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
                                           String lastEventId) {
         Long userId = UserAuthorizationUtil.getLoginUserId();
-        return notificationService.subscribe(userId, lastEventId);
+
+        // 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache"); // 캐시 방지
+        headers.add("X-Accel-Buffering", "no");
+
+        return new ResponseEntity<>(notificationService.subscribe(userId, lastEventId), headers, HttpStatus.OK);
     }
 }
