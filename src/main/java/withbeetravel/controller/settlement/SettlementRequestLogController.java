@@ -43,6 +43,7 @@ public class SettlementRequestLogController {
 
         // 헤더 설정
         HttpHeaders headers = new HttpHeaders();
+        headers.add("Connection", "keep-alive");
         headers.add("Cache-Control", "no-cache"); // 캐시 방지
         headers.add("X-Accel-Buffering", "no");
 
