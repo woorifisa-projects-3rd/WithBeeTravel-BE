@@ -5,15 +5,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import withbeetravel.domain.LoginLog;
-import withbeetravel.domain.LoginLogType;
-import withbeetravel.domain.User;
+import withbeetravel.domain.*;
+import withbeetravel.dto.request.admin.TravelAdminRequest;
 import withbeetravel.dto.request.admin.UserRequest;
 import withbeetravel.dto.response.admin.DashboardResponse;
 import withbeetravel.dto.request.admin.LoginLogRequest;
 import withbeetravel.dto.response.admin.LoginLogResponse;
+import withbeetravel.dto.response.admin.TravelAdminResponse;
 import withbeetravel.dto.response.admin.UserResponse;
 import withbeetravel.repository.LoginLogRepository;
+import withbeetravel.repository.TravelMemberRepository;
 import withbeetravel.repository.TravelRepository;
 import withbeetravel.repository.UserRepository;
 
@@ -27,6 +28,7 @@ public class AdminServiceImpl implements AdminService{
     private final LoginLogRepository loginLogRepository;
     private final UserRepository userRepository;
     private final TravelRepository travelRepository;
+    private final TravelMemberRepository travelMemberRepository;
 
     public DashboardResponse getLoginAttempts() {
         List<LoginLogType> loginLogTypes = Arrays.asList(LoginLogType.LOGIN, LoginLogType.LOGIN_FAILED);
@@ -69,6 +71,35 @@ public class AdminServiceImpl implements AdminService{
                     .orElse(null);
             return UserResponse.from(user, registerLog, recentLoginLog);
         });
+    }
+
+    public Page<TravelAdminResponse> showTravels(TravelAdminRequest travelAdminRequest) {
+        Pageable pageable = PageRequest.of(travelAdminRequest.getPage() - 1, travelAdminRequest.getSize());
+
+        if (travelAdminRequest.getUserId() == null) {
+            return travelRepository.findAll(pageable)
+                    .map(this::convertToTravelAdminResponse);
+        } else {
+            return travelMemberRepository.findAllByUserId(travelAdminRequest.getUserId(), pageable)
+                    .map(travelMember -> convertToTravelAdminResponse(travelMember.getTravel()));
+        }
+    }
+
+    public TravelAdminResponse convertToTravelAdminResponse(Travel travel) {
+        return TravelAdminResponse.builder()
+                .travelId(travel.getId())
+                .travelName(travel.getTravelName())
+                .travelType(travel.isDomesticTravel() ? "극내" : "해외")
+                .travelStartDate(travel.getTravelStartDate().toString())
+                .travelEndDate(travel.getTravelEndDate().toString())
+                .totalMember(travel.getTravelMembers().size())
+                .captainId(travel.getTravelMembers().stream()
+                        .filter(TravelMember::isCaptain)
+                        .findFirst()
+                        .map(travelMember -> travelMember.getUser().getId())
+                        .orElse(null))
+                .settlementStatus(travel.getSettlementStatus().toString())
+                .build();
     }
 
 

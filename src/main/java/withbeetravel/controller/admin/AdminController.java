@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import withbeetravel.dto.request.admin.TravelAdminRequest;
 import withbeetravel.dto.request.admin.UserRequest;
 import withbeetravel.dto.response.admin.DashboardResponse;
 import withbeetravel.dto.request.admin.LoginLogRequest;
 import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.dto.response.admin.LoginLogResponse;
+import withbeetravel.dto.response.admin.TravelAdminResponse;
 import withbeetravel.dto.response.admin.UserResponse;
 import withbeetravel.service.admin.AdminService;
 
@@ -56,6 +58,23 @@ public class AdminController {
                 "사용자 목록 조회 성공",
                 adminService.showUsers(userRequest)
         );
+    }
+
+    @GetMapping("/travels")
+    public SuccessResponse<Page<TravelAdminResponse>> showTravels(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam(required = false) Long userId
+    ){
+        TravelAdminRequest travelAdminRequest = TravelAdminRequest.builder()
+                .page(page).size(size).userId(userId).build();
+
+        return SuccessResponse.of(
+                HttpStatus.OK.value(),
+                userId == null ? "전체 여행 조회 성공" : "사용자의 여행 조회 성공",
+                adminService.showTravels(travelAdminRequest)
+        );
+
     }
 
 

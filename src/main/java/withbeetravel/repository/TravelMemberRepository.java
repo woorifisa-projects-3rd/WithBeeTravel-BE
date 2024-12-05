@@ -1,5 +1,7 @@
 package withbeetravel.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import withbeetravel.domain.TravelMember;
@@ -19,4 +21,6 @@ public interface TravelMemberRepository extends JpaRepository<TravelMember, Long
     List<TravelMember> findAllByUserId(Long userId);
 
     boolean existsByTravelIdAndUserId(Long travelId, Long userId);
+
+    Page<TravelMember> findAllByUserId(Long userId, Pageable pageable);
 }
