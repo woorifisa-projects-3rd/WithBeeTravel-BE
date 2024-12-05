@@ -38,7 +38,7 @@ jobs:
           echo "${{ secrets.APPLICATION_DEV }}" > ./src/main/resources/application.properties
       - name: Create aws.properties
         run: |
-          echo "${{ secrets.AWS_PROPERTIES }}" | tr ';' '\n' > ./src/main/resources/aws.properties
+          echo "${{ secrets.AWS_PROPERTIES }}" > ./src/main/resources/aws.properties
 
       # Gradle 빌드 (JAR 파일 생성), 테스트 생략
       - name: Build with Gradle Wrapper (without tests)
