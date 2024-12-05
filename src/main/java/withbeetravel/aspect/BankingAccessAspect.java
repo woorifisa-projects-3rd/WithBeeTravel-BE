@@ -31,7 +31,7 @@ public class BankingAccessAspect {
 
         // accountId에 해당하는 계좌가 존재하는지 확인
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new CustomException(BankingErrorCode.HISTORY_ACCESS_FORBIDDEN));
+                .orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
         // 권한 검사: 로그인된 사용자와 계좌 소유자가 일치하는지 확인
         Long accountUserId = account.getUser().getId();  // Account 객체에 User 정보가 포함되어 있다고 가정

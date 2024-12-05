@@ -3,6 +3,7 @@ package withbeetravel.controller.banking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import withbeetravel.aspect.CheckBankingAccess;
 import withbeetravel.aspect.CheckTravelAccess;
 import withbeetravel.controller.banking.docs.HistoryControllerDocs;
 import withbeetravel.dto.request.account.HistoryRequest;
@@ -18,11 +19,17 @@ public class HistoryController implements HistoryControllerDocs {
 
     private final HistoryService historyService;
 
+    @Override
+    @CheckBankingAccess
     @PostMapping("/{accountId}/payment")
-    public SuccessResponse<Void> addPayment(@PathVariable Long accountId,
-                                      @RequestBody HistoryRequest historyRequest){
+    public SuccessResponse<Void> addPayment(
+            @PathVariable Long accountId,
+            @RequestBody HistoryRequest historyRequest
+    ){
 
-        historyService.addHistory(accountId,historyRequest);
+        Long userId = UserAuthorizationUtil.getLoginUserId();
+
+        historyService.addHistory(userId, accountId,historyRequest);
         return SuccessResponse.of(
                 HttpStatus.CREATED.value(),
                 "결제 내역 등록 완료"
