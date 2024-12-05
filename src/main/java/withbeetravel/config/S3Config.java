@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration // 설정 파일을 읽기 위한 annotation
 public class S3Config {
 
+    // S3
     @Value("${cloud.aws.credentials.accessKey}")
     private String accessKey;
 
