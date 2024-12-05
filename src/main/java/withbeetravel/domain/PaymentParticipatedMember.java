@@ -31,4 +31,8 @@ public class PaymentParticipatedMember {
         this.travelMember = travelMember;
         this.sharedPayment = sharedPayment;
     }
+
+    public void assignSharedPayment(SharedPayment sharedPayment) {
+        this.sharedPayment = sharedPayment;
+    }
 }
