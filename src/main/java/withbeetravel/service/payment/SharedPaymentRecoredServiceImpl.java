@@ -62,6 +62,15 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
                 travel.updateMainImage(newImageUrl);
             }
         }
+        // 기존 이미지를 메인 이미지로 설정한 경우
+        else if(isMainImage && sharedPayment.getPaymentImage() != null) {
+            // 여행 정보 찾아오기
+            Travel travel = travelRepository.findById(travelId)
+                    .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
+
+            // 여행 이미지 수정
+            travel.updateMainImage(sharedPayment.getPaymentImage());
+        }
 
         // comment 정보 엔티티에서 변경
         sharedPayment.updatePaymentCommnet(comment);
