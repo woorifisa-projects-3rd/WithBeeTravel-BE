@@ -84,8 +84,12 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
         SharedPayment sharedPayment = sharedPaymentRepository.findById(sharedPaymentId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
 
+        // paymentImage가 메인 이미지인지 여부
+        boolean isMainImage = sharedPayment.getPaymentImage() != null &&
+                sharedPayment.getPaymentImage().equals(sharedPayment.getTravel().getMainImage());
+
         // Response Dto에 담기
-        SharedPaymentRecordResponse responseDto = SharedPaymentRecordResponse.from(sharedPayment);
+        SharedPaymentRecordResponse responseDto = SharedPaymentRecordResponse.from(sharedPayment, isMainImage);
 
         return responseDto;
     }

@@ -28,12 +28,19 @@ public class SharedPaymentRecordResponse {
     )
     private String paymentComment;
 
-    public static SharedPaymentRecordResponse from(SharedPayment sharedPayment) {
+    @Schema(
+            description = "메인 여행 사진 여부",
+            example = "true"
+    )
+    private boolean mainImage;
+
+    public static SharedPaymentRecordResponse from(SharedPayment sharedPayment, boolean isMainImage) {
 
         return SharedPaymentRecordResponse.builder()
                 .sharedPaymentId(sharedPayment.getId())
                 .paymentImage(sharedPayment.getPaymentImage())
                 .paymentComment(sharedPayment.getPaymentComment())
+                .mainImage(isMainImage)
                 .build();
     }
 }
