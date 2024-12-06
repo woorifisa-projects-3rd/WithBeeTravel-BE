@@ -89,7 +89,7 @@ public class AdminServiceImpl implements AdminService{
         return TravelAdminResponse.builder()
                 .travelId(travel.getId())
                 .travelName(travel.getTravelName())
-                .travelType(travel.isDomesticTravel() ? "극내" : "해외")
+                .travelType(travel.isDomesticTravel() ? "국내" : "해외")
                 .travelStartDate(travel.getTravelStartDate().toString())
                 .travelEndDate(travel.getTravelEndDate().toString())
                 .totalMember(travel.getTravelMembers().size())
