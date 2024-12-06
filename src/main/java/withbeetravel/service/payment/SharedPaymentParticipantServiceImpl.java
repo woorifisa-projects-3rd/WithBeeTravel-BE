@@ -28,7 +28,7 @@ public class SharedPaymentParticipantServiceImpl implements SharedPaymentPartici
     
     @Override
     @Transactional
-    public SuccessResponse<Void> updateParticipantMembers(
+    public void updateParticipantMembers(
             Long travelId,
             Long sharedPaymentId,
             SharedPaymentParticipateRequest sharedPaymentParticipateRequest
@@ -56,8 +56,6 @@ public class SharedPaymentParticipantServiceImpl implements SharedPaymentPartici
 
         // 정산 인원 수정
         sharedPayment.updateParticipantCount(newParticipateMembersId.size());
-
-        return SuccessResponse.of(HttpStatus.OK.value(), "정산인원 변경 성공");
     }
 
     void isAllMemberIdInTravelMemberId(List<TravelMember> allByTravelId, List<Long> newParticipateMembersId) {

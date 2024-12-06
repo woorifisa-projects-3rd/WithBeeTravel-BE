@@ -1,6 +1,7 @@
 package withbeetravel.controller.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import withbeetravel.aspect.CheckTravelAndSharedPaymentAccess;
 import withbeetravel.controller.payment.docs.SharedPaymentParticipantControllerDocs;
@@ -24,7 +25,9 @@ public class SharedPaymentParticipantController implements SharedPaymentParticip
             @RequestBody SharedPaymentParticipateRequest sharedPaymentParticipateRequest
     ) {
 
-        return sharedPaymentParticipantService
+        sharedPaymentParticipantService
                 .updateParticipantMembers(travelId, sharedPaymentId, sharedPaymentParticipateRequest);
+
+        return SuccessResponse.of(HttpStatus.OK.value(), "정산인원 변경 성공");
     }
 }
