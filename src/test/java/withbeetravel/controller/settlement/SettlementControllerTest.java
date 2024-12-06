@@ -48,4 +48,17 @@ class SettlementControllerTest extends BaseIntegrationTest {
                 .all()
                 .statusCode(HttpStatus.OK.value());
     }
+
+    @Test
+    void 세부지출내역을_조회한다() {
+        given().log().all()
+                .header(AUTHORIZATION, "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/travels/1/settlements")
+                .then()
+                .log()
+                .all()
+                .statusCode(HttpStatus.OK.value());
+    }
 }
