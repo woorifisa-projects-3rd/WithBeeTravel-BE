@@ -354,4 +354,128 @@ class SharedPaymentRegisterServiceTest {
         verify(travelMemberRepository).findByTravelIdAndUserId(travelId, userId);
         verify(s3Uploader).upload(image, "shared-payments/" + travelId);
     }
+
+    @Test
+    void 유효하지_않은_날짜_형식_입력_시_예외_발생() {
+        // Given
+        Long userId = 1L;
+        Long travelId = 1L;
+
+        User user1 = UserFixture.builder().id(userId).build();
+        User user2 = UserFixture.builder().id(2L).build();
+        User user3 = UserFixture.builder().id(3L).build();
+
+        Travel travel = TravelFixture.builder()
+                .id(travelId)
+                .build();
+
+        TravelMember travelMember1 = TravelMember.builder()
+                .id(1L)
+                .travel(travel)
+                .user(user1)
+                .isCaptain(true)
+                .build();
+        TravelMember travelMember2 = TravelMember.builder()
+                .id(2L)
+                .travel(travel)
+                .user(user2)
+                .isCaptain(false)
+                .build();
+        TravelMember travelMember3 = TravelMember.builder()
+                .id(3L)
+                .travel(travel)
+                .user(user3)
+                .isCaptain(false)
+                .build();
+        List<TravelMember> travelMembers = Arrays.asList(travelMember1, travelMember2, travelMember3);
+
+        given(travelRepository.findById(travelId)).willReturn(Optional.of(travel));
+        given(travelMemberRepository.findByTravelIdAndUserId(travelId, userId)).willReturn(Optional.of(travelMember1));
+
+        // When & Then
+        CustomException exception = assertThrows(
+                CustomException.class,
+                () -> sharedPaymentRegisterService.addManualSharedPayment(
+                        userId,
+                        travelId,
+                        "2024-12-06",
+                        "명수네 떡볶이",
+                        14000,
+                        10.0,
+                        "USD",
+                        1400.0,
+                        null,
+                        null,
+                        false
+                )
+        );
+
+        assertEquals(ValidationErrorCode.INVALID_DATE_FORMAT, exception.getErrorCode());
+
+        verify(travelRepository).findById(travelId);
+        verify(travelMemberRepository).findByTravelIdAndUserId(travelId, userId);
+        verify(travelMemberRepository).findAllByTravelId(travelId);
+    }
+
+    @Test
+    void 지원되지_않는_통화_코드_입력_시_예외_발생() {
+        // Given
+        Long userId = 1L;
+        Long travelId = 1L;
+
+        User user1 = UserFixture.builder().id(userId).build();
+        User user2 = UserFixture.builder().id(2L).build();
+        User user3 = UserFixture.builder().id(3L).build();
+
+        Travel travel = TravelFixture.builder()
+                .id(travelId)
+                .build();
+
+        TravelMember travelMember1 = TravelMember.builder()
+                .id(1L)
+                .travel(travel)
+                .user(user1)
+                .isCaptain(true)
+                .build();
+        TravelMember travelMember2 = TravelMember.builder()
+                .id(2L)
+                .travel(travel)
+                .user(user2)
+                .isCaptain(false)
+                .build();
+        TravelMember travelMember3 = TravelMember.builder()
+                .id(3L)
+                .travel(travel)
+                .user(user3)
+                .isCaptain(false)
+                .build();
+        List<TravelMember> travelMembers = Arrays.asList(travelMember1, travelMember2, travelMember3);
+
+        given(travelRepository.findById(travelId)).willReturn(Optional.of(travel));
+        given(travelMemberRepository.findByTravelIdAndUserId(travelId, userId)).willReturn(Optional.of(travelMember1));
+
+        // When & Then
+        CustomException exception = assertThrows(
+                CustomException.class,
+                () -> sharedPaymentRegisterService.addManualSharedPayment(
+                        userId,
+                        travelId,
+                        "2024-12-06 20:04",
+                        "명수네 떡볶이",
+                        14000,
+                        10.0,
+                        "USS",
+                        1400.0,
+                        null,
+                        null,
+                        false
+                )
+        );
+
+        assertEquals(ValidationErrorCode.INVALID_CURRENCY_UNIT, exception.getErrorCode());
+
+        verify(travelRepository).findById(travelId);
+        verify(travelMemberRepository).findByTravelIdAndUserId(travelId, userId);
+        verify(travelMemberRepository).findAllByTravelId(travelId);
+    }
 }
