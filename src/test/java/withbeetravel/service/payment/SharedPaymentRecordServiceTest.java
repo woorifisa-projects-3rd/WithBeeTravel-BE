@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
+import withbeetravel.dto.response.payment.SharedPaymentRecordResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.ValidationErrorCode;
 import withbeetravel.repository.SharedPaymentRepository;
@@ -24,14 +25,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class SharedPaymentRecoredServiceTest {
+class SharedPaymentRecordServiceTest {
 
     @Mock private S3Uploader s3Uploader;
     @Mock private TravelRepository travelRepository;
     @Mock private SharedPaymentRepository sharedPaymentRepository;
     @Mock private MultipartFile image;
 
-    @InjectMocks private SharedPaymentRecoredServiceImpl service;
+    @InjectMocks private SharedPaymentRecordServiceImpl service;
 
     @Test
     void 이미지_업로드_및_메인_이미지_수정_성공() throws IOException {
@@ -132,5 +133,69 @@ class SharedPaymentRecoredServiceTest {
         assertEquals(ValidationErrorCode.IMAGE_PROCESSING_FAILED, exception.getErrorCode());
         verify(sharedPaymentRepository).findById(sharedPaymentId);
         verify(travelRepository).findById(travelId);
+    }
+
+    @Test
+    void 메인_이미지로_사용하는_이미지를_포함한_여행_기록_가져오기 () {
+        // Given
+        Long sharedPaymentId = 1L;
+        Long travelId = 1L;
+        String imageUrl = "imageUrl";
+
+        Travel travel = TravelFixture.builder()
+                .id(travelId)
+                .mainImage(imageUrl)
+                .build();
+
+        SharedPayment sharedPayment = SharedPaymentFixture.builder()
+                .id(sharedPaymentId)
+                .travel(travel)
+                .paymentImage(imageUrl)
+                .build();
+
+        // Mocking Repository에서 엔티티 반환
+        given(sharedPaymentRepository.findById(sharedPaymentId)).willReturn(Optional.of(sharedPayment));
+
+        // When
+        SharedPaymentRecordResponse response = service.getSharedPaymentRecord(sharedPaymentId);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("imageUrl", response.getPaymentImage());
+        assertTrue(response.isMainImage());
+
+        verify(sharedPaymentRepository).findById(sharedPaymentId);
+    }
+
+    @Test
+    void 메인_이미지로_사용하지_않는_이미지를_포함한_여행_기록_가져오기 () {
+        // Given
+        Long sharedPaymentId = 1L;
+        Long travelId = 1L;
+        String imageUrl = "imageUrl";
+
+        Travel travel = TravelFixture.builder()
+                .id(travelId)
+                .build();
+
+        SharedPayment sharedPayment = SharedPaymentFixture.builder()
+                .id(sharedPaymentId)
+                .travel(travel)
+                .paymentImage(imageUrl)
+                .build();
+
+        // Mocking Repository에서 엔티티 반환
+        given(sharedPaymentRepository.findById(sharedPaymentId)).willReturn(Optional.of(sharedPayment));
+
+        // When
+        SharedPaymentRecordResponse response = service.getSharedPaymentRecord(sharedPaymentId);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("imageUrl", response.getPaymentImage());
+        assertFalse(response.isMainImage());
+
+        // Repository 메소드가 호출된 것을 검증
+        verify(sharedPaymentRepository).findById(sharedPaymentId);
     }
 }

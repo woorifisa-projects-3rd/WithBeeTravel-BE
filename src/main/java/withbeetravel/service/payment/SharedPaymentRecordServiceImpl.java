@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
 import withbeetravel.dto.response.payment.SharedPaymentRecordResponse;
-import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
@@ -20,7 +19,7 @@ import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
-public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordService {
+public class SharedPaymentRecordServiceImpl implements SharedPaymentRecordService {
 
     private final S3Uploader s3Uploader;
 
