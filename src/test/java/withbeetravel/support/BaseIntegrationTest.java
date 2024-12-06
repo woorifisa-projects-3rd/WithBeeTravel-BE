@@ -1,4 +1,4 @@
-package withbeetravel.controller;
+package withbeetravel.support;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;

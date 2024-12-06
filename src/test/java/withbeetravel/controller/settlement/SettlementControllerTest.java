@@ -3,7 +3,7 @@ package withbeetravel.controller.settlement;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import withbeetravel.controller.BaseIntegrationTest;
+import withbeetravel.support.BaseIntegrationTest;
 
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
