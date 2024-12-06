@@ -1,5 +1,7 @@
 package withbeetravel.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import withbeetravel.domain.Travel;
@@ -13,4 +15,6 @@ public interface TravelRepository extends JpaRepository<Travel, Long> {
     Optional<Travel> findByInviteCode(String inviteCode);
 
     List<Travel> findAllByTravelEndDate(LocalDate localDate);
+
+    Page<Travel> findAll(Pageable pageable);
 }

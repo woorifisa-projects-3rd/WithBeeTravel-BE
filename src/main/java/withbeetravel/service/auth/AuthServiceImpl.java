@@ -17,6 +17,7 @@ import withbeetravel.jwt.JwtUtil;
 import withbeetravel.jwt.TokenStatus;
 import withbeetravel.repository.RefreshTokenRepository;
 import withbeetravel.repository.UserRepository;
+import withbeetravel.service.loginLog.LoginLogService;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final LoginLogService loginLogService;
 
     @Override
     public void signUp(SignUpRequest signUpRequest) {
@@ -49,8 +51,8 @@ public class AuthServiceImpl implements AuthService {
                 .pinLocked(false)
                 .roleType(RoleType.USER)
                 .build();
-
         userRepository.save(user);
+        loginLogService.logRegister(user,user.getEmail());
     }
 
     @Override
@@ -62,6 +64,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new CustomException(AuthErrorCode.EMAIL_NOT_FOUND));
 
         if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
+            loginLogService.logLoginFailed(user,email); // 로그인 실패 로그 저장
             throw new CustomException(AuthErrorCode.INVALID_PASSWORD);
         }
 
@@ -84,6 +87,9 @@ public class AuthServiceImpl implements AuthService {
 
         // AccessTokenDto 생성
         UserAuthResponse userAuthResponse = UserAuthResponse.of(accessToken, user.getRoleType());
+
+        // 로그인 성공 로그 기록
+        loginLogService.logLoginSuccess(user, email);
 
         return SignInResponse.of(userAuthResponse, refreshToken);
     }
