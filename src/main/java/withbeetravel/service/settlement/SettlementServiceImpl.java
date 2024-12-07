@@ -377,7 +377,7 @@ public class SettlementServiceImpl implements SettlementService {
     private String getLink(Travel travel, User user, LogTitle logTitle) {
         return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
                 logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
-                (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ?
+                (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) || logTitle.equals(LogTitle.SETTLEMENT_COMPLETE) ?
                         logTitle.getLinkPattern(travel.getId()) : null);
     }
 

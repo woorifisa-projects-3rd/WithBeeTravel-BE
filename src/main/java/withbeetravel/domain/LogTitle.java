@@ -24,7 +24,7 @@ public enum LogTitle {
             "travel/{0}/settlement"),
     SETTLEMENT_COMPLETE("정산 완료",
             "{0}의 정산이 완료되었습니다! 🎉<br /> 위비가 {1}원을 지원했습니다.🍀 위비와 함께하는 다음 여행도 기대해요!",
-            null);
+            "travel/{0}/honey-capsule");
 
     @Getter
     private final String title;
