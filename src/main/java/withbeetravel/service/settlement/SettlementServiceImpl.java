@@ -114,8 +114,11 @@ public class SettlementServiceImpl implements SettlementService {
 
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
 
-            // 정산 요청 저장
-            saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST, 0);
+            // 여행장 제외하고 정산 요청 전송
+            if (user.getId() != userId) {
+                // 정산 요청 저장
+                saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST, 0);
+            }
 
         }
 
