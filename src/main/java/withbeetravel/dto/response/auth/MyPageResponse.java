@@ -38,8 +38,13 @@ public class MyPageResponse {
         return MyPageResponse.builder()
                 .profileImage(user.getProfileImage())
                 .username(user.getName())
-                .accountProduct(user.getConnectedAccount().getProduct().name())
-                .accountNumber(user.getConnectedAccount().getAccountNumber())
+                .accountProduct(
+                        user.getConnectedAccount() != null
+                                ? user.getConnectedAccount().getProduct().name()
+                                : null)
+                .accountNumber(user.getConnectedAccount() != null
+                                ? user.getConnectedAccount().getAccountNumber()
+                                : null)
                 .build();
     }
 }
