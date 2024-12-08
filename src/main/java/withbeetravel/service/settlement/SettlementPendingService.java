@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SettlementPendingService {
 
-    void handlePendingSettlementRequest(SettlementRequestLog settlementRequestLog,
+    void handlePendingSettlementRequest(List<SettlementRequestLog> settlementRequestLogs,
                                         List<TravelMember> insufficientBalanceMembers,
                                         SettlementRequest settlementRequest,
                                         int updatedCount,

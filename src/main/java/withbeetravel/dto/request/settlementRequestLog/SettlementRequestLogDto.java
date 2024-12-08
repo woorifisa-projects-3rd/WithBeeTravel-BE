@@ -2,6 +2,7 @@ package withbeetravel.dto.request.settlementRequestLog;
 
 import lombok.Builder;
 import lombok.Getter;
+import withbeetravel.domain.SettlementRequestLog;
 
 import java.time.LocalDateTime;
 
@@ -20,5 +21,15 @@ public class SettlementRequestLogDto {
         this.logTitle = logTitle;
         this.logMessage = logMessage;
         this.link = link;
+    }
+
+    public static SettlementRequestLogDto of (SettlementRequestLog settlementRequestLog, String link) {
+        return SettlementRequestLogDto.builder()
+                .id(settlementRequestLog.getId())
+                .logTime(settlementRequestLog.getLogTime())
+                .logTitle(settlementRequestLog.getLogTitle().getTitle())
+                .logMessage(settlementRequestLog.getLogMessage())
+                .link(link)
+                .build();
     }
 }

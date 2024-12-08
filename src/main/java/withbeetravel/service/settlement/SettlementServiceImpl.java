@@ -1,8 +1,12 @@
 package withbeetravel.service.settlement;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.*;
 import withbeetravel.dto.response.settlement.*;
 import withbeetravel.exception.CustomException;
@@ -11,11 +15,17 @@ import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.SettlementErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.*;
+import withbeetravel.repository.notification.EmitterRepository;
 import withbeetravel.service.banking.AccountService;
+import withbeetravel.service.notification.SettlementRequestLogService;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
@@ -33,8 +43,12 @@ public class SettlementServiceImpl implements SettlementService {
     private final SettlementRequestLogRepository settlementRequestLogRepository;
     private final AccountRepository accountRepository;
 
-    private final SettlementPendingService settlementRequestLogService;
+    private final SettlementPendingService settlementPendingService;
     private final AccountService accountService;
+    private final TaskScheduler taskScheduler;
+    private final SettlementRequestLogService settlementRequestLogService;
+    private final EmitterRepository emitterRepository;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -84,6 +98,7 @@ public class SettlementServiceImpl implements SettlementService {
         // 여행멤버정산내역 생성
         for (TravelMember member : travelMemberRepository.findAllByTravelId(travelId)) {
             Long travelMemberId = member.getId();
+            User user = member.getUser();
 
             int ownPaymentCost = getTotalOwnPaymentCost(travelMemberId);
             int actualBurdenCost = getTotalActualBurdenCost(travelMemberId);
@@ -98,13 +113,29 @@ public class SettlementServiceImpl implements SettlementService {
                             .build();
 
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
+
+            // 여행장 제외하고 정산 요청 전송
+            if (user.getId() != userId) {
+                // 정산 요청 저장
+                saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST, 0);
+            }
+
         }
 
         // 정산 여부를 ONGOING으로 변경
         travel.updateSettlementStatus(SettlementStatus.ONGOING);
 
-        // 정산 요청 저장
-        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_REQUEST);
+        // 24시간(= 86400초) 뒤에 createSettlementRerequestLogForNotAgreed 실행
+        try {
+            if (newSettlementRequest.getRequestStartTime() != null) {
+                taskScheduler.schedule(
+                        () -> settlementRequestLogService.createSettlementReRequestLogForNotAgreed(newSettlementRequest),
+                        newSettlementRequest.getRequestStartTime()
+                                .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(24 * 60 * 60));
+            }
+        } catch (Exception e) {
+            throw new CustomException(SettlementErrorCode.SCHEDULER_PROCESSING_FAILED);
+        }
     }
 
     private void validateSettlementStatusIsNotOngoing(Travel travel) {
@@ -159,13 +190,16 @@ public class SettlementServiceImpl implements SettlementService {
             // insufficientBalancedMembers에 한 명이라도 있을 경우, 정산 보류
             if (!insufficientBalanceMembers.isEmpty()) {
 
-                // 정산 보류 로그 추가
-                SettlementRequestLog settlementRequestLog =
-                        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_PENDING);
+                List<SettlementRequestLog> settlementRequestLogs = insufficientBalanceMembers.stream()
+                        .map(travelMember -> {
+                            User insufficientUser = travelMember.getUser();
+                            return saveSettlementRequestLog(travel, insufficientUser, LogTitle.SETTLEMENT_PENDING, 0);
+                        })
+                        .toList();
 
                 // 롤백시 실행되도록 다른 서비스 클래스로 분리
-                settlementRequestLogService.handlePendingSettlementRequest(
-                        settlementRequestLog,
+                settlementPendingService.handlePendingSettlementRequest(
+                        settlementRequestLogs,
                         insufficientBalanceMembers,
                         settlementRequest,
                         insufficientBalanceMembers.size(),
@@ -180,7 +214,7 @@ public class SettlementServiceImpl implements SettlementService {
             // totalPaymentCost가 0보다 작은 경우, 해당 멤버의 계좌에서 totalPaymentCost를 인출
             // totalPaymentCost가 0 이상일 경우, 해당 멤버의 계좌에 totalPaymentCost를 송금
             Account managerAccount = accountRepository
-                    .findById(9999L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
+                    .findById(1L).orElseThrow(() -> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
 
             // 총 정산 금액의 합산 계산
             int totalPaymentCostSum = getTotalPaymentCostSum(travelMemberSettlementHistories);
@@ -198,9 +232,11 @@ public class SettlementServiceImpl implements SettlementService {
             settlementRequest.updateRequestEndDate(LocalDateTime.now());
 
             // 정산 완료 로그 생성
-            SettlementRequestLog settlementRequestLog =
-                    saveCompleteSettlementRequestLog(travel, totalPaymentCostSum);
-            settlementRequestLogRepository.save(settlementRequestLog);
+            for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
+                SettlementRequestLog settlementRequestLog =
+                        saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_COMPLETE, totalPaymentCostSum);
+                settlementRequestLogRepository.save(settlementRequestLog);
+            }
 
             return "모든 여행 멤버의 정산 동의 완료 후 정산 완료";
         }
@@ -271,7 +307,9 @@ public class SettlementServiceImpl implements SettlementService {
         travel.updateSettlementStatus(SettlementStatus.PENDING);
 
         // 정산 취소 로그 저장
-        saveSettlementRequestLog(travel, LogTitle.SETTLEMENT_CANCEL);
+        for (TravelMember travelMember : travelMemberRepository.findAllByTravelId(travelId)) {
+            saveSettlementRequestLog(travel, travelMember.getUser(), LogTitle.SETTLEMENT_CANCEL, 0);
+        }
     }
 
     private void updateIsAgreedAndDisagreeCount(TravelMemberSettlementHistory travelMemberSettlementHistory, SettlementRequest settlementRequest) {
@@ -315,23 +353,71 @@ public class SettlementServiceImpl implements SettlementService {
         }
     }
 
-    private SettlementRequestLog saveSettlementRequestLog(Travel travel,
-                                                          LogTitle logTitle) {
-        return settlementRequestLogRepository.save(
+    private SettlementRequestLog saveSettlementRequestLog(Travel travel, User user,
+                                                          LogTitle logTitle, int additionalValue) {
+
+        String logMessage = getLogMessage(travel, user, logTitle, additionalValue);
+        String link = getLink(travel, user, logTitle);
+
+        SettlementRequestLog settlementRequestLog = settlementRequestLogRepository.save(
                 SettlementRequestLog.builder()
                         .travel(travel)
+                        .user(user)
                         .logTitle(logTitle)
-                        .logMessage(logTitle.getMessage(travel.getTravelName()))
+                        .logMessage(logMessage)
+                        .link(link)
                         .build());
+
+        // 실시간 알림 전송
+        if (!logTitle.equals(LogTitle.SETTLEMENT_PENDING)) {
+            sendNotification(settlementRequestLog);
+        }
+
+        return settlementRequestLog;
     }
 
-    private SettlementRequestLog saveCompleteSettlementRequestLog(Travel travel, int additionalValue) {
-        return settlementRequestLogRepository.save(
-                SettlementRequestLog.builder()
-                        .travel(travel)
-                        .logTitle(LogTitle.SETTLEMENT_COMPLETE)
-                        .logMessage( LogTitle.SETTLEMENT_COMPLETE.getMessage(travel.getTravelName(), additionalValue))
-                        .build());
+    @Nullable
+    private String getLink(Travel travel, User user, LogTitle logTitle) {
+        return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
+                (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) || logTitle.equals(LogTitle.SETTLEMENT_COMPLETE) ?
+                        logTitle.getLinkPattern(travel.getId()) : null);
+    }
+
+    @NotNull
+    private String getLogMessage(Travel travel, User user, LogTitle logTitle, int additionalValue) {
+        return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
+                logTitle.getMessage(travel.getTravelName(), user.getName()) :
+                (logTitle.equals(LogTitle.SETTLEMENT_COMPLETE) ?
+                        logTitle.getMessage(travel.getTravelName(), additionalValue) :
+                        logTitle.getMessage(travel.getTravelName()));
+    }
+
+    private void sendNotification(SettlementRequestLog settlementRequestLog) {
+        String userId = String.valueOf(settlementRequestLog.getUser().getId());
+
+        // 수신자에 연결된 모든 SseEmitter 객체를 가져옴
+        Map<String, SseEmitter> emitters =
+                emitterRepository.findAllEmitterStartWithByUserId(userId);
+
+        // eventId 생성
+        String eventId = userId + "_" + System.currentTimeMillis();
+
+        // emitter를 순환하며 각 SseEmitter 객체에 알림 전송
+        emitters.forEach(
+                (key, sseEmitter) -> {
+                    Map<String, String> eventData = new HashMap<>();
+                    eventData.put("title", settlementRequestLog.getLogTitle().getTitle()); // 로그 타이틀 (ex. 정산 요청)
+                    eventData.put("message", settlementRequestLog.getLogMessage()); // 로그 메시지
+                    eventData.put("link", settlementRequestLog.getLink()); // 이동 링크
+                    emitterRepository.saveEventCache(key, eventData);
+                    try {
+                        sseEmitter.send(SseEmitter.event().id(eventId).name("message").data(eventData));
+                    } catch (IOException e) {
+                        emitterRepository.deleteById(key);
+                    }
+                }
+        );
     }
 
     private int getTotalActualBurdenCost(Long travelMemberId) {
@@ -354,12 +440,11 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     private SettlementRequest createSettlementRequest(Travel travel, int totalMemberCount) {
-        SettlementRequest newSettlementRequest = settlementRequestRepository.save(
-                SettlementRequest.builder()
-                        .travel(travel)
-                        .disagreeCount(totalMemberCount)
-                        .build());
-        return newSettlementRequest;
+                return settlementRequestRepository.save(
+                        SettlementRequest.builder()
+                                .travel(travel)
+                                .disagreeCount(totalMemberCount)
+                                .build());
     }
 
     private Travel findTravelById(Long travelId) {

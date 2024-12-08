@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.domain.SharedPayment;
 import withbeetravel.domain.Travel;
 import withbeetravel.dto.response.payment.SharedPaymentRecordResponse;
-import withbeetravel.dto.response.SuccessResponse;
 import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.PaymentErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
@@ -20,7 +19,7 @@ import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
-public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordService {
+public class SharedPaymentRecordServiceImpl implements SharedPaymentRecordService {
 
     private final S3Uploader s3Uploader;
 
@@ -43,24 +42,24 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
         SharedPayment sharedPayment = sharedPaymentRepository.findById(sharedPaymentId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
 
+        // 여행 정보 찾아오기
+        Travel travel = travelRepository.findById(travelId)
+                .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
+
         // 이미지 추가, 수정, 삭제
         if(image != null && image.getSize() != 0) {
-            String newImageUrl;
-            try {
-                newImageUrl = s3Uploader.upload(image, SHARED_PAYMENT_IMAGE_DIR + travelId);
-            } catch (IOException e) {
-                throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
-            }
+            String newImageUrl = uploadImage(travelId, sharedPayment, image);
             sharedPayment.updatePaymentImage(newImageUrl);
             // 메인 이미지로 설정했다면, 여행 메인 사진 바꿔주기
             if(isMainImage) {
-                // 여행 정보 찾아오기
-                Travel travel = travelRepository.findById(travelId)
-                        .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
-
                 // 여행 이미지 수정
                 travel.updateMainImage(newImageUrl);
             }
+        }
+        // 기존 이미지를 메인 이미지로 설정한 경우
+        else if(isMainImage && sharedPayment.getPaymentImage() != null) {
+            // 여행 이미지 수정
+            travel.updateMainImage(sharedPayment.getPaymentImage());
         }
 
         // comment 정보 엔티티에서 변경
@@ -75,8 +74,12 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
         SharedPayment sharedPayment = sharedPaymentRepository.findById(sharedPaymentId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.SHARED_PAYMENT_NOT_FOUND));
 
+        // paymentImage가 메인 이미지인지 여부
+        boolean isMainImage = sharedPayment.getPaymentImage() != null &&
+                sharedPayment.getPaymentImage().equals(sharedPayment.getTravel().getMainImage());
+
         // Response Dto에 담기
-        SharedPaymentRecordResponse responseDto = SharedPaymentRecordResponse.from(sharedPayment);
+        SharedPaymentRecordResponse responseDto = SharedPaymentRecordResponse.from(sharedPayment, isMainImage);
 
         return responseDto;
     }
@@ -105,11 +108,6 @@ public class SharedPaymentRecoredServiceImpl implements SharedPaymentRecordServi
             } catch (IOException e) { // 이미지 저장에 실패했을 경우
                 throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
             }
-        }
-        // image가 null로 들어왔다면, 기존 이미지 삭제
-        else {
-            // S3에 이미지 삭제
-            s3Uploader.delete(paymentImage);
         }
 
         // 새로운 이미지 정보 반환

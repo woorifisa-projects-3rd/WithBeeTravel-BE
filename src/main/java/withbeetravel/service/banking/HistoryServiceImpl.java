@@ -3,9 +3,7 @@ package withbeetravel.service.banking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import withbeetravel.domain.Account;
-import withbeetravel.domain.History;
-import withbeetravel.domain.User;
+import withbeetravel.domain.*;
 import withbeetravel.dto.request.account.HistoryRequest;
 import withbeetravel.dto.response.account.HistoryResponse;
 import withbeetravel.dto.response.account.WibeeCardHistoryListResponse;
@@ -14,9 +12,8 @@ import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.ValidationErrorCode;
-import withbeetravel.repository.AccountRepository;
-import withbeetravel.repository.HistoryRepository;
-import withbeetravel.repository.UserRepository;
+import withbeetravel.repository.*;
+import withbeetravel.service.payment.SharedPaymentRegisterService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +26,8 @@ public class HistoryServiceImpl implements HistoryService {
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
     private final AccountRepository accountRepository;
+    private final TravelMemberRepository travelMemberRepository;
+    private final SharedPaymentRegisterService sharedPaymentRegisterService;
 
     public List<HistoryResponse> showAll(Long accountId) {
         List<History> histories = historyRepository.findByAccountIdOrderByDateDesc(accountId);
@@ -37,8 +36,13 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     // 거래 내역 추가하기
+    @Override
     @Transactional
-    public void addHistory(Long accountId, HistoryRequest historyRequest){
+    public void addHistory(
+            Long userId,
+            Long accountId,
+            HistoryRequest historyRequest
+    ){
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()-> new CustomException(BankingErrorCode.ACCOUNT_NOT_FOUND));
@@ -54,14 +58,32 @@ public class HistoryServiceImpl implements HistoryService {
         }
 
         History history = History.builder().
-                account(account).date(LocalDateTime.now()).payAM(historyRequest.getPayAm())
-                .rqspeNm(historyRequest.getRqspeNm()).isWibeeCard(historyRequest.isWibeeCard())
+                account(account)
+                .date(LocalDateTime.now())
+                .payAM(historyRequest.getPayAm())
+                .rqspeNm(historyRequest.getRqspeNm())
+                .isWibeeCard(historyRequest.isWibeeCard())
                 .balance(account.getBalance()- historyRequest.getPayAm())
                 .build();
 
         historyRepository.save(history);
 
         account.transfer(-historyRequest.getPayAm());
+
+        // 위비 카드 결제 내역 & 여행 기간 중 발생한 결제 내역이면 공동 결제 내역에 자동으로 추가
+        List<Travel> invitedTravelList = getInvitedTravelList(userId); // 참여 중인 여행 리스트
+
+        Travel currentTravel = getCurrentTravels(invitedTravelList); // 현재 진행 중인 여행
+
+        if(currentTravel != null) { // 현재 진행 중인 여행이 있다면, 해당 여행의 공동 결제 내역에 현재 결제 내역 추가
+
+            sharedPaymentRegisterService.saveWibeeCardSharedPayment(
+                    getTravelMember(userId, currentTravel.getId()),
+                    currentTravel,
+                    history
+            );
+            history.addedSharedPayment();
+        }
     }
 
     @Override
@@ -109,6 +131,33 @@ public class HistoryServiceImpl implements HistoryService {
     User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+    }
+
+    TravelMember getTravelMember(Long userId, Long travelId) {
+        return travelMemberRepository.findByTravelIdAndUserId(travelId, userId).get();
+    }
+
+    // userId에 해당하는 회원이 참여 중인 여행 리스트 반환
+    List<Travel> getInvitedTravelList(Long userId) {
+        List<TravelMember> travelMembers = travelMemberRepository.findAllByUserId(userId);
+
+        // TravelMember에서 Travel만 추출하여 리스트로 변환
+        return travelMembers.stream()
+                .map(TravelMember::getTravel) // TravelMember의 Travel 필드 추출
+                .toList(); // List로 변환
+    }
+
+    // 현재 진행 중인 여행 반환
+    public Travel getCurrentTravels(List<Travel> travels) {
+        LocalDate today = LocalDate.now();
+
+        for (Travel travel : travels) {
+            if (!today.isBefore(travel.getTravelStartDate()) && !today.isAfter(travel.getTravelEndDate())) {
+                return travel;  // 조건에 맞는 첫 번째 여행을 반환
+            }
+        }
+
+        return null;
     }
 
     void validateDateRange(LocalDate sDate, LocalDate eDate) {

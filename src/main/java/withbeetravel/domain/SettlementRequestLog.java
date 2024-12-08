@@ -22,6 +22,10 @@ public class SettlementRequestLog {
     @JoinColumn(name = "travel_id", nullable = false)
     private Travel travel;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(name = "log_title", nullable = false)
     @Enumerated(EnumType.STRING)
     private LogTitle logTitle;
@@ -33,16 +37,23 @@ public class SettlementRequestLog {
     @Column(name = "log_time")
     private LocalDateTime logTime;
 
+    @Column(name = "link")
+    private String link;
+
     @Builder
     public SettlementRequestLog(Long id,
                                 Travel travel,
+                                User user,
                                 LogTitle logTitle,
                                 String logMessage,
-                                LocalDateTime logTime) {
+                                LocalDateTime logTime,
+                                String link) {
         this.id = id;
         this.travel = travel;
+        this.user = user;
         this.logTitle = logTitle;
         this.logMessage = logMessage;
         this.logTime = logTime;
+        this.link = link;
     }
 }
