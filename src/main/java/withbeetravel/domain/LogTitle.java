@@ -17,14 +17,16 @@ public enum LogTitle {
             "banking/{0}"),
     SETTLEMENT_CANCEL("정산 취소",
             "{0}의 정산 요청이 취소되었습니다. 😌",
-            null
-            ),
+            null),
     SETTLEMENT_RE_REQUEST("정산 재요청",
             "{0}의 정산 요청에 아직 동의하지 않았어요! 😅<br /> 혹시 잊으신 건 아닌가요? 빠르게 정산을 완료해 주세요.",
             "travel/{0}/settlement"),
+    TRAVEL_MEMBER_ADDED("여행 멤버 합류",
+            "{0}님이 {1}에 합류했어요! 🎉<br />함께 멋진 추억을 만들어 보세요. 🥰",
+            "travel/{0}"),
     SETTLEMENT_COMPLETE("정산 완료",
             "{0}의 정산이 완료되었습니다! 🎉<br /> 위비가 {1}원을 지원했습니다.🍀 위비와 함께하는 다음 여행도 기대해요!",
-            null);
+            "travel/{0}/honey-capsule");
 
     @Getter
     private final String title;
@@ -42,6 +44,9 @@ public enum LogTitle {
     }
 
     public String getMessage(String travelName, int additionalValue) {
+        if (additionalValue == 0) {
+            return travelName + "의 정산이 완료되었습니다! 🎉<br />위비와 함께하는 다음 여행도 기대해요!";
+        }
         return messageTemplate
                 .replace("{0}", travelName)
                 .replace("{1}", formatter.format(additionalValue));
