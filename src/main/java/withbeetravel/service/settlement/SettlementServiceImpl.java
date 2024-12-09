@@ -131,7 +131,9 @@ public class SettlementServiceImpl implements SettlementService {
                 taskScheduler.schedule(
                         () -> settlementRequestLogService.createSettlementReRequestLogForNotAgreed(newSettlementRequest),
                         newSettlementRequest.getRequestStartTime()
-                                .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(24 * 60 * 60));
+//                                .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(24 * 60 * 60));
+                                .atZone(ZoneId.systemDefault()).toInstant().plusSeconds(10 * 60));
+
             }
         } catch (Exception e) {
             throw new CustomException(SettlementErrorCode.SCHEDULER_PROCESSING_FAILED);
