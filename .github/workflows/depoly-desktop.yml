@@ -6,15 +6,14 @@ on:
       - dev
 
 env:
-  DOCKER_IMAGE_NAME: with-bee-dev  # Docker 이미지 이름
+  DOCKER_IMAGE_NAME: with-bee-dev
   LOCAL_UBUNTU_HOST: ${{ secrets.LOCAL_UBUNTU_HOST }}
-  LOCAL_UBUNTU_SSH_USER: ubuntu  # 사용자 이름
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
-  DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/withbee-dev  # Docker Hub 이미지 이름
+  LOCAL_UBUNTU_SSH_USER: ubuntu
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_HUB: ${{ secrets.DOCKER_USERNAME }}/withbee-dev
   SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
 
 jobs:
-  # 1단계: 빌드
   build-and-push-docker:
     runs-on: ubuntu-latest
 
@@ -30,6 +29,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
 
+      - name: Grant execute permissions to gradlew
+        run: chmod +x ./gradlew
+
       - name: Create necessary directories
         run: |
           mkdir -p ./src/main/resources
@@ -40,7 +42,6 @@ jobs:
         run: |
           echo "${{ secrets.AWS_PROPERTIES }}" > ./src/main/resources/aws.properties
 
-      # Gradle 빌드 (JAR 파일 생성), 테스트 생략
       - name: Build with Gradle Wrapper (without tests)
         run: ./gradlew build -x test
 
@@ -54,7 +55,6 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest
 
-   #2단계: 로컬 Ubuntu에 Docker 배포
   deploy-to-ubuntu:
     runs-on: ubuntu-latest
     needs: build-and-push-docker
@@ -66,18 +66,13 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            # Docker Hub에 로그인
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            # 기존 컨테이너가 있을 경우 제거
             CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
             if [ ! -z "$CONTAINER_ID" ]; then
               sudo docker stop $CONTAINER_ID
               sudo docker rm $CONTAINER_ID
             fi
 
-            # Docker Hub에서 새 이미지 pull
             sudo docker pull "${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest"
-
-            # 새로운 컨테이너로 실행
             sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul "${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest"
