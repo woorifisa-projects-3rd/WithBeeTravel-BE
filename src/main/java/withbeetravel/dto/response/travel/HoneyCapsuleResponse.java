@@ -60,6 +60,12 @@ public class HoneyCapsuleResponse {
     )
     private String unit;
 
+    @Schema(
+            description = "결제 내역 추가 멤버의 프로필 이미지",
+            example = "1"
+    )
+    private int addMemberProfileImage;
+
     public static HoneyCapsuleResponse from(SharedPayment sharedPayment) {
 
         return HoneyCapsuleResponse.builder()
@@ -71,6 +77,7 @@ public class HoneyCapsuleResponse {
                 .paymentAmount(sharedPayment.getPaymentAmount())
                 .foreignPaymentAmount(sharedPayment.getForeignPaymentAmount())
                 .unit(sharedPayment.getCurrencyUnit().name())
+                .addMemberProfileImage(sharedPayment.getAddedByMember().getUser().getProfileImage())
                 .build();
     }
 }

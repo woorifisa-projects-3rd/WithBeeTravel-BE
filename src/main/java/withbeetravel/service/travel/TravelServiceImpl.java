@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.account.CardCompletedRequest;
@@ -20,11 +21,13 @@ import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.TravelErrorCode;
+import withbeetravel.exception.error.ValidationErrorCode;
 import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.TravelCountryRepository;
 import withbeetravel.repository.TravelRepository;
 import withbeetravel.repository.*;
 import withbeetravel.repository.notification.EmitterRepository;
+import withbeetravel.service.global.S3Uploader;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -50,6 +53,11 @@ public class TravelServiceImpl implements TravelService {
     private final PaymentParticipatedMemberRepository paymentParticipatedMemberRepository;
     private final SettlementRequestLogRepository settlementRequestLogRepository;
     private final EmitterRepository emitterRepository;
+
+    private final S3Uploader s3Uploader;
+
+    // S3에 이미지를 저장할 경로
+    private static final String TRAVEL_IMAGE_DIR = "travels/";
 
     @Override
     public TravelResponse saveTravel(TravelRequest requestDto,Long userId) {
@@ -345,7 +353,6 @@ public class TravelServiceImpl implements TravelService {
 
     }
 
-
     @Override
     public AccountConnectedWibeeResponse getConnectedWibee(Long userId){
         User user = userRepository.findById(userId)
@@ -354,5 +361,22 @@ public class TravelServiceImpl implements TravelService {
         return new AccountConnectedWibeeResponse(isConnected);
     }
 
+    @Override
+    public void changeMainImage(Long travelId, MultipartFile image) {
+        // 여행 정보 찾아오기
+        Travel travel = travelRepository.findById(travelId)
+                .orElseThrow(() -> new CustomException(TravelErrorCode.TRAVEL_NOT_FOUND));
 
+        // 이미지 추가, 수정, 삭제
+        if(image != null && image.getSize() != 0) {
+            // 이미지 저장할 S3 디렉토리 정보
+            String dirName = TRAVEL_IMAGE_DIR + travelId;
+            try {
+                String newImage = s3Uploader.upload(image, dirName);
+                travel.updateMainImage(newImage);
+            } catch (IOException e) {
+                throw new CustomException(ValidationErrorCode.IMAGE_PROCESSING_FAILED);
+            }
+        }
+    }
 }
