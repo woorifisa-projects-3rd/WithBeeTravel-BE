@@ -42,7 +42,7 @@ jobs:
 
       # Gradle 빌드 (JAR 파일 생성), 테스트 생략
       - name: Build with Gradle Wrapper (without tests)
-        run: ./gradlew build -x test
+        run: chmod +x ./gradlew
 
       - name: Build Docker image
         run: |
