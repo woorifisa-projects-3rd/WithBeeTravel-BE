@@ -3,7 +3,9 @@ package withbeetravel.controller.travel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.aspect.CheckTravelAccess;
+import withbeetravel.controller.travel.docs.TravelControllerDocs;
 import withbeetravel.dto.request.account.CardCompletedRequest;
 import withbeetravel.dto.request.travel.InviteCodeSignUpRequest;
 import withbeetravel.dto.request.travel.TravelRequest;
@@ -22,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/travels")
-public class TravelController {
+public class TravelController implements TravelControllerDocs {
 
     private final TravelService travelService;
 
@@ -85,5 +87,16 @@ public class TravelController {
         Long userId = UserAuthorizationUtil.getLoginUserId();
         AccountConnectedWibeeResponse accountConnectedWibeeResponse = travelService.getConnectedWibee(userId);
         return SuccessResponse.of(HttpStatus.OK.value(), "위비 카드 발급 여부 확인",accountConnectedWibeeResponse);
+    }
+
+    @Override
+    @CheckTravelAccess
+    @PatchMapping(value = "/{travelId}/main-image", consumes = "multipart/form-data")
+    public SuccessResponse<Void> changeMainImage(
+            @PathVariable Long travelId,
+            @RequestPart(value = "image") MultipartFile image
+    ) {
+        travelService.changeMainImage(travelId, image);
+        return SuccessResponse.of(HttpStatus.OK.value(), "여행 메인 이미지를 성공적으로 변경했습니다.");
     }
 }
