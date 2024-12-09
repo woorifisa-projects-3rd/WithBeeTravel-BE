@@ -36,7 +36,7 @@ public class SharedPaymentRegisterServiceImpl implements SharedPaymentRegisterSe
     private final S3Uploader s3Uploader;
 
     // S3에 이미지를 저장할 경로
-    private static final String SHARED_PAYMENT_IMAGE_DIR = "shared-payments/";
+    private static final String SHARED_PAYMENT_IMAGE_DIR = "travels/";
 
     @Override
     @Transactional

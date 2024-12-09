@@ -1,5 +1,6 @@
 package withbeetravel.service.travel;
 
+import org.springframework.web.multipart.MultipartFile;
 import withbeetravel.dto.request.account.CardCompletedRequest;
 import withbeetravel.dto.response.account.AccountConnectedWibeeResponse;
 import withbeetravel.dto.response.travel.TravelHomeResponse;
@@ -29,4 +30,6 @@ TravelService {
     void postConnectedAccount(CardCompletedRequest request, Long userId);
 
     AccountConnectedWibeeResponse getConnectedWibee(Long userId);
+
+    void changeMainImage(Long travelId, MultipartFile image);
 }
