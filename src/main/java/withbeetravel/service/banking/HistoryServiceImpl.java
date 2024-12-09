@@ -70,19 +70,21 @@ public class HistoryServiceImpl implements HistoryService {
 
         account.transfer(-historyRequest.getPayAm());
 
-        // 위비 카드 결제 내역 & 여행 기간 중 발생한 결제 내역이면 공동 결제 내역에 자동으로 추가
-        List<Travel> invitedTravelList = getInvitedTravelList(userId); // 참여 중인 여행 리스트
+        if(account.isConnectedWibeeCard() && historyRequest.isWibeeCard()) {
+            // 위비 카드 결제 내역 & 여행 기간 중 발생한 결제 내역이면 공동 결제 내역에 자동으로 추가
+            List<Travel> invitedTravelList = getInvitedTravelList(userId); // 참여 중인 여행 리스트
 
-        Travel currentTravel = getCurrentTravels(invitedTravelList); // 현재 진행 중인 여행
+            Travel currentTravel = getCurrentTravels(invitedTravelList); // 현재 진행 중인 여행
 
-        if(currentTravel != null) { // 현재 진행 중인 여행이 있다면, 해당 여행의 공동 결제 내역에 현재 결제 내역 추가
+            if (currentTravel != null) { // 현재 진행 중인 여행이 있다면, 해당 여행의 공동 결제 내역에 현재 결제 내역 추가
 
-            sharedPaymentRegisterService.saveWibeeCardSharedPayment(
-                    getTravelMember(userId, currentTravel.getId()),
-                    currentTravel,
-                    history
-            );
-            history.addedSharedPayment();
+                sharedPaymentRegisterService.saveWibeeCardSharedPayment(
+                        getTravelMember(userId, currentTravel.getId()),
+                        currentTravel,
+                        history
+                );
+                history.addedSharedPayment();
+            }
         }
     }
 
