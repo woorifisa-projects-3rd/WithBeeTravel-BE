@@ -114,8 +114,11 @@ public class SettlementServiceImpl implements SettlementService {
 
             travelMemberSettlementHistoryRepository.save(travelMemberSettlementHistory);
 
-            // 정산 요청 저장
-            saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST, 0);
+            // 여행장 제외하고 정산 요청 전송
+            if (user.getId() != userId) {
+                // 정산 요청 저장
+                saveSettlementRequestLog(travel, user, LogTitle.SETTLEMENT_REQUEST, 0);
+            }
 
         }
 
@@ -377,7 +380,7 @@ public class SettlementServiceImpl implements SettlementService {
     private String getLink(Travel travel, User user, LogTitle logTitle) {
         return logTitle.equals(LogTitle.SETTLEMENT_PENDING) ?
                 logTitle.getLinkPattern(user.getConnectedAccount().getId()) :
-                (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) ?
+                (logTitle.equals(LogTitle.SETTLEMENT_REQUEST) || logTitle.equals(LogTitle.SETTLEMENT_COMPLETE) ?
                         logTitle.getLinkPattern(travel.getId()) : null);
     }
 
