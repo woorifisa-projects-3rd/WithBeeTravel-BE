@@ -25,6 +25,7 @@ public class AuthErrorCode extends ErrorCode{
     public static final AuthErrorCode USER_NOT_FOUND = new AuthErrorCode(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "AUTH-017", "사용자를 찾을 수 없음");
     public static final AuthErrorCode VALIDATION_FAILED = new AuthErrorCode(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "AUTH-018", "유효성 검사 실패");
     public static final AuthErrorCode SCHEDULER_PROCESSING_FAILED = new AuthErrorCode(HttpStatus.UNPROCESSABLE_ENTITY, "SCHEDULER_PROCESSING_FAILED", "AUTH-019", "리프레시 토큰 삭제 스케줄링 중 오류가 발생했습니다.");
+    public static final AuthErrorCode ACCOUNT_NOT_CREATED = new AuthErrorCode(HttpStatus.UNPROCESSABLE_ENTITY, "ACCOUNT_NOT_CREATED", "AUTH-020", "회원가입 중 계좌 생성 오류");
 
     private AuthErrorCode(HttpStatus status, String name, String code, String message) {
         super(status, name, code, message);

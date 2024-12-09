@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import withbeetravel.domain.RefreshToken;
-import withbeetravel.domain.User;
+import withbeetravel.domain.*;
+import withbeetravel.dto.request.account.CreateAccountRequest;
 import withbeetravel.dto.request.auth.CustomUserInfo;
-import withbeetravel.domain.RoleType;
 import withbeetravel.dto.request.auth.SignInRequest;
 import withbeetravel.dto.request.auth.SignUpRequest;
 import withbeetravel.dto.response.auth.*;
@@ -15,12 +14,16 @@ import withbeetravel.exception.CustomException;
 import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.jwt.JwtUtil;
 import withbeetravel.jwt.TokenStatus;
+import withbeetravel.repository.AccountRepository;
+import withbeetravel.repository.HistoryRepository;
 import withbeetravel.repository.RefreshTokenRepository;
 import withbeetravel.repository.UserRepository;
+import withbeetravel.service.banking.AccountService;
 import withbeetravel.service.loginLog.LoginLogService;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Random;
 
 import static java.util.Objects.isNull;
 
@@ -34,6 +37,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final LoginLogService loginLogService;
+    private final AccountService accountService;
+    private final AccountRepository accountRepository;
 
     @Override
     public void signUp(SignUpRequest signUpRequest) {
@@ -52,7 +57,25 @@ public class AuthServiceImpl implements AuthService {
                 .roleType(RoleType.USER)
                 .build();
         userRepository.save(user);
+
+        // 계좌 생성
+        createNewAccount(user);
+
         loginLogService.logRegister(user,user.getEmail());
+    }
+
+    private void createNewAccount(User user) {
+        accountService.createAccount(user.getId(), CreateAccountRequest.builder().product(Product.WON통장).build());
+
+        Account account = accountRepository.findAccountByUserId(user.getId())
+                .orElseThrow(() -> new CustomException(AuthErrorCode.ACCOUNT_NOT_CREATED));
+
+        Random random = new Random();
+        int randomBalance = random.nextInt(500_000_000) + 1;
+
+        accountService.deposit(account.getId(), randomBalance, "여행 출발 지원금");
+
+        user.updateConnectedAccount(account);
     }
 
     @Override
