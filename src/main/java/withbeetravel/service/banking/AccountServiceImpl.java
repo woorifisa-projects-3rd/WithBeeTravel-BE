@@ -142,7 +142,8 @@ public class AccountServiceImpl implements AccountService {
         // 상대 계좌 입금 처리
         targetAccount.transfer(amount);
 
-        sendNotification(account, amount, targetAccount);
+        if(account.getId()!=1){
+            sendNotification(account, amount, targetAccount);}
     }
 
     private void sendNotification(Account senderAccount, int amount, Account targetAccount) {
