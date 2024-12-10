@@ -15,7 +15,8 @@ public class SettlementRequestLogScheduler {
     private final SettlementRequestLogService settlementRequestLogService;
 
     // 메일 오후 6시에 실행
-    @Scheduled(cron = "0 0 18 * * *", zone = "Asia/Seoul")
+//    @Scheduled(cron = "0 0 18 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 35 11 * * *", zone = "Asia/Seoul")
     public void createSettlementLogsForEndedTravels() {
         try {
             settlementRequestLogService.createSettlementLogsForEndedTravels();
