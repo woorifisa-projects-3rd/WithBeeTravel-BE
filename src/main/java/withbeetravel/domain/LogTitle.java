@@ -25,8 +25,9 @@ public enum LogTitle {
             "{0}님이 {1}에 합류했어요! 🎉<br />함께 멋진 추억을 만들어 보세요. 🥰",
             "travel/{0}"),
     SETTLEMENT_COMPLETE("정산 완료",
-            "{0}의 정산이 완료되었습니다! 🎉<br /> 위비가 {1}원을 지원했습니다.🍀 위비와 함께하는 다음 여행도 기대해요!",
-            "travel/{0}/honey-capsule");
+            "{0}의 정산이 완료되었습니다. 정산금을 확인해주세요! 🎉<br /> " +
+                    "위비가 {1}원을 지원했습니다.🍀 위비와 함께하는 다음 여행도 기대해요!",
+            "banking/{0}");
 
     @Getter
     private final String title;
