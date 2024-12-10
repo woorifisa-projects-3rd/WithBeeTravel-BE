@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.Account;
 import withbeetravel.domain.History;
 import withbeetravel.domain.Product;
@@ -21,11 +22,11 @@ import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.repository.AccountRepository;
 import withbeetravel.repository.HistoryRepository;
 import withbeetravel.repository.UserRepository;
+import withbeetravel.repository.notification.EmitterRepository;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +36,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
+    private final EmitterRepository emitterRepository;
 
     // 계좌 조회
     public List<AccountResponse> showAll(Long userId) {
@@ -139,6 +141,29 @@ public class AccountServiceImpl implements AccountService {
 
         // 상대 계좌 입금 처리
         targetAccount.transfer(amount);
+
+        sendNotification(account, amount, targetAccount);
+    }
+
+    private void sendNotification(Account senderAccount, int amount, Account targetAccount) {
+        Long userId = targetAccount.getId();
+        String senderName = senderAccount.getUser().getName();
+        String eventId = userId + "_" + System.currentTimeMillis();
+        Map<String, SseEmitter> emitters = emitterRepository.findAllEmitterStartWithByUserId(userId.toString());
+
+        emitters.forEach((key, sseEmitter) -> {
+            Map<String, String> eventData = new HashMap<>();
+            eventData.put("title", "송금이 왔어요~😊😊");
+            eventData.put("message", senderName + "님이 " + amount + "을 보냈어요!");
+            eventData.put("link", "banking/"+targetAccount.getId()); // 거래 내역 페이지로 링크
+
+            emitterRepository.saveEventCache(key, eventData);
+            try {
+                sseEmitter.send(SseEmitter.event().id(eventId).name("message").data(eventData));
+            } catch (IOException e) {
+                emitterRepository.deleteById(key);
+            }
+        });
     }
 
     private History createTargetHistory(int amount, Account targetAccount, Account account, String rqspeNm) {

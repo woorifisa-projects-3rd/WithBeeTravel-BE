@@ -3,6 +3,7 @@ package withbeetravel.service.banking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import withbeetravel.domain.*;
 import withbeetravel.dto.request.account.HistoryRequest;
 import withbeetravel.dto.response.account.HistoryResponse;
@@ -13,11 +14,15 @@ import withbeetravel.exception.error.AuthErrorCode;
 import withbeetravel.exception.error.BankingErrorCode;
 import withbeetravel.exception.error.ValidationErrorCode;
 import withbeetravel.repository.*;
+import withbeetravel.repository.notification.EmitterRepository;
 import withbeetravel.service.payment.SharedPaymentRegisterService;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,8 @@ public class HistoryServiceImpl implements HistoryService {
     private final AccountRepository accountRepository;
     private final TravelMemberRepository travelMemberRepository;
     private final SharedPaymentRegisterService sharedPaymentRegisterService;
+    private final EmitterRepository emitterRepository;
+
 
     public List<HistoryResponse> showAll(Long accountId) {
         List<History> histories = historyRepository.findByAccountIdOrderByDateDesc(accountId);
@@ -86,6 +93,31 @@ public class HistoryServiceImpl implements HistoryService {
                 history.addedSharedPayment();
             }
         }
+        sendNotification(account,history);
+    }
+
+    private void sendNotification(Account account,History history) {
+        Long userId = account.getUser().getId();
+        String eventId = userId + "_" + System.currentTimeMillis();
+        Map<String, SseEmitter> emitters = emitterRepository.findAllEmitterStartWithByUserId(userId.toString());
+        String name = account.getUser().getName();
+        String payDetail = history.getRqspeNm();
+        int payAmount = history.getPayAM();
+
+        emitters.forEach((key, sseEmitter) -> {
+            Map<String, String> eventData = new HashMap<>();
+            eventData.put("title", "카드 결제 완료~~😘😘");
+            eventData.put("message", name+"님 "+ payDetail+"에서 "
+                    + payAmount+"원으로 카드 결제 내역이 추가되었어요!💲💲\n확인하러 가볼까요?");
+            eventData.put("link", "banking/"+account.getId()); // 거래 내역 페이지로 링크
+
+            emitterRepository.saveEventCache(key, eventData);
+            try {
+                sseEmitter.send(SseEmitter.event().id(eventId).name("message").data(eventData));
+            } catch (IOException e) {
+                emitterRepository.deleteById(key);
+            }
+        });
     }
 
     @Override
