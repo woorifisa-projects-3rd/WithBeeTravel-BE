@@ -106,9 +106,9 @@ public class HistoryServiceImpl implements HistoryService {
 
         emitters.forEach((key, sseEmitter) -> {
             Map<String, String> eventData = new HashMap<>();
-            eventData.put("title", "카드 결제 완료~~😘😘");
+            eventData.put("title", "결제 알림✔");
             eventData.put("message", name+"님 "+ payDetail+"에서 "
-                    + payAmount+"원으로 카드 결제 내역이 추가되었어요!💲💲\n확인하러 가볼까요?");
+                    + payAmount+"원이 결제되었어요!💲");
             eventData.put("link", "banking/"+account.getId()); // 거래 내역 페이지로 링크
 
             emitterRepository.saveEventCache(key, eventData);

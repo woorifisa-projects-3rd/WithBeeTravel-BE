@@ -153,7 +153,7 @@ public class AccountServiceImpl implements AccountService {
 
         emitters.forEach((key, sseEmitter) -> {
             Map<String, String> eventData = new HashMap<>();
-            eventData.put("title", "송금이 왔어요~😊😊");
+            eventData.put("title", "돈 받았어요~😊");
             eventData.put("message", senderName + "님이 " + amount + "을 보냈어요!");
             eventData.put("link", "banking/"+targetAccount.getId()); // 거래 내역 페이지로 링크
 
