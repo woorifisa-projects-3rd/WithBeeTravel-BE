@@ -14,6 +14,7 @@ import withbeetravel.exception.error.TravelErrorCode;
 import withbeetravel.repository.SharedPaymentRepository;
 import withbeetravel.repository.TravelRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,10 +42,13 @@ public class HoneyCapsuleServiceImpl implements HoneyCapsuleService{
         // travelId의 공동 결제 내역 모두 불러오기
         List<SharedPayment> allByTravelId = sharedPaymentRepository.findAllByTravelId(travelId);
 
-        // SharedPayment 리스트를 HoneyCapsuleResponse 리스트로 변환
-        List<HoneyCapsuleResponse> honeyCapsuleResponseList = allByTravelId.stream()
-                .map(HoneyCapsuleResponse::from)
-                .toList();
+        // SharedPayment 리스트를 HoneyCapsuleResponse 리스트로 변환 (사진과 문구가 둘 다 없으면 반환하지 않음)
+        List<HoneyCapsuleResponse> honeyCapsuleResponseList = new ArrayList<>();
+        for(SharedPayment sharedPayment : allByTravelId) {
+            if(sharedPayment.getPaymentImage() != null || sharedPayment.getPaymentComment() != null) {
+                honeyCapsuleResponseList.add(HoneyCapsuleResponse.from(sharedPayment));
+            }
+        }
 
         return SuccessResponse.of(200, "여행 기록 조회 성공", honeyCapsuleResponseList);
     }
