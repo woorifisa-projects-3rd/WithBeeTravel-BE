@@ -66,13 +66,21 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
+            # Docker 로그인
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
+            
+            # 8080 포트를 사용하는 현재 실행 중인 컨테이너 찾기
             CONTAINER_ID=$(sudo docker ps -q --filter "publish=8080-8080")
             if [ ! -z "$CONTAINER_ID" ]; then
               sudo docker stop $CONTAINER_ID
               sudo docker rm $CONTAINER_ID
             fi
-
+            
+            # 모든 종료된(exited) 컨테이너 삭제
+            sudo docker container prune -f
+            
+            # 최신 이미지 풀링
             sudo docker pull "${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest"
+            
+            # 새로운 컨테이너 실행
             sudo docker run --name with-bee-dev -d -p 8080:8080 -e TZ=Asia/Seoul "${{ secrets.DOCKER_USERNAME }}/withbee-dev:latest"
