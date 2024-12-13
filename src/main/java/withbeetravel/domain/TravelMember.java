@@ -23,19 +23,22 @@ public class TravelMember {
     private User user;
 
     @Column(name = "is_captain", nullable = false)
-    private int isCaptain;
+    private boolean isCaptain;
 
-    @Column(name = "connected_account", nullable = false)
-    private String connectedAccount;
+    @OneToOne(mappedBy = "travelMember")
+    private TravelMemberSettlementHistory settlementHistory;
 
     protected TravelMember() {}
 
     @Builder
-    public TravelMember(Long id, Travel travel, User user, int isCaptain, String connectedAccount) {
+    public TravelMember(Long id, Travel travel, User user, boolean isCaptain) {
         this.id = id;
         this.travel = travel;
         this.user = user;
         this.isCaptain = isCaptain;
-        this.connectedAccount = connectedAccount;
+    }
+
+    public void initializeSettlementHistory() {
+        settlementHistory = null;
     }
 }

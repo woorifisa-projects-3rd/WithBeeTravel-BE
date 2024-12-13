@@ -1,13 +1,19 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @Table(name = "travels")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Travel {
 
     @Id
@@ -31,20 +37,27 @@ public class Travel {
     private String mainImage;
 
     @Column(name = "is_domestic_travel", nullable = false)
-    private int isDomesticTravel;
+    private boolean isDomesticTravel;
 
     @Column(name = "settlement_status", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private SettlementStatus settlementStatus;
 
-    protected Travel() {}
+    @OneToMany(mappedBy = "travel")
+    private List<TravelMember> travelMembers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "travel")
+    private List<TravelCountry> countries = new ArrayList<>();
+
+    @Builder
     public Travel(Long id,
                   String travelName,
                   LocalDate travelStartDate,
                   LocalDate travelEndDate,
                   String inviteCode,
-                  String mainImage, int isDomesticTravel, SettlementStatus settlementStatus) {
+                  String mainImage,
+                  boolean isDomesticTravel,
+                  SettlementStatus settlementStatus) {
         this.id = id;
         this.travelName = travelName;
         this.travelStartDate = travelStartDate;
@@ -53,5 +66,22 @@ public class Travel {
         this.mainImage = mainImage;
         this.isDomesticTravel = isDomesticTravel;
         this.settlementStatus = settlementStatus;
+    }
+
+    public void updateTravel(String travelName, LocalDate travelStartDate, LocalDate travelEndDate, boolean isDomesticTravel) {
+        this.travelName = travelName;
+        this.travelStartDate = travelStartDate;
+        this.travelEndDate = travelEndDate;
+        this.isDomesticTravel = isDomesticTravel;
+    }
+
+
+
+    public void updateMainImage(String newMainImage) {
+        this.mainImage = newMainImage;
+    }
+
+    public void updateSettlementStatus(SettlementStatus newSettlementStatus) {
+        this.settlementStatus = newSettlementStatus;
     }
 }

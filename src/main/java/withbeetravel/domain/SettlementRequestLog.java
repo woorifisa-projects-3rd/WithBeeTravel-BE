@@ -1,14 +1,16 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "settlement_request_logs")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class SettlementRequestLog {
 
     @Id
@@ -17,22 +19,41 @@ public class SettlementRequestLog {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "settlement_request_id", nullable = false)
-    private SettlementRequest settlementRequest;
+    @JoinColumn(name = "travel_id", nullable = false)
+    private Travel travel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(name = "log_title", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LogTitle logTitle;
 
     @Column(name = "log_message", nullable = false)
     private String logMessage;
 
-    @Column(name = "log_time", nullable = false)
+    @CreationTimestamp
+    @Column(name = "log_time")
     private LocalDateTime logTime;
 
-    protected SettlementRequestLog() {}
+    @Column(name = "link")
+    private String link;
 
     @Builder
-    public SettlementRequestLog(Long id, SettlementRequest settlementRequest, String logMessage, LocalDateTime logTime) {
+    public SettlementRequestLog(Long id,
+                                Travel travel,
+                                User user,
+                                LogTitle logTitle,
+                                String logMessage,
+                                LocalDateTime logTime,
+                                String link) {
         this.id = id;
-        this.settlementRequest = settlementRequest;
+        this.travel = travel;
+        this.user = user;
+        this.logTitle = logTitle;
         this.logMessage = logMessage;
         this.logTime = logTime;
+        this.link = link;
     }
 }

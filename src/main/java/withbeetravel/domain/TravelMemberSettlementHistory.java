@@ -1,12 +1,15 @@
 package withbeetravel.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "travel_member_settlement_histories")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelMemberSettlementHistory {
 
     @Id
@@ -23,28 +26,30 @@ public class TravelMemberSettlementHistory {
     private TravelMember travelMember;
 
     @Column(name = "own_payment_cost", nullable = false)
-    private double ownPaymentCost;
+    private int ownPaymentCost;
 
     @Column(name = "actual_burden_cost", nullable = false)
-    private double actualBurdenCost;
+    private int actualBurdenCost;
 
     @Column(name = "is_agreed", nullable = false)
-    private int isAgreed;
-
-    protected TravelMemberSettlementHistory() {}
+    private boolean isAgreed;
 
     @Builder
     public TravelMemberSettlementHistory(Long id,
                                          SettlementRequest settlementRequest,
                                          TravelMember travelMember,
-                                         double ownPaymentCost,
-                                         double actualBurdenCost,
-                                         int isAgreed) {
+                                         int ownPaymentCost,
+                                         int actualBurdenCost,
+                                         boolean isAgreed) {
         this.id = id;
         this.settlementRequest = settlementRequest;
         this.travelMember = travelMember;
         this.ownPaymentCost = ownPaymentCost;
         this.actualBurdenCost = actualBurdenCost;
+        this.isAgreed = isAgreed;
+    }
+
+    public void updateIsAgreed(boolean isAgreed) {
         this.isAgreed = isAgreed;
     }
 }
