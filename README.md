@@ -34,6 +34,13 @@
 
 <br/>
 
+## 🎥 시연 영상
+
+[윗비트래블 시연 영상](https://youtu.be/MLBJV3tiibA)
+
+<br/>
+
+
 ## 📚 기술 스택
 
 ## ![기술 스택1](https://github.com/user-attachments/assets/35065822-dd35-4abb-8fb8-4eef7c08963d)
