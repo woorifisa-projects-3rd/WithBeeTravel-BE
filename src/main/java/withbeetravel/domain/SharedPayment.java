@@ -131,4 +131,9 @@ public class SharedPayment {
         this.storeName = storeName;
         this.paymentDate = paymentDate;
     }
+
+    public void addPaymentParticipatedMember(PaymentParticipatedMember member) {
+        this.paymentParticipatedMembers.add(member);
+        member.assignSharedPayment(this);
+    }
 }
